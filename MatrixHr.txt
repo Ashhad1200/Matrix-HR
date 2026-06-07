@@ -1,0 +1,210 @@
+Here's a clean, professional brief you can send directly to your partner. It's concise, scannable, and hits all the key points without overwhelming them.
+
+---
+
+## 📄 MatrixHR — Project Brief
+
+**Product Name:** MatrixHR
+**Tagline:** The connected HR platform built for South Asia and the Middle East.
+**Type:** Multi-tenant SaaS — HR & Payroll Software
+
+---
+
+### 🎯 The Opportunity
+
+Global HR platforms like BambooHR don't serve our region well:
+- No Pakistani payroll (FBR tax, EOBI, PF, gratuity)
+- No Urdu/Arabic support
+- USD pricing — too expensive for local SMBs (PKR 4–7 lakh/month for a 100-person company)
+- No local bank integration
+- Slow, foreign support
+
+**MatrixHR fills this gap** with a modern, locally-built HR platform priced for our market.
+
+---
+
+### 👥 Target Customers
+
+- Pakistani and GCC SMBs with **20–500 employees**
+- Software houses, manufacturers, retail chains, schools, hospitals, agencies
+- Initial focus: **Pakistan** → expand to UAE, Saudi, Bangladesh
+
+---
+
+### 🧱 Core Modules
+
+**Phase 1 — MVP (Months 1–6)**
+
+1. **Employee Database** — Central record of all employees, documents, org chart, custom fields
+2. **Leave Management** — Customizable policies, approvals, "Who's Out" calendar, Hijri/Gregorian
+3. **Attendance & Time Tracking** — Web + mobile clock-in, biometric device integration, geo-fencing
+4. **Onboarding** — Workflow templates, document collection, checklists for new hires
+5. **WhatsApp Integration** — Apply for leave, approve, get payslips, all via WhatsApp (our killer feature)
+6. **Self-Service Portal** — Employees manage their own profile, leave, attendance, documents
+
+**Phase 2 — Months 7–12**
+
+7. **Payroll Engine** — FBR tax slabs, EOBI, PF, gratuity, loans, bonuses, payslip generation
+8. **Bank File Generation** — Direct salary disbursement files for Meezan, HBL, UBL, MCB
+9. **Recruitment / ATS** — Job posting, candidate pipeline, offer letters with e-signature
+10. **Performance Management** — Goals, reviews, 360 feedback, continuous feedback
+
+**Phase 3 — Months 13–18**
+
+11. **AI-Powered Features** — Resume screening, performance summaries, policy assistant
+12. **Built-in LMS** — Courses, quizzes, certifications
+13. **Marketplace Integrations** — Foodpanda, Careem, telemedicine, insurance, NADRA Verisys
+14. **Advanced Analytics** — Custom dashboards, predictive insights
+
+---
+
+### 🌟 Key Differentiators (Why Customers Buy from Us)
+
+| Feature | BambooHR | MatrixHR |
+|---------|----------|----------|
+| Pakistani Payroll (FBR/EOBI/PF) | ❌ | ✅ |
+| Urdu/Arabic Support + RTL | ❌ | ✅ |
+| PKR Pricing | ❌ | ✅ |
+| WhatsApp Workflows | ❌ | ✅ |
+| Biometric Device Integration | ❌ | ✅ |
+| Local Bank File Generation | ❌ | ✅ |
+| NADRA Verisys (CNIC verify) | ❌ | ✅ |
+| Same-timezone Support | ❌ | ✅ |
+| Cost for 100 employees/month | PKR 4–7 lakh | PKR 1–2 lakh (target) |
+
+---
+
+### 💰 Business Model
+
+**Pricing Tiers** (per employee per month, in PKR):
+- **Starter** — Core HR, leave, attendance, employee portal
+- **Growth** — Adds payroll, recruitment, performance
+- **Enterprise** — Adds AI features, LMS, advanced analytics, dedicated support
+
+**Additional Revenue:**
+- Premium integrations (priced separately)
+- Marketplace commissions (Foodpanda, insurance partners, telemedicine)
+- One-time setup/implementation fees
+- Custom development for enterprise clients
+
+---
+
+### 🛠️ Tech Stack
+
+- **Backend:** Node.js + NestJS + PostgreSQL + Redis
+- **Frontend:** Next.js 14 + Tailwind + shadcn/ui
+- **Mobile:** React Native (Expo)
+- **Build Tool:** AI-assisted development via Antigravity (faster build cycle)
+- **Hosting:** DigitalOcean or Hetzner (cost-efficient for our market)
+
+---
+
+### 🎨 Design Standard
+
+- Modern, polished UI on par with Linear, Vercel, Stripe
+- Full dark mode and light mode
+- English + Urdu + Arabic with RTL support
+- Mobile-first responsive
+- WCAG 2.1 AA accessibility
+
+---
+
+### 📅 Timeline (Realistic)
+
+| Phase | Duration | Deliverable |
+|-------|----------|-------------|
+| Foundation + MVP build | 9–12 weeks | Working app: Auth, Employee, Leave, Attendance, Onboarding, WhatsApp |
+| Pilot with 3–5 clients (free) | 6–8 weeks | Real-world feedback, case studies |
+| Payroll + Recruitment build | 8–10 weeks | Full HR + Payroll offering |
+| First paying customers | Month 6–8 | Revenue starts |
+| Phase 3 + GCC expansion | Year 2 | AI features, regional growth |
+
+---
+
+### 🚀 Go-to-Market
+
+**First 10 customers from:**
+1. Our personal network (ex-colleagues' companies, friends running businesses)
+2. Direct outreach to HR managers via LinkedIn
+3. Free 3-month pilots in exchange for case studies and referrals
+4. Software house network — sell to our own industry first
+
+**Long-term channels:**
+- Referrals from happy clients
+- Partnerships with HR consultants and accountants
+- LinkedIn content marketing
+- Local industry events (P@SHA, OPEN, etc.)
+
+---
+
+### 🏁 Competition
+
+**Direct competitors in our region:**
+- ResourceInn (Pakistan) — established but dated UI
+- PeopleQlik (Pakistan/MENA) — solid but expensive
+- Bayzat (UAE) — GCC-focused, premium pricing
+- Keka, Darwinbox, GreytHR (India) — strong but not Pakistan-localized
+
+**Our edge:** Modern UI, WhatsApp-native, AI-ready, transparent pricing, software-house-friendly.
+
+---
+
+### 💼 What We Need From the Team
+
+- **Engineering:** AI-assisted development means smaller team — 1–2 devs can ship MVP
+- **Sales:** 1 dedicated sales/BD person from Month 4 onward
+- **Customer Success:** 1 person from Month 6 to handle pilot clients
+- **Design:** Use design system; no full-time designer needed initially
+- **Budget:** Mostly hosting + tool subscriptions ($200–500/month during development)
+
+---
+
+### 🎯 Success Metrics
+
+**Year 1:**
+- MVP launched and stable
+- 10 paying customers
+- PKR 5–10 lakh MRR (monthly recurring revenue)
+
+**Year 2:**
+- 50+ paying customers
+- PKR 30–50 lakh MRR
+- Break-even
+- Soft launch in UAE
+
+**Year 3:**
+- 150+ customers across Pakistan and GCC
+- PKR 1+ crore MRR
+- Profitable
+- Series A ready (optional)
+
+---
+
+### ❓ Open Questions for Discussion
+
+1. Are we bootstrapping or raising seed capital?
+2. Equity split and roles?
+3. Where do we want to be in 3 years — lifestyle business or VC-scale?
+4. Who owns sales vs. who owns product?
+5. Initial industry vertical focus — software houses first, or go broader?
+
+---
+
+**Next Step:** Approve direction → Lock founding terms → Begin MVP development.
+
+---
+
+## 💡 How to send it
+
+You have 3 options:
+
+**Option 1 — Just paste it as a WhatsApp/email message**
+Copy everything above and send as text. Good for a quick read.
+
+**Option 2 — I can convert it to a PDF**
+Want me to make this into a clean, branded PDF like the last one? Better for formal presentation.
+
+**Option 3 — I can convert it to a slide deck format**
+If you want to present it in a meeting rather than send it for reading.
+
+Which one do you want? Or want me to tweak the content first — make it shorter, longer, more aggressive on numbers, or add anything specific your partner cares about?

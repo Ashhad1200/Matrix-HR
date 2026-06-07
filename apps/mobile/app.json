@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "MatrixHR",
+    "slug": "matrixhr",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "matrixhr",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#2563eb"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.matrixhr.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#2563eb"
+      },
+      "package": "com.matrixhr.app"
+    }
+  }
+}

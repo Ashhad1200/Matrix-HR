@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: matrixhr
+          POSTGRES_PASSWORD: matrixhr
+          POSTGRES_DB: matrixhr
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://matrixhr:matrixhr@localhost:5432/matrixhr?schema=public
+      JWT_SECRET: test-secret-minimum-32-characters-long
+      JWT_REFRESH_SECRET: test-refresh-secret-32-chars-min
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
+      - name: Push database schema
+        run: pnpm db:push
+
+      - name: Build shared packages
+        run: pnpm --filter @matrixhr/shared build && pnpm --filter @matrixhr/database build
+
+      - name: Lint API
+        run: pnpm --filter @matrixhr/api lint
+
+      - name: Test API
+        run: pnpm --filter @matrixhr/api test
+
+      - name: Build API
+        run: pnpm --filter @matrixhr/api build
+
+      - name: Build Web
+        run: pnpm --filter @matrixhr/web build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001/api/v1
