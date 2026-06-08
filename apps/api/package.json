@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nest build",
-    "dev": "nest start --watch",
+    "dev": "nest build && nest start --watch",
     "start": "node dist/main.js",
     "lint": "tsc --noEmit",
     "test": "jest",

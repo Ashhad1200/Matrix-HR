@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "setup": "powershell -ExecutionPolicy Bypass -File scripts/dev.ps1",
-    "dev": "pnpm db:start && powershell -ExecutionPolicy Bypass -File scripts/wait-for-db.ps1 && powershell -ExecutionPolicy Bypass -File scripts/free-dev-ports.ps1 && turbo dev --filter=@matrixhr/api --filter=@matrixhr/web",
+    "dev": "powershell -ExecutionPolicy Bypass -File scripts/free-dev-ports.ps1 && pnpm db:start && powershell -ExecutionPolicy Bypass -File scripts/wait-for-db.ps1 && pnpm --filter @matrixhr/api build && turbo dev --filter=@matrixhr/api --filter=@matrixhr/web",
     "dev:all": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",

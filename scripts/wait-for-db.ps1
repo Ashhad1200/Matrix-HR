@@ -1,4 +1,4 @@
-# Wait until DATABASE_URL host:port accepts TCP connections.
+# Wait until Prisma can execute a query against DATABASE_URL.
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot\..
 
@@ -21,15 +21,21 @@ if ($url -match '@([^:/]+):(\d+)') {
 }
 
 Write-Host "==> Waiting for database at ${hostName}:${port}..."
+$dbDir = Join-Path (Get-Location) "packages\database"
 $deadline = (Get-Date).AddSeconds(90)
 while ((Get-Date) -lt $deadline) {
-    $tcpOk = (Test-NetConnection $hostName -Port $port -WarningAction SilentlyContinue).TcpTestSucceeded
-    if ($tcpOk) {
-        Write-Host "==> Database port is open; warming up..."
-        Start-Sleep -Seconds 15
+    Push-Location $dbDir
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    "SELECT 1" | pnpm exec prisma db execute --stdin --schema prisma/schema.prisma 2>$null | Out-Null
+    $prismaOk = $LASTEXITCODE -eq 0
+    $ErrorActionPreference = $prevEap
+    Pop-Location
+    if ($prismaOk) {
+        Write-Host "==> Database query check passed."
         exit 0
     }
-    Start-Sleep -Seconds 2
+    Start-Sleep -Seconds 3
 }
 
 Write-Error "Database not reachable at ${hostName}:${port}. Run: pnpm db:start"
