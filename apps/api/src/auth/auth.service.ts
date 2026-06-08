@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
-import { DEFAULT_LEAVE_POLICIES } from '@matrixhr/shared';
+import { DEFAULT_LEAVE_POLICIES, getPermissionsForRole } from '@matrixhr/shared';
 import { SignUpDto, LoginDto } from './dto';
 
 @Injectable()
@@ -182,10 +182,38 @@ export class AuthService {
   }
 
   async getMe(userId: string) {
-    return this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: { tenant: true, employee: { include: { department: true, designation: true } } },
     });
+    if (!user) return null;
+
+    const pendingApprovals = user.employeeId
+      ? await this.prisma.leaveRequest.count({
+          where: {
+            tenantId: user.tenantId,
+            status: 'PENDING',
+            ...(user.role === 'MANAGER' ? { approverId: user.employeeId } : {}),
+          },
+        })
+      : 0;
+
+    const unreadNotifications = await this.prisma.notification.count({
+      where: { tenantId: user.tenantId, userId: user.id, read: false },
+    });
+
+    const permissions = getPermissionsForRole(user.role);
+    const nav = permissions.nav.map((item) =>
+      item.badge === 'pendingApprovals' && pendingApprovals > 0
+        ? { ...item, badgeCount: pendingApprovals }
+        : item,
+    );
+
+    return {
+      ...user,
+      permissions: { ...permissions, nav },
+      badges: { pendingApprovals, unreadNotifications },
+    };
   }
 
   private async generateTokens(userId: string, tenantId: string, role: string) {

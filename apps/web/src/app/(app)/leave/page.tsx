@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { formatDate } from '@/lib/utils';
+import { PermissionGate } from '@/components/permission-gate';
 
 export default function LeavePage() {
   const [balances, setBalances] = useState<any[]>([]);
@@ -109,10 +110,12 @@ export default function LeavePage() {
                     'bg-yellow-100 text-yellow-800'
                   }`}>{r.status}</span>
                   {r.status === 'PENDING' && (
-                    <>
-                      <Button size="sm" onClick={() => handleApprove(r.id)}>Approve</Button>
-                      <Button size="sm" variant="secondary" onClick={() => handleReject(r.id)}>Reject</Button>
-                    </>
+                    <PermissionGate action="leave" subAction="approve">
+                      <>
+                        <Button size="sm" onClick={() => handleApprove(r.id)}>Approve</Button>
+                        <Button size="sm" variant="secondary" onClick={() => handleReject(r.id)}>Reject</Button>
+                      </>
+                    </PermissionGate>
                   )}
                 </div>
               </div>

@@ -21,6 +21,18 @@ import { MarketplaceModule } from './marketplace/marketplace.module';
 import { AiModule } from './ai/ai.module';
 import { ReportsModule } from './reports/reports.module';
 import { DevModule } from './dev/dev.module';
+import { ApprovalsModule } from './approvals/approvals.module';
+import { CustomFieldsModule } from './custom-fields/custom-fields.module';
+import { WorkflowsModule } from './workflows/workflows.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
+import { IntegrationsModule } from './integrations/integrations.module';
+import { FormulasModule } from './formulas/formulas.module';
+import { PreboardingModule } from './preboarding/preboarding.module';
+import { EsignModule } from './esign/esign.module';
+import { EnpsModule } from './enps/enps.module';
+import { PeerReviewsModule } from './peer-reviews/peer-reviews.module';
+import { ExtensionsModule } from './extensions/extensions.module';
+import { ReportsBuilderModule } from './reports-builder/reports-builder.module';
 
 @Module({
   imports: [
@@ -45,6 +57,18 @@ import { DevModule } from './dev/dev.module';
     AiModule,
     MarketplaceModule,
     DevModule,
+    ApprovalsModule,
+    CustomFieldsModule,
+    WorkflowsModule,
+    WebhooksModule,
+    IntegrationsModule,
+    FormulasModule,
+    PreboardingModule,
+    EsignModule,
+    EnpsModule,
+    PeerReviewsModule,
+    ExtensionsModule,
+    ReportsBuilderModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

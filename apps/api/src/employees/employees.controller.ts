@@ -6,7 +6,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles, CurrentUser, TenantId } from '../common/decorators';
 import { UserRole } from '@matrixhr/database';
-import { CreateEmployeeDto, UpdateEmployeeDto, ImportCsvDto } from './dto';
+import { CreateEmployeeDto, UpdateEmployeeDto, SelfUpdateEmployeeDto, ImportCsvDto } from './dto';
 
 @Controller('employees')
 @UseGuards(JwtAuthGuard)
@@ -44,6 +44,27 @@ export class EmployeesController {
   @Post('departments')
   createDepartment(@TenantId() tenantId: string, @Body() body: { name: string; parentId?: string }) {
     return this.employees.createDepartment(tenantId, body);
+  }
+
+  @Get('team')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.MANAGER, UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN)
+  getTeam(@TenantId() tenantId: string, @CurrentUser('employeeId') employeeId: string) {
+    return this.employees.getTeam(tenantId, employeeId);
+  }
+
+  @Get('me/payslips')
+  getMyPayslips(@TenantId() tenantId: string, @CurrentUser('employeeId') employeeId: string) {
+    return this.employees.getMyPayslips(tenantId, employeeId);
+  }
+
+  @Patch('me/self')
+  selfUpdate(
+    @TenantId() tenantId: string,
+    @CurrentUser('employeeId') employeeId: string,
+    @Body() dto: SelfUpdateEmployeeDto,
+  ) {
+    return this.employees.selfUpdate(tenantId, employeeId, dto);
   }
 
   @Get('designations')

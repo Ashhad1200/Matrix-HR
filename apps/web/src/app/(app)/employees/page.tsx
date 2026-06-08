@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PermissionGate } from '@/components/permission-gate';
 
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState<any>({ data: [], total: 0 });
@@ -38,7 +39,9 @@ export default function EmployeesPage() {
           <Link href="/employees/org-chart">
             <Button variant="secondary">Org Chart</Button>
           </Link>
-          <Button onClick={() => setShowAdd(!showAdd)}>Add Employee</Button>
+          <PermissionGate action="employees" subAction="create">
+            <Button onClick={() => setShowAdd(!showAdd)}>Add Employee</Button>
+          </PermissionGate>
         </div>
       </div>
 

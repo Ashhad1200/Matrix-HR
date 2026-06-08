@@ -9,6 +9,7 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ title: 'MatrixHR' }} />
         <Stack.Screen name="clock-in" options={{ title: 'Clock In/Out' }} />
         <Stack.Screen name="leave" options={{ title: 'Leave' }} />
+        <Stack.Screen name="approvals" options={{ title: 'Approvals' }} />
       </Stack>
     </>
   );

@@ -149,6 +149,19 @@ model Tenant {
   auditLogs          AuditLog[]
   notifications      Notification[]
   whatsappMessages   WhatsAppMessage[]
+  customFieldDefs    CustomFieldDefinition[]
+  workflowDefs       WorkflowDefinition[]
+  workflowInstances  WorkflowInstance[]
+  webhooks           Webhook[]
+  tenantIntegrations TenantIntegration[]
+  enpsSurveys        EnpsSurvey[]
+  formulaDefinitions FormulaDefinition[]
+  apiKeys            ApiKey[]
+  preboardingInvites PreboardingInvite[]
+  esignRequests      EsignRequest[]
+  reportDefinitions  ReportDefinition[]
+  extensionAccess    ExtensionPanelAccess[]
+  peerReviews360     PeerReview360[]
 }
 
 model User {
@@ -820,4 +833,251 @@ model WhatsAppMessage {
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, createdAt])
+}
+
+// ─── Custom Fields & Workflows (Phase 2) ─────────────────────────────────────
+
+model CustomFieldDefinition {
+  id         String   @id @default(cuid())
+  tenantId   String
+  entity     String   @default("Employee")
+  key        String
+  label      String
+  fieldType  String   // text, number, date, dropdown, boolean
+  options    Json?
+  required   Boolean  @default(false)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, entity, key])
+  @@index([tenantId])
+}
+
+model WorkflowDefinition {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  trigger     String   // employee.salary_change, leave.request, etc.
+  steps       Json     // [{role, order, action}]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant    Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  instances WorkflowInstance[]
+
+  @@index([tenantId])
+}
+
+model WorkflowInstance {
+  id           String   @id @default(cuid())
+  tenantId     String
+  definitionId String
+  entityType   String
+  entityId     String
+  currentStep  Int      @default(0)
+  status       String   @default("pending") // pending, approved, rejected
+  metadata     Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  definition WorkflowDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+}
+
+// ─── Integrations & Webhooks (Phase 5) ───────────────────────────────────────
+
+model Webhook {
+  id        String   @id @default(cuid())
+  tenantId  String
+  url       String
+  events    String[] // employee.created, employee.terminated, leave.approved
+  secret    String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  deliveries WebhookDelivery[]
+
+  @@index([tenantId])
+}
+
+model WebhookDelivery {
+  id         String   @id @default(cuid())
+  webhookId  String
+  event      String
+  payload    Json
+  status     String   @default("pending") // pending, delivered, failed
+  response   String?
+  attempts   Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId, status])
+}
+
+model TenantIntegration {
+  id           String   @id @default(cuid())
+  tenantId     String
+  provider     String   // slack, okta, deel
+  status       String   @default("disconnected")
+  accessToken  String?
+  refreshToken String?
+  config       Json?
+  installedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, provider])
+  @@index([tenantId])
+}
+
+model FormulaDefinition {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  entity    String
+  expression String  // e.g. "dateOfJoining + 90 days"
+  targetField String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  keyHash   String
+  prefix    String
+  lastUsed  DateTime?
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+// ─── Talent Acquisition Extensions (Phase 3) ───────────────────────────────
+
+model PreboardingInvite {
+  id          String   @id @default(cuid())
+  tenantId    String
+  applicationId String?
+  email       String
+  token       String   @unique
+  expiresAt   DateTime
+  status      String   @default("pending")
+  documents   Json?
+  createdAt   DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, token])
+}
+
+model EsignRequest {
+  id         String   @id @default(cuid())
+  tenantId   String
+  entityType String
+  entityId   String
+  signerEmail String
+  documentUrl String
+  status     String   @default("pending") // pending, signed, declined
+  signedAt   DateTime?
+  createdAt  DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+}
+
+// ─── Experience (Phase 6) ───────────────────────────────────────────────────
+
+model EnpsSurvey {
+  id        String   @id @default(cuid())
+  tenantId  String
+  title     String
+  question  String   @default("How likely are you to recommend this company?")
+  status    String   @default("draft")
+  sentAt    DateTime?
+  closesAt  DateTime?
+  createdAt DateTime @default(now())
+
+  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  responses EnpsResponse[]
+
+  @@index([tenantId])
+}
+
+model EnpsResponse {
+  id        String   @id @default(cuid())
+  surveyId  String
+  score     Int      // 0-10
+  comment   String?
+  createdAt DateTime @default(now())
+
+  survey EnpsSurvey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  @@index([surveyId])
+}
+
+model PeerReview360 {
+  id           String   @id @default(cuid())
+  tenantId     String
+  cycleId      String
+  employeeId   String
+  reviewerId   String
+  relationship String   @default("peer") // peer, direct_report, skip_level
+  rating       Int?
+  feedback     String?
+  isAnonymous  Boolean  @default(true)
+  status       String   @default("pending")
+  createdAt    DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, cycleId])
+}
+
+// ─── Enterprise (Phase 7) ────────────────────────────────────────────────────
+
+model ReportDefinition {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  config    Json     // columns, filters, groupBy
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+model ExtensionPanelAccess {
+  id        String   @id @default(cuid())
+  tenantId  String
+  panel     String   // recruitment, it_assets, compliance
+  userId    String?
+  role      String?
+  readOnly  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, panel])
 }

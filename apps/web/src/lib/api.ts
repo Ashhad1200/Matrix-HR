@@ -40,10 +40,28 @@ export const api = {
       request<any>(`/employees?${new URLSearchParams(params || {})}`),
     get: (id: string) => request<any>(`/employees/${id}`),
     create: (data: any) => request<any>('/employees', { method: 'POST', body: JSON.stringify(data) }),
+    updateSelf: (data: { phone?: string; address?: string; emergencyContact?: string }) =>
+      request<any>('/employees/me/self', { method: 'PATCH', body: JSON.stringify(data) }),
+    myPayslips: () => request<any>('/employees/me/payslips'),
+    team: () => request<any>('/employees/team'),
     orgChart: () => request<any>('/employees/org-chart'),
     departments: () => request<any>('/employees/departments'),
     designations: () => request<any>('/employees/designations'),
     import: (rows: any[]) => request<any>('/employees/import', { method: 'POST', body: JSON.stringify({ rows }) }),
+  },
+  approvals: {
+    inbox: () => request<any>('/approvals/inbox'),
+    approve: (id: string) => request<any>(`/approvals/${id}/approve`, { method: 'PATCH' }),
+    reject: (id: string, reason?: string) =>
+      request<any>(`/approvals/${id}/reject`, { method: 'PATCH', body: JSON.stringify({ reason }) }),
+  },
+  settings: {
+    customFields: () => request<any>('/settings/custom-fields'),
+    workflows: () => request<any>('/settings/workflows'),
+  },
+  audit: {
+    logs: (params?: Record<string, string>) =>
+      request<any>(`/audit/logs?${new URLSearchParams(params || {})}`),
   },
   leave: {
     policies: () => request<any>('/leave/policies'),
@@ -88,6 +106,7 @@ export const api = {
     applications: () => request<any>('/recruitment/applications'),
     updateApplicationStatus: (id: string, status: string) =>
       request<any>(`/recruitment/applications/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+    preboarding: () => request<any>('/recruitment/preboarding'),
   },
   performance: {
     goals: () => request<any>('/performance/goals'),
@@ -95,6 +114,10 @@ export const api = {
     createGoal: (data: any) => request<any>('/performance/goals', { method: 'POST', body: JSON.stringify(data) }),
     updateGoalProgress: (id: string, progress: number) =>
       request<any>(`/performance/goals/${id}/progress`, { method: 'PATCH', body: JSON.stringify({ progress }) }),
+    enps: () => request<any>('/performance/enps'),
+  },
+  extensions: {
+    list: () => request<any>('/extensions'),
   },
   lms: {
     courses: () => request<any>('/lms/courses'),

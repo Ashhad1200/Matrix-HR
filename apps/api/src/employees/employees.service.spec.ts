@@ -17,7 +17,14 @@ describe('EmployeesService tenant isolation', () => {
   };
 
   const audit = { log: jest.fn() };
-  const service = new EmployeesService(prisma as never, audit as never);
+  const webhooks = { dispatch: jest.fn() };
+  const onboarding = { startOnboarding: jest.fn() };
+  const service = new EmployeesService(
+    prisma as never,
+    audit as never,
+    webhooks as never,
+    onboarding as never,
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();

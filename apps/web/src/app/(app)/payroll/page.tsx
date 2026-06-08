@@ -5,6 +5,7 @@ import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
+import { PermissionGate } from '@/components/permission-gate';
 
 export default function PayrollPage() {
   const [runs, setRuns] = useState<any[]>([]);
@@ -36,7 +37,9 @@ export default function PayrollPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Payroll</h1>
-        <Button onClick={createRun}>Run Payroll</Button>
+        <PermissionGate action="payroll" subAction="run">
+          <Button onClick={createRun}>Run Payroll</Button>
+        </PermissionGate>
       </div>
 
       <Card>
@@ -72,7 +75,9 @@ export default function PayrollPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Payroll {selected.period}</CardTitle>
             {selected.status === 'DRAFT' && (
-              <Button onClick={() => approveRun(selected.id)}>Approve & Lock</Button>
+              <PermissionGate action="payroll" subAction="approve">
+                <Button onClick={() => approveRun(selected.id)}>Approve & Lock</Button>
+              </PermissionGate>
             )}
           </CardHeader>
           <CardContent>

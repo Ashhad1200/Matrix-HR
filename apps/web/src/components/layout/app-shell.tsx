@@ -1,34 +1,29 @@
 'use client';
 
-import { Sidebar } from './sidebar';
+import { RoleSidebar } from './role-sidebar';
+import { NotificationBell } from './notification-bell';
 import { ThemeToggle } from './theme-toggle';
-import { useEffect, useState } from 'react';
-import { api } from '@/lib/api';
-import { useRouter } from 'next/navigation';
+import { AuthProvider } from '@/context/auth-context';
+import { useAuth } from '@/hooks/use-auth';
 
-export function AppShell({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+const ROLE_LABELS: Record<string, string> = {
+  SUPER_ADMIN: 'Super Admin',
+  COMPANY_ADMIN: 'Company Admin',
+  HR_MANAGER: 'HR Manager',
+  MANAGER: 'Manager',
+  EMPLOYEE: 'Employee',
+};
 
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      router.push('/login');
-      return;
-    }
-    api.auth.me().then(setUser).catch(() => {
-      localStorage.removeItem('accessToken');
-      router.push('/login');
-    });
-  }, [router]);
+const PORTAL_BADGE: Record<string, string> = {
+  admin: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  manager: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  ess: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+};
 
-  function logout() {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    router.push('/login');
-  }
+function AppShellInner({ children }: { children: React.ReactNode }) {
+  const { user, loading, logout } = useAuth();
 
-  if (!user) {
+  if (loading || !user) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-600 border-t-transparent" />
@@ -36,18 +31,32 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
+  const displayName = user.employee
+    ? `${user.employee.firstName} ${user.employee.lastName}`
+    : user.email;
+
   return (
     <div className="flex h-screen">
-      <Sidebar />
+      <RoleSidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex h-16 items-center justify-between border-b border-[hsl(var(--border))] px-6">
           <div>
             <p className="text-sm text-[hsl(var(--muted-foreground))]">{user.tenant?.name}</p>
-            <p className="font-medium">{user.email}</p>
+            <div className="flex items-center gap-2">
+              <p className="font-medium">{displayName}</p>
+              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${PORTAL_BADGE[user.permissions.portal] ?? ''}`}>
+                {ROLE_LABELS[user.role] ?? user.role}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <NotificationBell />
             <ThemeToggle />
-            <button onClick={logout} className="text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]">
+            <button
+              type="button"
+              onClick={logout}
+              className="text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+            >
               Sign out
             </button>
           </div>
@@ -55,5 +64,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>
+  );
+}
+
+export function AppShell({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthProvider>
+      <AppShellInner>{children}</AppShellInner>
+    </AuthProvider>
   );
 }

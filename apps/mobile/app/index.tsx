@@ -27,10 +27,12 @@ export default function HomeScreen() {
           <Text style={styles.cardTitle}>Payslips</Text>
           <Text style={styles.cardDesc}>Download PDF</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.card}>
-          <Text style={styles.cardTitle}>Team</Text>
-          <Text style={styles.cardDesc}>Who&apos;s out today</Text>
-        </TouchableOpacity>
+        <Link href="/approvals" asChild>
+          <TouchableOpacity style={styles.card}>
+            <Text style={styles.cardTitle}>Approvals</Text>
+            <Text style={styles.cardDesc}>Manager inbox</Text>
+          </TouchableOpacity>
+        </Link>
       </View>
     </ScrollView>
   );

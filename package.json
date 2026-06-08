@@ -2,8 +2,16 @@
   "name": "matrixhr",
   "private": true,
   "scripts": {
-    "setup": "powershell -ExecutionPolicy Bypass -File scripts/dev.ps1",
-    "dev": "powershell -ExecutionPolicy Bypass -File scripts/free-dev-ports.ps1 && pnpm db:start && powershell -ExecutionPolicy Bypass -File scripts/wait-for-db.ps1 && pnpm --filter @matrixhr/api build && turbo dev --filter=@matrixhr/api --filter=@matrixhr/web",
+    "start": "powershell -ExecutionPolicy Bypass -File scripts/start.ps1",
+    "setup": "powershell -ExecutionPolicy Bypass -File scripts/start.ps1",
+    "dev": "powershell -ExecutionPolicy Bypass -File scripts/start.ps1",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down --remove-orphans",
+    "docker:reset": "powershell -ExecutionPolicy Bypass -File scripts/docker-reset.ps1",
+    "docker:logs": "docker compose logs -f",
+    "dev:api": "pnpm --filter @matrixhr/api dev",
+    "dev:web": "pnpm --filter @matrixhr/web dev",
+    "dev:apps": "pnpm turbo dev --filter=@matrixhr/api --filter=@matrixhr/web",
     "dev:all": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
@@ -14,9 +22,11 @@
     "db:push": "pnpm --filter @matrixhr/database push",
     "db:seed": "pnpm --filter @matrixhr/database seed",
     "db:studio": "pnpm --filter @matrixhr/database studio",
-    "test:api": "pnpm --filter @matrixhr/database exec tsx ../../scripts/test-apis.ts"
+    "test:api": "pnpm exec tsx scripts/test-apis.ts",
+    "test:bamboo": "pnpm exec tsx scripts/bamboo-comparison-test.ts"
   },
   "devDependencies": {
+    "tsx": "^4.19.2",
     "turbo": "^2.3.3",
     "typescript": "^5.7.2"
   },

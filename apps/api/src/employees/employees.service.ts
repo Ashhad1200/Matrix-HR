@@ -1,13 +1,17 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
-import { CreateEmployeeDto, UpdateEmployeeDto } from './dto';
+import { WebhooksService } from '../webhooks/webhooks.service';
+import { OnboardingService } from '../onboarding/onboarding.service';
+import { CreateEmployeeDto, UpdateEmployeeDto, SelfUpdateEmployeeDto } from './dto';
 
 @Injectable()
 export class EmployeesService {
   constructor(
     private prisma: PrismaService,
     private audit: AuditService,
+    private webhooks: WebhooksService,
+    private onboarding: OnboardingService,
   ) {}
 
   async findAll(tenantId: string, filters?: {
@@ -114,7 +118,95 @@ export class EmployeesService {
       tenantId, userId, action: 'UPDATE', entity: 'Employee', entityId: id, before, after: employee,
     });
 
+    if (dto.status === 'TERMINATED' && before.status !== 'TERMINATED') {
+      await this.handleTerminationCascade(tenantId, employee);
+    }
+
     return employee;
+  }
+
+  private async handleTerminationCascade(
+    tenantId: string,
+    employee: { id: string; employeeCode: string; firstName: string; lastName: string; email: string | null },
+  ) {
+    const linkedUser = await this.prisma.user.findFirst({
+      where: { tenantId, employeeId: employee.id },
+    });
+
+    if (linkedUser) {
+      await this.prisma.user.update({
+        where: { id: linkedUser.id },
+        data: { status: 'INACTIVE' },
+      });
+    }
+
+    const offboardingTemplate = await this.prisma.onboardingTemplate.findFirst({
+      where: {
+        tenantId,
+        isActive: true,
+        OR: [
+          { name: { contains: 'offboarding', mode: 'insensitive' } },
+          { role: 'offboarding' },
+        ],
+      },
+    });
+
+    if (offboardingTemplate) {
+      await this.onboarding.startOnboarding(tenantId, employee.id, offboardingTemplate.id);
+    }
+
+    await this.webhooks.dispatch(tenantId, 'employee.terminated', {
+      employeeId: employee.id,
+      employeeCode: employee.employeeCode,
+      name: `${employee.firstName} ${employee.lastName}`,
+      email: employee.email,
+      terminatedAt: new Date().toISOString(),
+    });
+  }
+
+  async selfUpdate(tenantId: string, employeeId: string, dto: SelfUpdateEmployeeDto) {
+    if (!employeeId) throw new ForbiddenException('No employee profile linked to this account');
+    await this.findOne(tenantId, employeeId);
+
+    return this.prisma.employee.update({
+      where: { id: employeeId },
+      data: {
+        phone: dto.phone,
+        currentAddress: dto.currentAddress,
+        permanentAddress: dto.permanentAddress,
+        emergencyContact: dto.emergencyContact,
+        emergencyPhone: dto.emergencyPhone,
+      },
+      include: { department: true, designation: true },
+    });
+  }
+
+  async getTeam(tenantId: string, managerEmployeeId: string) {
+    if (!managerEmployeeId) throw new ForbiddenException('No employee profile linked to this account');
+
+    return this.prisma.employee.findMany({
+      where: { tenantId, managerId: managerEmployeeId, status: 'ACTIVE' },
+      include: {
+        designation: { select: { name: true } },
+        department: { select: { name: true } },
+      },
+      orderBy: { firstName: 'asc' },
+    });
+  }
+
+  async getMyPayslips(tenantId: string, employeeId: string) {
+    if (!employeeId) throw new ForbiddenException('No employee profile linked to this account');
+
+    return this.prisma.payrollItem.findMany({
+      where: {
+        employeeId,
+        payrollRun: { tenantId, status: { in: ['APPROVED', 'PROCESSED', 'LOCKED'] } },
+      },
+      include: {
+        payrollRun: { select: { id: true, period: true, status: true, processedAt: true } },
+      },
+      orderBy: { payrollRun: { period: 'desc' } },
+    });
   }
 
   async getOrgChart(tenantId: string) {
@@ -150,7 +242,6 @@ export class EmployeesService {
     return results;
   }
 
-  // Departments
   async getDepartments(tenantId: string) {
     return this.prisma.department.findMany({
       where: { tenantId },
@@ -163,7 +254,6 @@ export class EmployeesService {
     return this.prisma.department.create({ data: { tenantId, ...data } });
   }
 
-  // Designations
   async getDesignations(tenantId: string) {
     return this.prisma.designation.findMany({
       where: { tenantId },
@@ -175,7 +265,6 @@ export class EmployeesService {
     return this.prisma.designation.create({ data: { tenantId, ...data } });
   }
 
-  // Documents
   async addDocument(tenantId: string, employeeId: string, data: {
     type: string; name: string; fileUrl: string; expiryDate?: string;
   }) {

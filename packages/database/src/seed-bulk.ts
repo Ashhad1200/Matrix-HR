@@ -134,7 +134,7 @@ export async function seedBulkData(
     if (!emp?.email) continue;
     await prisma.user.upsert({
       where: { tenantId_email: { tenantId, email: emp.email } },
-      update: { employeeId: emp.id },
+      update: { employeeId: emp.id, role: i === 5 ? 'MANAGER' : 'EMPLOYEE' },
       create: {
         tenantId,
         email: emp.email,

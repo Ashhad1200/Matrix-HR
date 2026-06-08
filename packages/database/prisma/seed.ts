@@ -131,9 +131,22 @@ async function main() {
     },
   });
 
-  await prisma.user.update({
-    where: { id: adminUser.id },
-    data: { employeeId: manager.id },
+  await prisma.user.updateMany({
+    where: { tenantId: tenant.id, employeeId: manager.id },
+    data: { employeeId: null },
+  });
+
+  await prisma.user.upsert({
+    where: { tenantId_email: { tenantId: tenant.id, email: 'ali.khan@acme.com' } },
+    update: { employeeId: manager.id, role: UserRole.MANAGER },
+    create: {
+      tenantId: tenant.id,
+      email: 'ali.khan@acme.com',
+      passwordHash,
+      role: UserRole.MANAGER,
+      employeeId: manager.id,
+      emailVerified: true,
+    },
   });
 
   await prisma.user.upsert({
@@ -300,6 +313,7 @@ async function main() {
   console.log('  Tenant: acme.matrixhr.com');
   console.log('  Admin: admin@acme.com / Password123!');
   console.log('  HR: hr@acme.com / Password123!');
+  console.log('  Manager: ali.khan@acme.com / Password123!');
   console.log('  Employee: sara.ahmed@acme.com / Password123!');
 }
 

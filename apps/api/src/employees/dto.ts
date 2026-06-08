@@ -47,7 +47,33 @@ export class CreateEmployeeDto {
   baseSalary?: number;
 }
 
-export class UpdateEmployeeDto extends CreateEmployeeDto {}
+export class UpdateEmployeeDto extends CreateEmployeeDto {
+  @IsOptional()
+  @IsEnum(['ACTIVE', 'ON_LEAVE', 'SUSPENDED', 'TERMINATED', 'RESIGNED'])
+  status?: 'ACTIVE' | 'ON_LEAVE' | 'SUSPENDED' | 'TERMINATED' | 'RESIGNED';
+}
+
+export class SelfUpdateEmployeeDto {
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  currentAddress?: string;
+
+  @IsOptional()
+  @IsString()
+  permanentAddress?: string;
+
+  @IsOptional()
+  @IsString()
+  emergencyContact?: string;
+
+  @IsOptional()
+  @IsString()
+  emergencyPhone?: string;
+}
 
 export class ImportCsvDto {
   rows: CreateEmployeeDto[];
