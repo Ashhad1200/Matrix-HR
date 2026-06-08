@@ -9,18 +9,22 @@ export default function ReportsPage() {
   const [headcount, setHeadcount] = useState<any[]>([]);
   const [leaveData, setLeaveData] = useState<any[]>([]);
   const [payrollCost, setPayrollCost] = useState<any[]>([]);
+  const [attendance, setAttendance] = useState<any[]>([]);
+  const month = new Date().toISOString().slice(0, 7);
 
   useEffect(() => {
     Promise.all([
       api.reports.headcount(),
       api.reports.leaveConsumption(),
       api.reports.payrollCost(),
-    ]).then(([h, l, p]) => {
+      api.reports.attendance(month),
+    ]).then(([h, l, p, a]) => {
       setHeadcount(h);
       setLeaveData(l);
       setPayrollCost(p);
+      setAttendance(a);
     }).catch(console.error);
-  }, []);
+  }, [month]);
 
   return (
     <div className="space-y-6">
@@ -51,6 +55,32 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader><CardTitle>Attendance Summary ({month})</CardTitle></CardHeader>
+        <CardContent>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-left text-[hsl(var(--muted-foreground))]">
+                <th className="p-2">Employee</th>
+                <th className="p-2">Present</th>
+                <th className="p-2">Late</th>
+                <th className="p-2">Absent</th>
+              </tr>
+            </thead>
+            <tbody>
+              {attendance.map((r, i) => (
+                <tr key={i} className="border-b">
+                  <td className="p-2">{r.name || r.employee}</td>
+                  <td className="p-2">{r.present}</td>
+                  <td className="p-2">{r.late}</td>
+                  <td className="p-2">{r.absent}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader><CardTitle>Leave Consumption</CardTitle></CardHeader>

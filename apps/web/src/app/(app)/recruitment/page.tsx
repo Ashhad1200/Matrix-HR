@@ -35,7 +35,7 @@ export default function RecruitmentPage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Pipeline</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Pipeline ({applications.length})</CardTitle></CardHeader>
           <CardContent>
             <div className="flex gap-2 overflow-x-auto pb-2">
               {stages.map((stage) => {
@@ -51,6 +51,21 @@ export default function RecruitmentPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader><CardTitle>Recent Applications</CardTitle></CardHeader>
+        <CardContent className="space-y-2">
+          {applications.slice(0, 25).map((a) => (
+            <div key={a.id} className="flex items-center justify-between rounded-lg border border-[hsl(var(--border))] p-3 text-sm">
+              <div>
+                <p className="font-medium">{a.firstName} {a.lastName}</p>
+                <p className="text-[hsl(var(--muted-foreground))]">{a.job?.title || '—'} · Score: {a.score ?? '—'}</p>
+              </div>
+              <span className="rounded-full bg-[hsl(var(--muted))] px-2 py-1 text-xs">{a.status}</span>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
     </div>
   );
 }

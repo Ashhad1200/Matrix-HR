@@ -1,0 +1,88 @@
+# BambooHR System Architecture & Functional Blueprint
+### Comprehensive Product Requirements & Integration Specifications for Development Teams
+**Target Audience:** Development & Product Teams  
+**Document Class:** Core HRIS System Specification  
+**Architecture:** Single-Tenant Logic / Multi-Tenant Cloud  
+
+---
+
+## 1. Executive Platform Architecture
+This technical architecture blueprint outlines the functional mechanics, system integration layers, database schemes, and module permissions governing the BambooHR Human Resources Information System (HRIS). The engineering team should utilize this manual to scope downstream platform extensions, map API endpoints, configure webhook triggers, and establish role-based access tokens.
+
+### Core System Tiers
+The platform executes actions via a highly secure, distributed architecture, deploying structural UI layouts depending on real-time permission queries executed during the session handshake.
+
+`[User Authentication Layer] ➔ [Dynamic Permissions Engine] ➔ [Role-Tailored UX Viewport]`
+
+*   **The Client Viewport Layer:** Multi-platform rendering handling secure web sessions and native iOS/Android client actions. Layout engines dynamically hide or append widgets, navigation menus, and field tables using explicit client scopes.
+*   **The Application Compute Layer:** Server-side microservices powering central business engines, including time-off accrual math, compliance validation rules, and transactional processing loops.
+*   **The Core Database Schema:** A unified HRIS multi-tenant database layer. Relational integrity rules guarantee that mutations performed in localized records cascade dynamically across payroll grids, organization trees, and benefit logs to maintain data consistency.
+
+> **Database Governance Rule:** All employee status flags operate as immutable states. Changing an employee state from `Active` to `Terminated` must automatically trigger downstream asynchronous actions, including resource suspension webhooks and offboarding checklist cascades.
+
+---
+
+## 2. Unified Portal Panels & Authorization Matrices
+BambooHR skips disjointed application binaries in favor of a single unified portal. The platform evaluates active identity metadata on user login, using authorization tables to configure the dashboard environment into one of four functional scopes:
+
+### 2.1 Employee Self-Service (ESS) Panel
+The base user viewport designed to shift standard data entry tasks directly to workers.
+*   **Home Feed Widget Matrix:** Renders the global organizational notification board, open company event banners, and a shared team calendar showing current absenteeism.
+*   **Personal Profile Hub:** Provides restricted read/write access to individual worker properties, including home addresses, bank verification numbers, emergency profiles, and custom user fields.
+*   **Financial & Ledger Hub:** Secure window for accessing historical pay registers, managing state tax declarations, generating annual digital W-2 outputs, and downloading assigned corporate files.
+*   **Time Capture Console:** An interactive interface allowing deskless and office workers to clock in or out, align working blocks against specific internal project keys, and sign off on active weekly sheets.
+
+### 2.2 Manager Oversight Panel
+An inheritance-based operational overlay appended to an employee's base portal as soon as active reporting connections are identified in the database organization graph.
+*   **My Team Operations Console:** Visualized subset mapping the supervisor’s exact branch of the corporate hierarchy chart, exposing basic profile tables for direct and indirect reports.
+*   **Approval Processing Inbox:** Transactional interface to review, accept, or deny incoming workflows, including vacation requests, timesheet balance adjustments, and employee reimbursement lines.
+*   **Performance Management Hub:** Secure zone where managers construct periodic evaluations, log continuous 1-on-1 development notes, and track team goal parameters.
+
+### 2.3 Enterprise Administration Console
+The administrative operational center, granting global read/write access to the entire corporate directory schema and system variables.
+*   **System Settings Configuration:** Central control room containing tools to configure custom accrual algorithms, define state-level overtime rules, inject localized holiday maps, and authorize marketplace API keys.
+*   **Applicant Tracking System (ATS) Funnel:** Visual Kanban matrix displaying candidate progress across recruitment steps: application review, evaluation rounds, and final background checks.
+*   **Comp & Payroll CommandCenter:** Administrative dashboard used to compute domestic payroll runs, manage employee stock distribution values, and map benefit options during open enrollment.
+*   **Custom Matrix Report Builder:** An unrestricted drag-and-drop query layer that aggregates distinct platform databases to generate real-time tabular analytics.
+
+### 2.4 Custom Extension Panels
+Granular access rules let administrators build specialized views that isolate specific business areas for non-HR staff:
+*   **Recruitment Panel:** Exposes the ATS and onboarding milestones, but keeps employee pay histories and medical benefits hidden.
+*   **IT Asset Provisioning Panel:** Shares worker lifecycle actions, team assignments, and equipment metadata fields to streamline laptop preparation while securing private files.
+*   **Compliance Inspector View:** A strict read-only profile allowing outside regulators to review employee safety certifications and training completion rates without editing access.
+
+---
+
+## 3. Core Feature Specifications & Functional Modules
+
+| Module Group | Functional Module | Technical Capabilities & Developer Requirements |
+| :--- | :--- | :--- |
+| **HR Core & Registry** | Unified System Directory | Maintains relational data blocks for employee metadata, history tracks, and manager keys. Requires a flexible data framework to support user-defined fields. |
+| | Custom Field Engine | Lets admins expand data tables on the fly with specialized data formats (e.g., text blocks, dropdown selections, expiration date flags). |
+| | Workflow Automation | Runs automated multi-level approval steps for major profile modifications (e.g., salary updates, title changes). |
+| **Talent Acquisition** | Applicant Tracking (ATS) | Syndicates job posts to external aggregators (Indeed, ZipRecruiter) and tracks candidates using an interactive pipeline layout. |
+| | Pre-Boarding Engine | Generates digital, secure workspaces for incoming hires to collect signatures on tax packets and policy documents before Day 1. |
+| **Payroll & Workforce** | Domestic Payroll Engine | Automates net pay calculations, processes direct deposits, deductions, and handles local/federal tax submissions (US only). |
+| | Employer of Record (EOR) | Enables global hiring by connecting with local payroll entities and tax structures across more than 150 countries. |
+| | Time & Attendance Capture | Supports geofenced mobile entries, project-based allocation tracking, and dedicated hardware kiosk apps with verification options. |
+| **Talent & Experience** | Performance Architecture | Manages short-form review frequencies, 360-degree peer feedback, and alignment tracking for company-wide goals. |
+| | Sentiment Processing (eNPS) | Deploys recurring anonymous sentiment surveys. Uses an NLP engine to group open-text responses into actionable trends. |
+
+---
+
+## 4. Integration Architecture & Third-Party Ecosystem
+The platform relies heavily on an open REST API ecosystem alongside pre-built marketplace connectors. This architecture lets external apps subscribe to internal employee events via an event-driven webhook model.
+
+### Marketplace Integration Pillars
+*   **Global Payroll & PEO (Deel, Remote, Papaya Global):** Synchronize bidirectional data packets. The system pushes localized payroll additions, banking details, and country-specific tax forms straight into downstream regional databases.
+*   **Identity Management & Productivity (Okta, Azure AD, Slack):** Streamlines IT management. When an employee profile switches to `Active`, the integration automatically triggers account creation and app licensing. Slack integrations expose shortcuts for PTO lookups and approval notifications.
+*   **Learning Management (TalentLMS, Absorb LMS):** Syncs course certificates and training logs back to employee records to maintain an accurate audit history.
+*   **Background Screening & Vetting (Checkr, Verified First):** Embeds background verification orders into the ATS candidate card, tracking real-time status updates without switching applications.
+*   **Financial Planning & Benefits (Human Interest, Ease):** Connects 401(k) allocations, medical deductions, and eligibility changes directly with monthly payroll calculations.
+
+### Formula Operations Engine
+The customization engine supports custom mathematical operations to automate dynamic properties. For example, computing probation windows or tracking training investment caps can be configured using variable structures like:
+
+$$D_{probation} = D_{start} + \Delta t_{probation}$$
+
+Where $D_{start}$ defines the baseline employment date record, and $\Delta t_{probation}$ represents the fixed organizational adjustment constant mapped in the workspace properties.

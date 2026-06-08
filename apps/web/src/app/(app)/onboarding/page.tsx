@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export default function OnboardingPage() {
   const [templates, setTemplates] = useState<any[]>([]);
   const [progress, setProgress] = useState<any[]>([]);
   const [dashboard, setDashboard] = useState<any>(null);
 
-  useEffect(() => {
+  function load() {
     Promise.all([
       api.onboarding.templates(),
       api.onboarding.progress(),
@@ -19,7 +20,16 @@ export default function OnboardingPage() {
       setProgress(p);
       setDashboard(d);
     }).catch(console.error);
-  }, []);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function completeNextTask(p: any) {
+    const pending = p.tasks?.find((t: any) => t.status !== 'COMPLETED');
+    if (!pending) return;
+    await api.onboarding.completeTask(p.id, pending.taskId);
+    load();
+  }
 
   return (
     <div className="space-y-6">
@@ -69,6 +79,9 @@ export default function OnboardingPage() {
                   }}
                 />
               </div>
+              {p.status !== 'completed' && (
+                <Button size="sm" className="mt-2" onClick={() => completeNextTask(p)}>Complete Next Task</Button>
+              )}
             </div>
           ))}
         </CardContent>

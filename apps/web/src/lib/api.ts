@@ -72,6 +72,8 @@ export const api = {
     dashboard: () => request<any>('/onboarding/dashboard'),
     start: (data: { employeeId: string; templateId: string }) =>
       request<any>('/onboarding/start', { method: 'POST', body: JSON.stringify(data) }),
+    completeTask: (progressId: string, taskId: string) =>
+      request<any>(`/onboarding/tasks/${progressId}/${taskId}/complete`, { method: 'PATCH' }),
   },
   payroll: {
     runs: () => request<any>('/payroll/runs'),
@@ -82,14 +84,24 @@ export const api = {
   },
   recruitment: {
     jobs: () => request<any>('/recruitment/jobs'),
+    createJob: (data: any) => request<any>('/recruitment/jobs', { method: 'POST', body: JSON.stringify(data) }),
     applications: () => request<any>('/recruitment/applications'),
+    updateApplicationStatus: (id: string, status: string) =>
+      request<any>(`/recruitment/applications/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   },
   performance: {
     goals: () => request<any>('/performance/goals'),
     cycles: () => request<any>('/performance/cycles'),
+    createGoal: (data: any) => request<any>('/performance/goals', { method: 'POST', body: JSON.stringify(data) }),
+    updateGoalProgress: (id: string, progress: number) =>
+      request<any>(`/performance/goals/${id}/progress`, { method: 'PATCH', body: JSON.stringify({ progress }) }),
   },
   lms: {
     courses: () => request<any>('/lms/courses'),
+    enroll: (courseId: string) => request<any>('/lms/enroll', { method: 'POST', body: JSON.stringify({ courseId }) }),
+  },
+  whatsapp: {
+    messages: () => request<any>('/whatsapp/messages'),
   },
   reports: {
     headcount: () => request<any>('/reports/headcount'),
@@ -102,6 +114,7 @@ export const api = {
   },
   marketplace: {
     integrations: () => request<any>('/marketplace/integrations'),
+    categories: () => request<any>('/marketplace/categories'),
   },
   notifications: {
     list: () => request<any>('/notifications'),

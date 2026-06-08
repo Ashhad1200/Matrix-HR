@@ -40,6 +40,12 @@ export default function LeavePage() {
   async function handleApprove(id: string) {
     await api.leave.approve(id);
     setRequests(await api.leave.requests());
+    setBalances(await api.leave.balances());
+  }
+
+  async function handleReject(id: string) {
+    await api.leave.reject(id, 'Not approved at this time');
+    setRequests(await api.leave.requests());
   }
 
   return (
@@ -103,7 +109,10 @@ export default function LeavePage() {
                     'bg-yellow-100 text-yellow-800'
                   }`}>{r.status}</span>
                   {r.status === 'PENDING' && (
-                    <Button size="sm" onClick={() => handleApprove(r.id)}>Approve</Button>
+                    <>
+                      <Button size="sm" onClick={() => handleApprove(r.id)}>Approve</Button>
+                      <Button size="sm" variant="secondary" onClick={() => handleReject(r.id)}>Reject</Button>
+                    </>
                   )}
                 </div>
               </div>

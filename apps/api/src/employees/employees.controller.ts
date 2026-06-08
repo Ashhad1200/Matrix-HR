@@ -61,6 +61,17 @@ export class EmployeesController {
     return this.employees.createDesignation(tenantId, body);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.COMPANY_ADMIN, UserRole.HR_MANAGER)
+  @Post('import')
+  importCsv(
+    @TenantId() tenantId: string,
+    @CurrentUser('id') userId: string,
+    @Body() dto: ImportCsvDto,
+  ) {
+    return this.employees.importCsv(tenantId, userId, dto.rows);
+  }
+
   @Get(':id')
   findOne(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.employees.findOne(tenantId, id);
@@ -87,17 +98,6 @@ export class EmployeesController {
     @Body() dto: UpdateEmployeeDto,
   ) {
     return this.employees.update(tenantId, userId, id, dto);
-  }
-
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.COMPANY_ADMIN, UserRole.HR_MANAGER)
-  @Post('import')
-  importCsv(
-    @TenantId() tenantId: string,
-    @CurrentUser('id') userId: string,
-    @Body() dto: ImportCsvDto,
-  ) {
-    return this.employees.importCsv(tenantId, userId, dto.rows);
   }
 
   @Post(':id/documents')

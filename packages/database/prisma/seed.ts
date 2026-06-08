@@ -1,5 +1,10 @@
+import { config } from 'dotenv';
+import { resolve } from 'path';
 import { PrismaClient, UserRole, EmploymentType, EmployeeStatus } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+
+config({ path: resolve(__dirname, '../../../.env'), override: true });
+config({ path: resolve(__dirname, '../.env'), override: true });
 
 const prisma = new PrismaClient();
 
@@ -247,15 +252,51 @@ async function main() {
     { title: 'Probation review', phase: 'month3', assignee: 'hr', order: 10 },
   ];
 
+  const templateTaskIds: string[] = [];
   for (const task of tasks) {
+    const taskId = `${template.id}-task-${task.order}`;
+    templateTaskIds.push(taskId);
     await prisma.onboardingTask.upsert({
-      where: { id: `${template.id}-task-${task.order}` },
+      where: { id: taskId },
       update: {},
-      create: { id: `${template.id}-task-${task.order}`, templateId: template.id, ...task },
+      create: { id: taskId, templateId: template.id, ...task },
     });
   }
 
+  const annualPolicy = await prisma.leavePolicy.findUnique({
+    where: { tenantId_code: { tenantId: tenant.id, code: 'annual' } },
+  });
+  const casualPolicy = await prisma.leavePolicy.findUnique({
+    where: { tenantId_code: { tenantId: tenant.id, code: 'casual' } },
+  });
+  const sickPolicy = await prisma.leavePolicy.findUnique({
+    where: { tenantId_code: { tenantId: tenant.id, code: 'sick' } },
+  });
+
+  const shift = await prisma.shift.findUnique({ where: { id: `${tenant.id}-flexible` } });
+
+  const { seedBulkData } = await import('../src/seed-bulk');
+  const bulk = await seedBulkData(prisma, tenant.id, {
+    departments,
+    designations,
+    engDeptId: engDept.id,
+    seDesignationId: seDesignation.id,
+    managerId: manager.id,
+    shiftId: shift!.id,
+    templateId: template.id,
+    templateTaskIds,
+    adminUserId: adminUser.id,
+    hrUserId: hrUser.id,
+    policyIds: {
+      annual: annualPolicy!.id,
+      casual: casualPolicy!.id,
+      sick: sickPolicy!.id,
+    },
+    passwordHash,
+  });
+
   console.log('Seed complete!');
+  console.log(`  Employees: ${bulk.employeeCount}`);
   console.log('  Tenant: acme.matrixhr.com');
   console.log('  Admin: admin@acme.com / Password123!');
   console.log('  HR: hr@acme.com / Password123!');

@@ -10,29 +10,42 @@ Multi-tenant SaaS HR & Payroll — NestJS + Next.js + React Native (Expo) + Post
 
 - Node.js 20+
 - pnpm 9+
-- Docker Desktop
+- **Database:** Docker Desktop *or* Prisma Dev (built-in local Postgres)
 
-### Setup
+### Setup (Windows — recommended)
+
+```powershell
+pnpm install
+.\scripts\dev.ps1
+```
+
+`dev.ps1` starts Prisma Dev if needed, pushes the schema, seeds demo data, and runs API + Web.
+
+### Setup (Docker)
 
 ```bash
-# Clone and install
 pnpm install
-
-# Start infrastructure (Postgres, Redis, MinIO)
 docker compose -f infra/docker-compose.yml up -d
-
-# Copy environment
 cp .env.example .env
-
-# Generate Prisma client and push schema
+# Set DATABASE_URL=postgresql://matrixhr:matrixhr@localhost:5432/matrixhr
 pnpm db:generate
 pnpm db:push
-
-# Seed demo tenant (Acme Software)
 pnpm db:seed
-
-# Start dev servers
 pnpm dev
+```
+
+**Note:** If using Prisma Dev, append `&pgbouncer=true` to `DATABASE_URL` to avoid prepared-statement errors during hot reload.
+
+### Mock data (25 entries per module)
+
+After the API is running:
+
+```powershell
+# Populate 25 employees, leave requests, attendance logs, jobs, courses, etc.
+Invoke-RestMethod -Uri "http://localhost:3001/api/v1/dev/seed-bulk" -Method POST
+
+# Test all 68 API endpoints
+pnpm test:api
 ```
 
 ### Demo Credentials

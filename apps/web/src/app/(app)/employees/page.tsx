@@ -14,7 +14,7 @@ export default function EmployeesPage() {
   const [form, setForm] = useState({ employeeCode: '', firstName: '', lastName: '', email: '' });
 
   function load() {
-    api.employees.list({ search }).then(setEmployees).catch(console.error);
+    api.employees.list({ search, limit: '50' }).then(setEmployees).catch(console.error);
   }
 
   useEffect(() => { load(); }, [search]);

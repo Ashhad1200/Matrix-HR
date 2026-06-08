@@ -20,10 +20,11 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { MarketplaceModule } from './marketplace/marketplace.module';
 import { AiModule } from './ai/ai.module';
 import { ReportsModule } from './reports/reports.module';
+import { DevModule } from './dev/dev.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: ['../../.env', '.env'] }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     PrismaModule,
     AuditModule,
@@ -43,6 +44,7 @@ import { ReportsModule } from './reports/reports.module';
     ReportsModule,
     AiModule,
     MarketplaceModule,
+    DevModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
