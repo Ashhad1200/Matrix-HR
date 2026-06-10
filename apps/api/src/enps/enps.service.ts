@@ -14,6 +14,67 @@ export class EnpsService {
     });
   }
 
+  async getSummary(tenantId: string) {
+    const survey = await this.prisma.enpsSurvey.findFirst({
+      where: { tenantId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        responses: { orderBy: { createdAt: 'desc' }, take: 20 },
+      },
+    });
+
+    if (!survey) {
+      return { score: null, promoters: null, detractors: null, responses: [], themes: [], surveys: [] };
+    }
+
+    const scores = survey.responses.map((r) => r.score);
+    const total = scores.length;
+    const promoterCount = scores.filter((s) => s >= 9).length;
+    const detractorCount = scores.filter((s) => s <= 6).length;
+    const enps = total ? Math.round(((promoterCount - detractorCount) / total) * 100) : null;
+
+    return {
+      score: enps,
+      promoters: total ? Math.round((promoterCount / total) * 100) : null,
+      detractors: total ? Math.round((detractorCount / total) * 100) : null,
+      responses: survey.responses,
+      themes: this.groupThemes(survey.responses),
+      surveys: await this.findAll(tenantId),
+    };
+  }
+
+  /** Keyword-based clustering of open-text comments into actionable themes. */
+  private groupThemes(responses: { score: number; comment: string | null }[]) {
+    const THEME_KEYWORDS: Record<string, string[]> = {
+      Compensation: ['salary', 'pay', 'compensation', 'raise', 'bonus', 'underpaid', 'increment'],
+      'Work-life balance': ['balance', 'overtime', 'hours', 'workload', 'burnout', 'flexible', 'remote'],
+      Management: ['manager', 'leadership', 'boss', 'micromanage', 'communication', 'transparency'],
+      'Career growth': ['growth', 'promotion', 'career', 'learning', 'training', 'development', 'opportunity'],
+      Culture: ['culture', 'team', 'environment', 'toxic', 'friendly', 'collaboration', 'respect'],
+      'Tools & process': ['tools', 'process', 'software', 'equipment', 'bureaucracy', 'slow', 'system'],
+    };
+
+    const themes = new Map<string, { theme: string; count: number; avgScore: number; samples: string[] }>();
+
+    for (const r of responses) {
+      const comment = r.comment?.toLowerCase();
+      if (!comment) continue;
+      for (const [theme, keywords] of Object.entries(THEME_KEYWORDS)) {
+        if (keywords.some((k) => comment.includes(k))) {
+          const bucket = themes.get(theme) ?? { theme, count: 0, avgScore: 0, samples: [] };
+          bucket.avgScore = (bucket.avgScore * bucket.count + r.score) / (bucket.count + 1);
+          bucket.count += 1;
+          if (bucket.samples.length < 3 && r.comment) bucket.samples.push(r.comment);
+          themes.set(theme, bucket);
+        }
+      }
+    }
+
+    return [...themes.values()]
+      .map((t) => ({ ...t, avgScore: Math.round(t.avgScore * 10) / 10 }))
+      .sort((a, b) => b.count - a.count);
+  }
+
   async findOne(tenantId: string, id: string) {
     const survey = await this.prisma.enpsSurvey.findFirst({
       where: { id, tenantId },

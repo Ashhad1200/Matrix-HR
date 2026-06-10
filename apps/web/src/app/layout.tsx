@@ -1,18 +1,19 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Bricolage_Grotesque, Figtree } from 'next/font/google';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const display = Bricolage_Grotesque({ subsets: ['latin'], variable: '--font-display' });
+const body = Figtree({ subsets: ['latin'], variable: '--font-body' });
 
 export const metadata: Metadata = {
-  title: 'MatrixHR — Connected HR for South Asia',
-  description: 'Multi-tenant HR & Payroll platform built for Pakistan and the Middle East',
+  title: 'MatrixHR — The HR Operating System',
+  description: 'Multi-tenant HR, payroll, talent and time platform. Everything BambooHR does — built for South Asia and beyond.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.variable}>
+      <body className={`${display.variable} ${body.variable} font-sans`}>
         <script
           dangerouslySetInnerHTML={{
             __html: `if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark')`,

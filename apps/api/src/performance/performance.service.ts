@@ -56,4 +56,55 @@ export class PerformanceService {
       data: { progress: Math.min(100, Math.max(0, progress)) },
     });
   }
+
+  async getReviews(tenantId: string, cycleId?: string) {
+    const reviews = await this.prisma.performanceReview.findMany({
+      where: { tenantId, ...(cycleId ? { cycleId } : {}) },
+      include: { cycle: { select: { id: true, name: true, type: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Resolve employee/reviewer names in one query
+    const ids = [...new Set(reviews.flatMap((r) => [r.employeeId, r.reviewerId]))];
+    const employees = await this.prisma.employee.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, firstName: true, lastName: true, designation: { select: { name: true } } },
+    });
+    const empMap = new Map(employees.map((e) => [e.id, e]));
+
+    return reviews.map((r) => ({
+      ...r,
+      employee: empMap.get(r.employeeId) ?? null,
+      reviewer: empMap.get(r.reviewerId) ?? null,
+    }));
+  }
+
+  async createReview(tenantId: string, data: { cycleId: string; employeeId: string; reviewerId: string }) {
+    return this.prisma.performanceReview.create({
+      data: {
+        tenantId,
+        cycleId: data.cycleId,
+        employeeId: data.employeeId,
+        reviewerId: data.reviewerId,
+      },
+    });
+  }
+
+  async submitReview(
+    tenantId: string,
+    id: string,
+    data: { selfRating?: number; managerRating?: number; feedback?: string; status?: string },
+  ) {
+    const review = await this.prisma.performanceReview.findFirst({ where: { id, tenantId } });
+    if (!review) return null;
+    return this.prisma.performanceReview.update({
+      where: { id },
+      data: {
+        ...(data.selfRating != null ? { selfRating: data.selfRating } : {}),
+        ...(data.managerRating != null ? { managerRating: data.managerRating } : {}),
+        ...(data.feedback !== undefined ? { feedback: data.feedback } : {}),
+        status: data.status ?? 'submitted',
+      },
+    });
+  }
 }

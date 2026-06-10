@@ -32,4 +32,19 @@ export class PerformanceController {
   updateProgress(@Param('id') id: string, @Body('progress') progress: number) {
     return this.performance.updateGoalProgress(id, progress);
   }
+
+  @Get('reviews')
+  getReviews(@TenantId() tenantId: string, @Query('cycleId') cycleId?: string) {
+    return this.performance.getReviews(tenantId, cycleId);
+  }
+
+  @Post('reviews')
+  createReview(@TenantId() tenantId: string, @Body() body: any) {
+    return this.performance.createReview(tenantId, body);
+  }
+
+  @Patch('reviews/:id')
+  submitReview(@TenantId() tenantId: string, @Param('id') id: string, @Body() body: any) {
+    return this.performance.submitReview(tenantId, id, body);
+  }
 }

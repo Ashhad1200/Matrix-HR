@@ -33,30 +33,41 @@ export default function PreboardingPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {candidates.length === 0 ? (
-            <Card className="col-span-full"><CardContent className="p-6 text-[hsl(var(--muted-foreground))]">No pre-boarding candidates</CardContent></Card>
-          ) : candidates.map((c) => (
-            <Card key={c.id}>
-              <CardHeader><CardTitle className="text-base">{c.firstName} {c.lastName}</CardTitle></CardHeader>
-              <CardContent>
-                <p className="text-sm text-[hsl(var(--muted-foreground))]">{c.job?.title ?? c.position ?? '—'}</p>
-                {c.startDate && (
-                  <p className="mt-2 text-sm">Start: {formatDate(c.startDate)}</p>
-                )}
-                <div className="mt-3">
-                  <div className="flex items-center justify-between text-xs">
-                    <span>Documents</span>
-                    <span>{c.completedDocs ?? 0}/{c.totalDocs ?? 0}</span>
-                  </div>
-                  <div className="mt-1 h-2 rounded-full bg-[hsl(var(--muted))]">
-                    <div
-                      className="h-2 rounded-full bg-brand-600"
-                      style={{ width: `${((c.completedDocs ?? 0) / Math.max(c.totalDocs ?? 1, 1)) * 100}%` }}
-                    />
-                  </div>
-                </div>
+            <Card className="col-span-full">
+              <CardContent className="p-6 text-[hsl(var(--muted-foreground))]">
+                No pre-boarding invites yet. Create one from the recruitment pipeline.
               </CardContent>
             </Card>
-          ))}
+          ) : candidates.map((c) => {
+            const docs = (c.documents as Record<string, boolean> | null) ?? {};
+            const docKeys = Object.keys(docs);
+            const completedDocs = docKeys.filter((k) => docs[k]).length;
+            const totalDocs = docKeys.length || 1;
+
+            return (
+              <Card key={c.id}>
+                <CardHeader>
+                  <CardTitle className="text-base">{c.email}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm capitalize text-[hsl(var(--muted-foreground))]">Status: {c.status}</p>
+                  <p className="mt-1 text-sm">Expires: {formatDate(c.expiresAt)}</p>
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <span>Documents</span>
+                      <span>{completedDocs}/{totalDocs}</span>
+                    </div>
+                    <div className="mt-1 h-2 rounded-full bg-[hsl(var(--muted))]">
+                      <div
+                        className="h-2 rounded-full bg-brand-600"
+                        style={{ width: `${(completedDocs / totalDocs) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

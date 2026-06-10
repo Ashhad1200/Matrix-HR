@@ -51,13 +51,13 @@ export const api = {
   },
   approvals: {
     inbox: () => request<any>('/approvals/inbox'),
-    approve: (id: string) => request<any>(`/approvals/${id}/approve`, { method: 'PATCH' }),
+    approve: (id: string) => request<any>(`/leave/requests/${id}/approve`, { method: 'PATCH' }),
     reject: (id: string, reason?: string) =>
-      request<any>(`/approvals/${id}/reject`, { method: 'PATCH', body: JSON.stringify({ reason }) }),
+      request<any>(`/leave/requests/${id}/reject`, { method: 'PATCH', body: JSON.stringify({ reason }) }),
   },
   settings: {
-    customFields: () => request<any>('/settings/custom-fields'),
-    workflows: () => request<any>('/settings/workflows'),
+    customFields: () => request<any>('/custom-fields'),
+    workflows: () => request<any>('/workflows'),
   },
   audit: {
     logs: (params?: Record<string, string>) =>
@@ -106,18 +106,66 @@ export const api = {
     applications: () => request<any>('/recruitment/applications'),
     updateApplicationStatus: (id: string, status: string) =>
       request<any>(`/recruitment/applications/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
-    preboarding: () => request<any>('/recruitment/preboarding'),
+    preboarding: () => request<any>('/preboarding'),
   },
   performance: {
     goals: () => request<any>('/performance/goals'),
     cycles: () => request<any>('/performance/cycles'),
+    createCycle: (data: any) => request<any>('/performance/cycles', { method: 'POST', body: JSON.stringify(data) }),
     createGoal: (data: any) => request<any>('/performance/goals', { method: 'POST', body: JSON.stringify(data) }),
     updateGoalProgress: (id: string, progress: number) =>
       request<any>(`/performance/goals/${id}/progress`, { method: 'PATCH', body: JSON.stringify({ progress }) }),
-    enps: () => request<any>('/performance/enps'),
+    enps: () => request<any>('/enps/surveys/summary'),
+    enpsSurveys: () => request<any>('/enps/surveys'),
+    reviews: (cycleId?: string) => request<any>(`/performance/reviews${cycleId ? `?cycleId=${cycleId}` : ''}`),
+    createReview: (data: any) => request<any>('/performance/reviews', { method: 'POST', body: JSON.stringify(data) }),
+    submitReview: (id: string, data: any) =>
+      request<any>(`/performance/reviews/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  },
+  peerReviews: {
+    list: (cycleId?: string) => request<any>(`/peer-reviews${cycleId ? `?cycleId=${cycleId}` : ''}`),
+    create: (data: any) => request<any>('/peer-reviews', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: any) => request<any>(`/peer-reviews/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  },
+  oneOnOnes: {
+    list: () => request<any>('/one-on-ones'),
+    create: (data: any) => request<any>('/one-on-ones', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: any) => request<any>(`/one-on-ones/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    remove: (id: string) => request<any>(`/one-on-ones/${id}`, { method: 'DELETE' }),
+  },
+  timesheets: {
+    projects: () => request<any>('/timesheets/projects'),
+    createProject: (data: { key: string; name: string }) =>
+      request<any>('/timesheets/projects', { method: 'POST', body: JSON.stringify(data) }),
+    entries: (weekStart?: string) => request<any>(`/timesheets/entries${weekStart ? `?weekStart=${weekStart}` : ''}`),
+    createEntry: (data: any) => request<any>('/timesheets/entries', { method: 'POST', body: JSON.stringify(data) }),
+    updateEntry: (id: string, data: any) =>
+      request<any>(`/timesheets/entries/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    deleteEntry: (id: string) => request<any>(`/timesheets/entries/${id}`, { method: 'DELETE' }),
+    submitWeek: (weekStart: string) =>
+      request<any>('/timesheets/submit', { method: 'POST', body: JSON.stringify({ weekStart }) }),
+    pending: () => request<any>('/timesheets/pending'),
+    approve: (id: string) => request<any>(`/timesheets/entries/${id}/approve`, { method: 'PATCH' }),
+    reject: (id: string) => request<any>(`/timesheets/entries/${id}/reject`, { method: 'PATCH' }),
+  },
+  apiKeys: {
+    list: () => request<any>('/api-keys'),
+    create: (name: string) => request<any>('/api-keys', { method: 'POST', body: JSON.stringify({ name }) }),
+    revoke: (id: string) => request<any>(`/api-keys/${id}`, { method: 'DELETE' }),
+  },
+  sso: {
+    config: () => request<any>('/sso/config'),
+    save: (data: any) => request<any>('/sso/config', { method: 'PUT', body: JSON.stringify(data) }),
+  },
+  eor: {
+    countries: () => request<any>('/eor/countries'),
+    quote: (country: string, salary: number) => request<any>(`/eor/quote?country=${country}&salary=${salary}`),
+  },
+  payrollExtras: {
+    w2: (year?: number) => request<any>(`/payroll/w2${year ? `?year=${year}` : ''}`),
   },
   extensions: {
-    list: () => request<any>('/extensions'),
+    list: () => request<any>('/extensions/panels'),
   },
   lms: {
     courses: () => request<any>('/lms/courses'),
@@ -138,6 +186,9 @@ export const api = {
   marketplace: {
     integrations: () => request<any>('/marketplace/integrations'),
     categories: () => request<any>('/marketplace/categories'),
+    connect: (id: string) => request<any>(`/marketplace/${id}/connect`, { method: 'POST' }),
+    disconnect: (id: string) => request<any>(`/marketplace/${id}/disconnect`, { method: 'POST' }),
+    sync: (id: string) => request<any>(`/marketplace/${id}/sync`, { method: 'POST' }),
   },
   notifications: {
     list: () => request<any>('/notifications'),

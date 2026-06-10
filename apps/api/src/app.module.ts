@@ -33,6 +33,11 @@ import { EnpsModule } from './enps/enps.module';
 import { PeerReviewsModule } from './peer-reviews/peer-reviews.module';
 import { ExtensionsModule } from './extensions/extensions.module';
 import { ReportsBuilderModule } from './reports-builder/reports-builder.module';
+import { OneOnOnesModule } from './oneonones/oneonones.module';
+import { TimesheetsModule } from './timesheets/timesheets.module';
+import { ApiKeysModule } from './api-keys/api-keys.module';
+import { EorModule } from './eor/eor.module';
+import { SsoModule } from './sso/sso.module';
 
 @Module({
   imports: [
@@ -69,6 +74,11 @@ import { ReportsBuilderModule } from './reports-builder/reports-builder.module';
     PeerReviewsModule,
     ExtensionsModule,
     ReportsBuilderModule,
+    OneOnOnesModule,
+    TimesheetsModule,
+    ApiKeysModule,
+    EorModule,
+    SsoModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

@@ -58,6 +58,8 @@ const ALL_NAV: Record<string, NavItem> = {
   preboarding: { href: '/recruitment/preboarding', label: 'Pre-boarding', icon: 'FileSignature' },
   enps: { href: '/performance/enps', label: 'eNPS', icon: 'Heart' },
   extensions: { href: '/extensions', label: 'Extensions', icon: 'Puzzle' },
+  timesheets: { href: '/timesheets', label: 'Timesheets', icon: 'Timer' },
+  oneOnOnes: { href: '/one-on-ones', label: '1-on-1s', icon: 'MessagesSquare' },
 };
 
 function nav(...keys: string[]): NavItem[] {
@@ -123,8 +125,8 @@ export function getPermissionsForRole(role: string): UserPermissions {
       return {
         portal: 'admin',
         nav: nav(
-          'dashboard', 'employees', 'leave', 'attendance', 'payroll', 'recruitment',
-          'atsKanban', 'preboarding', 'onboarding', 'performance', 'enps', 'lms',
+          'dashboard', 'employees', 'leave', 'attendance', 'timesheets', 'payroll', 'recruitment',
+          'atsKanban', 'preboarding', 'onboarding', 'performance', 'enps', 'oneOnOnes', 'lms',
           'reports', 'whatsapp', 'settings', 'customFields', 'workflows', 'audit',
           'marketplace', 'extensions', 'ai',
         ),
@@ -133,14 +135,14 @@ export function getPermissionsForRole(role: string): UserPermissions {
     case ROLES.MANAGER:
       return {
         portal: 'manager',
-        nav: nav('dashboard', 'team', 'approvals', 'leave', 'performance', 'attendance', 'reports', 'myProfile', 'myPay', 'ai'),
+        nav: nav('dashboard', 'team', 'approvals', 'oneOnOnes', 'leave', 'performance', 'attendance', 'timesheets', 'reports', 'myProfile', 'myPay', 'ai'),
         actions: MANAGER_ACTIONS,
       };
     case ROLES.EMPLOYEE:
     default:
       return {
         portal: 'ess',
-        nav: nav('dashboard', 'myProfile', 'leave', 'attendance', 'myPay', 'performance', 'lms', 'ai'),
+        nav: nav('dashboard', 'myProfile', 'leave', 'attendance', 'timesheets', 'myPay', 'performance', 'lms', 'ai'),
         actions: ESS_ACTIONS,
       };
   }

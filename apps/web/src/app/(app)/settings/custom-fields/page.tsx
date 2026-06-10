@@ -51,8 +51,8 @@ export default function CustomFieldsPage() {
                   <tr><td colSpan={4} className="p-6 text-center text-[hsl(var(--muted-foreground))]">No custom fields configured</td></tr>
                 ) : fields.map((f) => (
                   <tr key={f.id} className="border-b hover:bg-[hsl(var(--muted))]">
-                    <td className="p-4 font-medium">{f.name ?? f.label}</td>
-                    <td className="p-4 text-sm">{f.type ?? 'text'}</td>
+                    <td className="p-4 font-medium">{f.label ?? f.key}</td>
+                    <td className="p-4 text-sm">{f.fieldType ?? f.type ?? 'text'}</td>
                     <td className="p-4 text-sm">{f.entity ?? 'Employee'}</td>
                     <td className="p-4 text-sm">{f.required ? 'Yes' : 'No'}</td>
                   </tr>

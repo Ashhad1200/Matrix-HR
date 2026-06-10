@@ -12,12 +12,19 @@ export class PreboardingController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN)
+  @Get()
+  listInvites(@TenantId() tenantId: string) {
+    return this.preboarding.findAll(tenantId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN)
   @Post('invite')
   createInvite(@TenantId() tenantId: string, @Body() dto: CreatePreboardingInviteDto) {
     return this.preboarding.createInvite(tenantId, dto);
   }
 
-  @Get(':token')
+  @Get('portal/:token')
   getByToken(@Param('token') token: string) {
     return this.preboarding.getByToken(token);
   }

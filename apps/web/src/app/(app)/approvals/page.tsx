@@ -55,10 +55,18 @@ export default function ApprovalsPage() {
             ) : items.map((item) => (
               <div key={item.id} className="flex items-center justify-between rounded-lg border border-[hsl(var(--border))] p-4">
                 <div>
-                  <p className="font-medium">{item.title ?? item.type}</p>
+                  <p className="font-medium">
+                    {item.policy?.name ?? 'Leave Request'}
+                    {item.startDate && item.endDate && (
+                      <span className="font-normal text-[hsl(var(--muted-foreground))]">
+                        {' '}· {formatDate(item.startDate)} – {formatDate(item.endDate)}
+                      </span>
+                    )}
+                  </p>
                   <p className="text-sm text-[hsl(var(--muted-foreground))]">
                     {item.employee?.firstName} {item.employee?.lastName}
-                    {item.description && ` · ${item.description}`}
+                    {item.employee?.employeeCode && ` (${item.employee.employeeCode})`}
+                    {item.reason && ` · ${item.reason}`}
                   </p>
                   {item.createdAt && (
                     <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">

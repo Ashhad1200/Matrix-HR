@@ -5,7 +5,7 @@ $ErrorActionPreference = "Continue"
 Set-Location $PSScriptRoot\..
 
 Write-Host "==> Stopping and removing old MatrixHR containers..."
-docker rm -f matrixhr-postgres matrixhr-redis matrixhr-minio 2>$null | Out-Null
+docker rm -f matrixhr-postgres matrixhr-redis matrixhr-minio matrixhr-api matrixhr-web 2>$null | Out-Null
 docker compose down --remove-orphans 2>$null | Out-Null
 
 Write-Host "==> Starting Docker (Postgres, Redis, MinIO)..."

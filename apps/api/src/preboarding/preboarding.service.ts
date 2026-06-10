@@ -24,6 +24,13 @@ export class PreboardingService {
     });
   }
 
+  async findAll(tenantId: string) {
+    return this.prisma.preboardingInvite.findMany({
+      where: { tenantId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async getByToken(token: string) {
     const invite = await this.prisma.preboardingInvite.findUnique({
       where: { token },

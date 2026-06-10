@@ -40,4 +40,9 @@ export class PayrollController {
     const run = await this.payroll.getPayrollRun(tenantId, id);
     return this.payroll.generateBankFile(run, bank || 'meezan');
   }
+
+  @Get('w2')
+  getW2Forms(@TenantId() tenantId: string, @Query('year') year?: string) {
+    return this.payroll.generateW2Forms(tenantId, year ? Number(year) : new Date().getFullYear() - 1);
+  }
 }

@@ -1,18 +1,15 @@
-# MatrixHR local infrastructure — run from project root (E:\Matrix HR)
+# MatrixHR — full stack from project root (E:\Matrix HR)
 #
-# FULL STACK (Docker + DB + Backend + Frontend):
-#   pnpm start
-#   pnpm dev          (same as start)
-#
-# DOCKER ONLY:
+# RECOMMENDED (kills port conflicts + starts everything):
 #   pnpm docker:up
-#   pnpm docker:reset   (fix container name conflicts)
-#   pnpm docker:down
+#   .\compose-up.ps1
+#   powershell -File scripts\compose-up.ps1
 #
-# APPS ONLY (Docker must already be running):
-#   pnpm dev:api        -> Backend  http://localhost:3001
-#   pnpm dev:web        -> Frontend http://localhost:3000
-#   pnpm dev:apps       -> Both API + Web together
+# Plain docker compose (no port cleanup — may fail if 3000/3001 in use):
+#   docker compose up --build
+#
+# Stop everything:
+#   docker compose down
 
 services:
   postgres:
@@ -30,7 +27,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U matrixhr"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   redis:
     image: redis:7-alpine
@@ -58,7 +55,48 @@ services:
     volumes:
       - minio_data:/data
 
+  api:
+    image: node:20-bookworm
+    container_name: matrixhr-api
+    working_dir: /app
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://matrixhr:matrixhr@postgres:5432/matrixhr?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-secret-change-in-production-32chars
+      JWT_REFRESH_SECRET: dev-refresh-secret-change-in-prod
+      WEB_URL: http://localhost:3000
+      API_URL: http://localhost:3001
+      PORT: "3001"
+    entrypoint: ["/bin/sh", "/app/docker/entrypoint-api.sh"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    image: node:20-bookworm
+    container_name: matrixhr-web
+    working_dir: /app
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001/api/v1
+      WEB_URL: http://localhost:3000
+    entrypoint: ["/bin/sh", "/app/docker/entrypoint-web.sh"]
+    depends_on:
+      - api
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:
   minio_data:
+  node_modules:

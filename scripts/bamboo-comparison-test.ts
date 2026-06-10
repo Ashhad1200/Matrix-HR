@@ -185,7 +185,9 @@ async function main() {
     }, 'D');
     addCheck('§2.2 Manager', 'My Team console', team.ok ? 'full' : 'missing', `GET /employees/team → ${team.status}`, 'D');
     addCheck('§2.2 Manager', 'Approval inbox', inbox.ok ? 'full' : 'missing', `GET /approvals/inbox → ${inbox.status}`, 'D');
-    addCheck('§2.2 Manager', '1-on-1 notes', 'missing', 'No dedicated 1-on-1 API/UI', 'D');
+    const oneOnOnes = await req('GET', '/one-on-ones', manager.token);
+    apiResults.push({ role: 'Manager', method: 'GET', path: '/one-on-ones', status: oneOnOnes.status, ok: oneOnOnes.ok });
+    addCheck('§2.2 Manager', '1-on-1 notes', oneOnOnes.ok ? 'full' : 'missing', `GET /one-on-ones → ${oneOnOnes.status} + /one-on-ones UI`, 'D');
   }
 
   // §2.3 Admin + new modules (Hypothesis B: new endpoints 404/500)
@@ -213,13 +215,18 @@ async function main() {
       const cov: Coverage = r.ok ? (r.status === 200 || r.status === 201 ? 'full' : 'partial') : 'missing';
       addCheck('§2.3 Admin / Phase 2-7', ep.label, cov, `${r.status}`, 'B');
     }
-    addCheck('§2.3 Admin', 'Admin settings UI', 'partial', 'Web page at /settings (no dedicated API)');
+    addCheck('§2.3 Admin', 'Admin settings UI', 'full', 'Settings hub + API keys/SSO/EOR pages backed by dedicated APIs');
 
     // Payroll engines
     const runs = await req('GET', '/payroll/runs', admin.token);
     addCheck('§3 Payroll', 'PK domestic payroll runs', runs.ok ? 'full' : 'partial', `runs endpoint ${runs.status}`);
-    addCheck('§3 Payroll', 'US W-2 / federal tax PDF', 'stub', 'UsPayrollEngine exists; W-2 PDF generation not implemented');
-    addCheck('§3 Payroll', 'EOR (150 countries)', 'missing', 'No EOR module');
+    const w2 = await req('GET', '/payroll/w2?year=2025', admin.token);
+    apiResults.push({ role: 'Admin', method: 'GET', path: '/payroll/w2', status: w2.status, ok: w2.ok });
+    addCheck('§3 Payroll', 'US W-2 / federal tax PDF', w2.ok ? 'partial' : 'stub', `GET /payroll/w2 → ${w2.status} (box data, no PDF render)`);
+    const eor = await req('GET', '/eor/countries', admin.token);
+    apiResults.push({ role: 'Admin', method: 'GET', path: '/eor/countries', status: eor.status, ok: eor.ok });
+    const eorTotal = (eor.data as { total?: number })?.total ?? 0;
+    addCheck('§3 Payroll', 'EOR (150 countries)', eor.ok && eorTotal >= 140 ? 'partial' : 'missing', `GET /eor/countries → ${eorTotal} countries + quote calculator (no live provider)`);
   }
 
   // §3 Talent Acquisition
@@ -227,42 +234,87 @@ async function main() {
     const jobs = await req('GET', '/recruitment/jobs', admin.token);
     const apps = await req('GET', '/recruitment/applications', admin.token);
     addCheck('§3 ATS', 'Job postings API', jobs.ok ? 'full' : 'partial', `status ${jobs.status}`);
-    addCheck('§3 ATS', 'Kanban pipeline UI', 'partial', 'Page exists at /recruitment/kanban; drag-drop TBD');
-    addCheck('§3 ATS', 'Indeed/ZipRecruiter syndication', 'missing', 'No external job board integration');
+    addCheck('§3 ATS', 'Kanban pipeline UI', 'full', 'HTML5 drag-drop board at /recruitment/kanban with optimistic updates');
+    const feed = await fetch(`${API}/careers/acme/feed.xml`);
+    addCheck('§3 ATS', 'Indeed/ZipRecruiter syndication', feed.ok ? 'partial' : 'missing', `Public XML feed /careers/:subdomain/feed.xml → ${feed.status}`);
     addCheck('§3 Pre-boarding', 'Secure candidate portal', apps.ok ? 'partial' : 'missing', 'Preboarding invite API + page stub');
     addCheck('§3 Pre-boarding', 'E-signatures (DocuSign-class)', 'stub', 'Esign module stub only');
   }
 
   // §3 Time & Attendance
   addCheck('§3 Time', 'Clock in/out', 'full', 'API + /attendance page');
-  addCheck('§3 Time', 'Project keys / timesheets', 'missing', 'No project time tracking');
+  if (empToken) {
+    const projects = await req('GET', '/timesheets/projects', empToken);
+    const entries = await req('GET', '/timesheets/entries', empToken);
+    apiResults.push({ role: 'Employee', method: 'GET', path: '/timesheets/entries', status: entries.status, ok: entries.ok });
+    addCheck(
+      '§3 Time',
+      'Project keys / timesheets',
+      projects.ok && entries.ok ? 'full' : 'missing',
+      `GET /timesheets/projects → ${projects.status}, weekly sheet + approvals UI at /timesheets`,
+    );
+  }
   addCheck('§3 Time', 'Geofence assignment UI', 'partial', 'Geo API exists; assignment UI stub');
-  addCheck('§3 Time', 'Hardware kiosk', 'missing', 'Marketplace stub only');
+  addCheck('§3 Time', 'Hardware kiosk', 'partial', 'Shared-device kiosk page at /kiosk (no biometric hardware pairing)');
 
   // §3 Performance & eNPS
-  addCheck('§3 Performance', '360 peer feedback', admin?.token ? 'partial' : 'missing', 'peer-reviews API exists');
-  addCheck('§3 Performance', 'Review forms UI', 'partial', 'Goals read-only; no full review forms');
-  addCheck('§3 eNPS', 'Anonymous sentiment + NLP', 'stub', 'Enps module; NLP grouping not implemented');
+  if (admin?.token) {
+    const reviews = await req('GET', '/performance/reviews', admin.token);
+    apiResults.push({ role: 'Admin', method: 'GET', path: '/performance/reviews', status: reviews.status, ok: reviews.ok });
+    addCheck('§3 Performance', '360 peer feedback', 'full', 'peer-reviews API + 360 tab at /performance/reviews');
+    addCheck('§3 Performance', 'Review forms UI', reviews.ok ? 'full' : 'partial', `GET /performance/reviews → ${reviews.status} + star-rating review forms`);
+    const enpsSummary = await req('GET', '/enps/surveys/summary', admin.token);
+    const hasThemes = Array.isArray((enpsSummary.data as { themes?: unknown[] })?.themes);
+    addCheck('§3 eNPS', 'Anonymous sentiment + NLP', enpsSummary.ok && hasThemes ? 'partial' : 'stub', `Summary themes grouping ${hasThemes ? 'active (keyword clustering)' : 'missing'}`);
+  }
 
   // §4 Integrations
   addCheck('§4 Integrations', 'REST API + JWT', 'full', `${apiResults.length}+ endpoints tested`);
-  addCheck('§4 Integrations', 'Public API docs', 'missing', 'No OpenAPI/Swagger published');
-  addCheck('§4 Integrations', 'API keys per tenant', 'stub', 'ApiKey model in schema');
+  const docs = await fetch(`${BASE}/api/docs-json`);
+  addCheck('§4 Integrations', 'Public API docs', docs.ok ? 'full' : 'missing', `OpenAPI at /api/docs → ${docs.status}`);
+  if (admin?.token) {
+    const createdKey = await req('POST', '/api-keys', admin.token, { name: 'comparison-probe' });
+    const keyId = (createdKey.data as { id?: string })?.id;
+    if (keyId) await req('DELETE', `/api-keys/${keyId}`, admin.token);
+    apiResults.push({ role: 'Admin', method: 'POST', path: '/api-keys', status: createdKey.status, ok: createdKey.ok });
+    addCheck('§4 Integrations', 'API keys per tenant', createdKey.ok ? 'full' : 'stub', `POST /api-keys → ${createdKey.status} (hashed, shown once) + settings UI`);
+  }
   addCheck('§4 Integrations', 'Outbound webhooks delivery', 'partial', 'Webhook models + dispatch on terminate');
-  addCheck('§4 Integrations', 'Slack OAuth install', 'stub', 'integrations/:provider/install stub');
-  addCheck('§4 Integrations', 'Deel/Okta/TalentLMS sync', 'missing', 'Static marketplace catalog only');
+  if (admin?.token) {
+    const slack = await req('POST', '/marketplace/slack/connect', admin.token);
+    addCheck('§4 Integrations', 'Slack OAuth install', slack.ok ? 'partial' : 'stub', `POST /marketplace/slack/connect → ${slack.status} (simulated OAuth)`);
+    const deel = await req('POST', '/marketplace/deel/connect', admin.token);
+    const deelSync = await req('POST', '/marketplace/deel/sync', admin.token);
+    apiResults.push({ role: 'Admin', method: 'POST', path: '/marketplace/deel/sync', status: deelSync.status, ok: deelSync.ok });
+    addCheck(
+      '§4 Integrations',
+      'Deel/Okta/TalentLMS sync',
+      deel.ok && deelSync.ok ? 'partial' : 'missing',
+      `Connect+sync pipeline → ${deelSync.status}; record counts persisted per provider (simulated transport)`,
+    );
+  }
 
   // §2.4 Extension panels
-  addCheck('§2.4 Extensions', 'Recruitment-only panel', 'partial', '/extensions page');
-  addCheck('§2.4 Extensions', 'IT asset provisioning', 'partial', 'Extension panel stub');
-  addCheck('§2.4 Extensions', 'Compliance inspector (read-only)', 'partial', 'Extension panel stub');
+  addCheck('§2.4 Extensions', 'Recruitment-only panel', 'full', 'Live read-only view at /extensions/recruitment (no pay data)');
+  addCheck('§2.4 Extensions', 'IT asset provisioning', 'full', 'Lifecycle/provisioning view at /extensions/it_assets');
+  addCheck('§2.4 Extensions', 'Compliance inspector (read-only)', 'full', 'Training completion view at /extensions/compliance');
 
   // §1 Termination cascade
   addCheck('§1 Architecture', 'Active→Terminated cascade', 'partial', 'employees.service handleTerminationCascade + webhooks');
 
   // §7 Enterprise
   addCheck('§7 Enterprise', 'PostgreSQL RLS', 'stub', 'rls-policies.sql manual apply');
-  addCheck('§7 Enterprise', 'SSO/SAML', 'missing', 'Not implemented');
+  if (admin?.token) {
+    const ssoConfig = await req('GET', '/sso/config', admin.token);
+    const metadata = await fetch(`${API}/sso/acme/metadata`);
+    apiResults.push({ role: 'Admin', method: 'GET', path: '/sso/config', status: ssoConfig.status, ok: ssoConfig.ok });
+    addCheck(
+      '§7 Enterprise',
+      'SSO/SAML',
+      ssoConfig.ok && metadata.ok ? 'partial' : 'missing',
+      `SAML config API + SP metadata XML → ${metadata.status} (assertion flow pending)`,
+    );
+  }
 
   // Print report
   const bySection = new Map<string, Check[]>();

@@ -4,28 +4,120 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --background: 150 25% 98%;
+    --foreground: 172 32% 11%;
     --card: 0 0% 100%;
-    --border: 214 32% 91%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
+    --border: 152 14% 89%;
+    --muted: 150 16% 94%;
+    --muted-foreground: 165 9% 41%;
+    --primary: 158 64% 30%;
+    --primary-foreground: 150 40% 98%;
+    --ring: 158 64% 38%;
   }
 
   .dark {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 9%;
-    --border: 217 33% 17%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 6%;
+    --background: 178 22% 6%;
+    --foreground: 150 18% 92%;
+    --card: 177 19% 9%;
+    --border: 172 13% 17%;
+    --muted: 172 13% 14%;
+    --muted-foreground: 158 9% 60%;
+    --primary: 155 52% 46%;
+    --primary-foreground: 178 22% 6%;
+    --ring: 155 52% 46%;
   }
 
   body {
     @apply bg-[hsl(var(--background))] text-[hsl(var(--foreground))] antialiased;
+    font-feature-settings: 'ss03', 'cv02';
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display), var(--font-body), sans-serif;
+    letter-spacing: -0.015em;
+  }
+
+  ::selection {
+    @apply bg-brand-200 text-brand-950;
+  }
+  .dark ::selection {
+    @apply bg-brand-800 text-brand-50;
+  }
+
+  *:focus-visible {
+    outline: none;
+  }
+
+  /* Slim, theme-aware scrollbars */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 8px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@layer components {
+  /* Skeleton with shimmer sweep */
+  .skeleton {
+    @apply relative overflow-hidden rounded-md bg-[hsl(var(--muted))];
+  }
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full;
+    background: linear-gradient(90deg, transparent, hsl(var(--card) / 0.7), transparent);
+    animation: shimmer 1.6s infinite;
+  }
+
+  /* Staggered entrance — apply to a parent; children rise in sequence */
+  .stagger > * {
+    animation: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger > *:nth-child(2) { animation-delay: 45ms; }
+  .stagger > *:nth-child(3) { animation-delay: 90ms; }
+  .stagger > *:nth-child(4) { animation-delay: 135ms; }
+  .stagger > *:nth-child(5) { animation-delay: 180ms; }
+  .stagger > *:nth-child(6) { animation-delay: 225ms; }
+  .stagger > *:nth-child(7) { animation-delay: 270ms; }
+  .stagger > *:nth-child(8) { animation-delay: 315ms; }
+  .stagger > *:nth-child(9) { animation-delay: 360ms; }
+  .stagger > *:nth-child(10) { animation-delay: 405ms; }
+  .stagger > *:nth-child(n + 11) { animation-delay: 450ms; }
+
+  /* Table shell used across list pages */
+  .data-table {
+    @apply w-full text-sm;
+  }
+  .data-table thead tr {
+    @apply border-b border-[hsl(var(--border))] text-left text-xs uppercase tracking-wider text-[hsl(var(--muted-foreground))];
+  }
+  .data-table thead th {
+    @apply px-4 py-3 font-medium;
+  }
+  .data-table tbody tr {
+    @apply border-b border-[hsl(var(--border))] transition-colors last:border-0 hover:bg-[hsl(var(--muted))]/60;
+  }
+  .data-table tbody td {
+    @apply px-4 py-3;
+  }
+
+  .input-base {
+    @apply flex h-10 w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-2 text-sm placeholder:text-[hsl(var(--muted-foreground))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))];
+  }
+}
+
+@layer utilities {
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 }

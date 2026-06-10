@@ -112,4 +112,55 @@ export class PayrollService {
     });
     return { bank, period: run.period, format: 'csv', content: lines.join('\n') };
   }
+
+  /** Annual W-2 wage & tax statements aggregated from approved payroll items. */
+  async generateW2Forms(tenantId: string, year: number) {
+    const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
+    const items = await this.prisma.payrollItem.findMany({
+      where: {
+        employee: { tenantId },
+        payrollRun: { tenantId, period: { startsWith: String(year) } },
+      },
+      include: {
+        employee: { select: { id: true, firstName: true, lastName: true, employeeCode: true, ntn: true } },
+      },
+    });
+
+    const byEmployee = new Map<string, { employee: (typeof items)[number]['employee']; wages: number; federalTax: number; socialSecurity: number; medicare: number }>();
+    for (const item of items) {
+      const breakdown = (item.breakdown ?? {}) as Record<string, number>;
+      const bucket = byEmployee.get(item.employeeId) ?? {
+        employee: item.employee,
+        wages: 0,
+        federalTax: 0,
+        socialSecurity: 0,
+        medicare: 0,
+      };
+      bucket.wages += Number(item.grossSalary);
+      bucket.federalTax += Number(breakdown.federalTax ?? item.taxAmount ?? 0);
+      bucket.socialSecurity += Number(breakdown.socialSecurity ?? 0);
+      bucket.medicare += Number(breakdown.medicare ?? 0);
+      byEmployee.set(item.employeeId, bucket);
+    }
+
+    const forms = [...byEmployee.values()].map((b) => ({
+      formType: 'W-2',
+      taxYear: year,
+      employer: { name: tenant?.name, ein: 'XX-XXXXXXX' },
+      employee: {
+        id: b.employee.id,
+        name: `${b.employee.firstName} ${b.employee.lastName}`,
+        code: b.employee.employeeCode,
+        tin: b.employee.ntn ?? 'on-file',
+      },
+      box1_wages: Math.round(b.wages),
+      box2_federalIncomeTax: Math.round(b.federalTax),
+      box3_socialSecurityWages: Math.round(b.wages),
+      box4_socialSecurityTax: Math.round(b.socialSecurity),
+      box5_medicareWages: Math.round(b.wages),
+      box6_medicareTax: Math.round(b.medicare),
+    }));
+
+    return { taxYear: year, count: forms.length, forms };
+  }
 }

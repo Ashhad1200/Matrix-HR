@@ -1,8 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageHeader } from '@/components/ui/page-header';
+import { Button } from '@/components/ui/button';
+import { ClipboardCheck, Heart } from 'lucide-react';
 
 export default function PerformancePage() {
   const [goals, setGoals] = useState<any[]>([]);
@@ -16,7 +20,20 @@ export default function PerformancePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Performance</h1>
+      <PageHeader
+        title="Performance"
+        description="Goals, review cycles, and continuous feedback"
+        actions={
+          <>
+            <Link href="/performance/reviews">
+              <Button variant="secondary"><ClipboardCheck className="mr-2 h-4 w-4" />Reviews & 360s</Button>
+            </Link>
+            <Link href="/performance/enps">
+              <Button variant="secondary"><Heart className="mr-2 h-4 w-4" />eNPS</Button>
+            </Link>
+          </>
+        }
+      />
 
       <Card>
         <CardHeader><CardTitle>Review Cycles</CardTitle></CardHeader>

@@ -19,6 +19,13 @@ export class EnpsController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN)
+  @Get('summary')
+  getSummary(@TenantId() tenantId: string) {
+    return this.enps.getSummary(tenantId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN)
   @Get(':id')
   findOne(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.enps.findOne(tenantId, id);

@@ -5,6 +5,7 @@ import { NestFactory } from '@nestjs/core';
 
 loadEnv({ path: resolve(__dirname, '../../../.env') });
 import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 
@@ -25,9 +26,25 @@ async function bootstrap() {
     }),
   );
 
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('MatrixHR API')
+    .setDescription('Public REST API for the MatrixHR platform. Authenticate with a Bearer JWT from /auth/login.')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api/docs', app, document, {
+    customSiteTitle: 'MatrixHR API Docs',
+    jsonDocumentUrl: 'api/docs-json',
+  });
+
   const port = process.env.PORT || 3001;
   await app.listen(port);
   console.log(`MatrixHR API running on http://localhost:${port}`);
+  console.log(`API docs at http://localhost:${port}/api/docs`);
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('Fatal error during API bootstrap:', err);
+  process.exit(1);
+});

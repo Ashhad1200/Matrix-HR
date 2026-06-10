@@ -1,21 +1,26 @@
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
-
-const API = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+import { Redirect } from 'expo-router';
+import { API, authHeaders, isAuthenticated } from '../lib/auth';
 
 export default function ApprovalsScreen() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isAuthenticated()) return;
     fetch(`${API}/approvals/inbox`, {
-      headers: { Authorization: 'Bearer demo-token' },
+      headers: authHeaders(),
     })
       .then((r) => (r.ok ? r.json() : { items: [] }))
       .then((d) => setItems(d.items || d || []))
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
   }, []);
+
+  if (!isAuthenticated()) {
+    return <Redirect href="/login" />;
+  }
 
   if (loading) {
     return (

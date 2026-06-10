@@ -5,7 +5,8 @@
     "start": "powershell -ExecutionPolicy Bypass -File scripts/start.ps1",
     "setup": "powershell -ExecutionPolicy Bypass -File scripts/start.ps1",
     "dev": "powershell -ExecutionPolicy Bypass -File scripts/start.ps1",
-    "docker:up": "docker compose up -d",
+    "docker:up": "powershell -ExecutionPolicy Bypass -File scripts/compose-up.ps1",
+    "docker:up:detached": "powershell -ExecutionPolicy Bypass -File scripts/compose-up.ps1 -Detached",
     "docker:down": "docker compose down --remove-orphans",
     "docker:reset": "powershell -ExecutionPolicy Bypass -File scripts/docker-reset.ps1",
     "docker:logs": "docker compose logs -f",
@@ -23,9 +24,11 @@
     "db:seed": "pnpm --filter @matrixhr/database seed",
     "db:studio": "pnpm --filter @matrixhr/database studio",
     "test:api": "pnpm exec tsx scripts/test-apis.ts",
-    "test:bamboo": "pnpm exec tsx scripts/bamboo-comparison-test.ts"
+    "test:bamboo": "pnpm exec tsx scripts/bamboo-comparison-test.ts",
+    "test:ui": "node scripts/ui-test.mjs"
   },
   "devDependencies": {
+    "playwright": "^1.60.0",
     "tsx": "^4.19.2",
     "turbo": "^2.3.3",
     "typescript": "^5.7.2"
