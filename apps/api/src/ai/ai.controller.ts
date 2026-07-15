@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, BadRequestException } from '@nestjs/common';
 import { AiService } from './ai.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser, TenantId } from '../common/decorators';
@@ -18,7 +18,11 @@ export class AiController {
   }
 
   @Post('rank-candidate')
-  rankCandidate(@Body() body: { jobDescription: string; resumeText: string }) {
-    return this.ai.rankCandidate(body.jobDescription, body.resumeText);
+  rankCandidate(@Body() body: { jobDescription: string; resumeText?: string; resume?: string }) {
+    const resumeText = body.resumeText ?? body.resume;
+    if (!resumeText || !body.jobDescription) {
+      throw new BadRequestException('jobDescription and resumeText are required');
+    }
+    return this.ai.rankCandidate(body.jobDescription, resumeText);
   }
 }

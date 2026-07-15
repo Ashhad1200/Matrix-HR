@@ -153,13 +153,17 @@ async function main() {
 
   // AI & Marketplace
   await req('POST', '/ai/ask', { question: 'How many leave days do I have?' });
-  await req('POST', '/ai/rank-candidate', { resume: 'React Node.js TypeScript', jobDescription: 'Software Engineer' });
+  await req('POST', '/ai/rank-candidate', { resumeText: 'React Node.js TypeScript', jobDescription: 'Software Engineer' });
   await req('GET', '/marketplace/integrations');
   await req('GET', '/marketplace/categories');
 
   // WhatsApp
   await req('GET', '/whatsapp/messages');
-  await req('POST', '/whatsapp/webhook', { entry: [{ changes: [{ value: { messages: [{ from: '923001234567', text: { body: 'balance' } }] } }] }] }, false);
+  await req('POST', '/whatsapp/webhook', {
+    tenantId,
+    from: '923001234567',
+    text: 'balance',
+  }, false);
 
   // Tenant branding
   await req('PATCH', '/tenants/branding', { primaryColor: '#2563eb' });

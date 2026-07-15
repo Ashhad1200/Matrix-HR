@@ -76,7 +76,10 @@ export class AttendanceService {
     });
   }
 
-  async getMyLogs(tenantId: string, employeeId: string, month?: string) {
+  async getMyLogs(tenantId: string, employeeId: string | null | undefined, month?: string) {
+    if (!employeeId) {
+      return [];
+    }
     const start = month
       ? new Date(`${month}-01`)
       : new Date(new Date().getFullYear(), new Date().getMonth(), 1);

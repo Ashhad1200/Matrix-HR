@@ -24,6 +24,7 @@
     "db:seed": "pnpm --filter @matrixhr/database seed",
     "db:studio": "pnpm --filter @matrixhr/database studio",
     "test:api": "pnpm exec tsx scripts/test-apis.ts",
+    "test:rbac": "pnpm exec tsx scripts/rbac-api-test.ts",
     "test:bamboo": "pnpm exec tsx scripts/bamboo-comparison-test.ts",
     "test:ui": "node scripts/ui-test.mjs"
   },

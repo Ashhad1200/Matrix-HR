@@ -19,7 +19,10 @@ export class LeaveService {
     });
   }
 
-  async getBalances(tenantId: string, employeeId: string) {
+  async getBalances(tenantId: string, employeeId: string | null | undefined) {
+    if (!employeeId) {
+      return [];
+    }
     const year = new Date().getFullYear();
     return this.prisma.leaveBalance.findMany({
       where: { tenantId, employeeId, year },
