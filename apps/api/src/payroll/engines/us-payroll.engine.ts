@@ -1,4 +1,4 @@
-import { PayrollEngine, PayrollBreakdown } from './payroll-engine.interface';
+import { PayrollEngine, PayrollBreakdown, PayrollCalcContext } from './payroll-engine.interface';
 
 const FEDERAL_TAX_BRACKETS_2025 = [
   { min: 0, max: 11600, rate: 0.10 },
@@ -31,13 +31,18 @@ export class UsPayrollEngine implements PayrollEngine {
     return Math.round(tax / 12);
   }
 
-  calculate(grossSalary: number): PayrollBreakdown {
-    const gross = Number(grossSalary);
+  calculate(grossSalary: number, context: PayrollCalcContext = {}): PayrollBreakdown {
+    const unpaidFraction = Math.min(Math.max(context.unpaidFraction ?? 0, 0), 1);
+    const taxableEarnings = context.taxableEarnings ?? 0;
+    const postTaxDeductions = context.postTaxDeductions ?? 0;
+
+    const baseAfterUnpaid = Number(grossSalary) * (1 - unpaidFraction);
+    const gross = baseAfterUnpaid + taxableEarnings;
     const annualGross = gross * 12;
     const tax = this.calculateFederalTax(annualGross);
     const socialSecurity = Math.round(Math.min(annualGross, SOCIAL_SECURITY_WAGE_BASE) / 12 * SOCIAL_SECURITY_RATE);
     const medicare = Math.round(gross * MEDICARE_RATE);
-    const deductions = tax + socialSecurity + medicare;
+    const deductions = tax + socialSecurity + medicare + postTaxDeductions;
     const net = gross - deductions;
 
     return {
@@ -48,10 +53,14 @@ export class UsPayrollEngine implements PayrollEngine {
       deductions,
       net,
       breakdown: {
+        baseSalary: Number(grossSalary),
+        unpaidFraction,
+        taxableEarnings,
         gross,
         federalTax: tax,
         socialSecurity,
         medicare,
+        postTaxDeductions,
         net,
         country: 'US',
       },

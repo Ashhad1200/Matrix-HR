@@ -124,8 +124,16 @@ export const api = {
     runs: () => request<any>('/payroll/runs'),
     createRun: (period: string) => request<any>(`/payroll/runs?period=${period}`, { method: 'POST' }),
     getRun: (id: string) => request<any>(`/payroll/runs/${id}`),
+    submit: (id: string) => request<any>(`/payroll/runs/${id}/submit`, { method: 'POST' }),
     approve: (id: string) => request<any>(`/payroll/runs/${id}/approve`, { method: 'POST' }),
+    lock: (id: string) => request<any>(`/payroll/runs/${id}/lock`, { method: 'POST' }),
+    reopen: (id: string, reason: string) => request<any>(`/payroll/runs/${id}/reopen`, { method: 'POST', body: JSON.stringify({ reason }) }),
+    payslipUrl: (runId: string, itemId: string) => request<{ url: string }>(`/payroll/runs/${runId}/items/${itemId}/payslip`),
     bankFile: (id: string, bank: string) => request<any>(`/payroll/runs/${id}/bank-file?bank=${bank}`),
+    compensationItems: (employeeId?: string) => request<any>(`/payroll/compensation-items${employeeId ? `?employeeId=${employeeId}` : ''}`),
+    createCompensationItem: (data: { employeeId: string; type: string; label: string; amount: number; recurring?: boolean; startPeriod?: string; endPeriod?: string }) =>
+      request<any>('/payroll/compensation-items', { method: 'POST', body: JSON.stringify(data) }),
+    deleteCompensationItem: (id: string) => request<any>(`/payroll/compensation-items/${id}`, { method: 'DELETE' }),
   },
   recruitment: {
     jobs: () => request<any>('/recruitment/jobs'),

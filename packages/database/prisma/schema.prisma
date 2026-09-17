@@ -143,6 +143,7 @@ model Tenant {
   onboardingTemplates OnboardingTemplate[]
   payrollRuns        PayrollRun[]
   salaryStructures   SalaryStructure[]
+  compensationItems  CompensationItem[]
   jobPostings        JobPosting[]
   reviewCycles       ReviewCycle[]
   courses            Course[]
@@ -305,6 +306,7 @@ model Employee {
   attendanceLogs AttendanceLog[]
   onboardingProgress OnboardingProgress[]
   payrollItems PayrollItem[]
+  compensationItems CompensationItem[]
   goals        Goal[]
   courseEnrollments CourseEnrollment[]
   jobApplications JobApplication[]
@@ -626,6 +628,18 @@ model PayrollRun {
   status    PayrollRunStatus @default(DRAFT)
   processedAt DateTime?
   approvedBy  String?
+
+  // Maker-checker (ENGINEERING_ROADMAP.md Phase 2): the actor who prepared a
+  // run may not also be the one who approves it — enforced in the service.
+  preparedByUserId   String?
+  submittedForReviewAt DateTime?
+  approvedByUserId   String?
+  approvedAt         DateTime?
+  lockedAt           DateTime?
+  reopenedByUserId   String?
+  reopenedAt         DateTime?
+  reopenReason       String?
+
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
 
@@ -654,6 +668,47 @@ model PayrollItem {
   employee   Employee   @relation(fields: [employeeId], references: [id])
 
   @@index([payrollRunId])
+}
+
+/// Effective-dated national compliance rules (tax slabs, EOBI, PF). Global,
+/// not tenant-scoped — Pakistani tax law is the same for every tenant.
+/// See ENGINEERING_ROADMAP.md Phase 2 — this replaces the previously
+/// hardcoded PAKISTAN_TAX_SLABS_2025 constant.
+model PayrollRuleSet {
+  id               String    @id @default(cuid())
+  country          String    // "PK", "US"
+  fiscalYear       Int
+  effectiveFrom    DateTime
+  effectiveTo      DateTime?
+  taxSlabs         Json      // [{ min, max, rate }]
+  eobiEmployeeRate Decimal   @db.Decimal(6, 4)
+  eobiEmployerRate Decimal   @db.Decimal(6, 4)
+  eobiMinWage      Decimal   @db.Decimal(12, 2)
+  pfRate           Decimal   @db.Decimal(6, 4) @default(0.08)
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+
+  @@index([country, effectiveFrom])
+}
+
+/// Per-employee recurring or one-off earnings/deductions (allowances, loans,
+/// advances, bonuses, arrears) that feed into payroll calculation.
+model CompensationItem {
+  id          String   @id @default(cuid())
+  tenantId    String
+  employeeId  String
+  type        String   // ALLOWANCE, DEDUCTION, LOAN, ADVANCE, BONUS, ARREARS
+  label       String
+  amount      Decimal  @db.Decimal(12, 2)
+  recurring   Boolean  @default(true)
+  startPeriod String?  // "2026-01" — null = active from the beginning
+  endPeriod   String?  // null = ongoing (for recurring) or same as startPeriod (one-off)
+  createdAt   DateTime @default(now())
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, employeeId])
 }
 
 // ─── Recruitment / ATS ───────────────────────────────────────────────────────

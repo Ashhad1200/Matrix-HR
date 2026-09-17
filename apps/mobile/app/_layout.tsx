@@ -10,7 +10,10 @@ export default function RootLayout() {
         <Stack.Screen name="login" options={{ title: 'Sign In' }} />
         <Stack.Screen name="clock-in" options={{ title: 'Clock In/Out' }} />
         <Stack.Screen name="leave" options={{ title: 'Leave' }} />
+        <Stack.Screen name="pay-stubs" options={{ title: 'Payslips' }} />
         <Stack.Screen name="approvals" options={{ title: 'Approvals' }} />
+        <Stack.Screen name="profile" options={{ title: 'Profile' }} />
+        <Stack.Screen name="timesheets" options={{ title: 'Timesheets' }} />
       </Stack>
     </>
   );

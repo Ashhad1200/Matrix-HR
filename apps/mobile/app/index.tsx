@@ -23,14 +23,28 @@ export default function HomeScreen() {
             <Text style={styles.cardDesc}>Apply & view balance</Text>
           </TouchableOpacity>
         </Link>
-        <TouchableOpacity style={styles.card}>
-          <Text style={styles.cardTitle}>Payslips</Text>
-          <Text style={styles.cardDesc}>Download PDF</Text>
-        </TouchableOpacity>
+        <Link href="/pay-stubs" asChild>
+          <TouchableOpacity style={styles.card}>
+            <Text style={styles.cardTitle}>Payslips</Text>
+            <Text style={styles.cardDesc}>Download PDF</Text>
+          </TouchableOpacity>
+        </Link>
         <Link href="/approvals" asChild>
           <TouchableOpacity style={styles.card}>
             <Text style={styles.cardTitle}>Approvals</Text>
             <Text style={styles.cardDesc}>Manager inbox</Text>
+          </TouchableOpacity>
+        </Link>
+        <Link href="/profile" asChild>
+          <TouchableOpacity style={styles.card}>
+            <Text style={styles.cardTitle}>Profile</Text>
+            <Text style={styles.cardDesc}>View employee details</Text>
+          </TouchableOpacity>
+        </Link>
+        <Link href="/timesheets" asChild>
+          <TouchableOpacity style={styles.card}>
+            <Text style={styles.cardTitle}>Timesheets</Text>
+            <Text style={styles.cardDesc}>View & log hours</Text>
           </TouchableOpacity>
         </Link>
       </View>

@@ -311,6 +311,9 @@ async function main() {
   const { seedCommercial } = await import('./seed-commercial');
   await seedCommercial(prisma, tenant.id);
 
+  const { seedPayrollRules } = await import('./seed-payroll-rules');
+  await seedPayrollRules(prisma);
+
   console.log('Seed complete!');
   console.log(`  Employees: ${bulk.employeeCount}`);
   console.log('  Tenant: acme.matrixhr.com');

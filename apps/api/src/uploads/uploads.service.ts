@@ -79,4 +79,21 @@ export class UploadsService implements OnModuleInit {
 
     return { url: `${this.publicEndpoint}/${this.bucket}/${key}`, key };
   }
+
+  /** For server-generated documents (payslips, reports) rather than user uploads. */
+  async uploadBuffer(tenantId: string, buffer: Buffer, filename: string, contentType: string): Promise<{ url: string; key: string }> {
+    const ext = filename.includes('.') ? filename.split('.').pop() : undefined;
+    const key = `${tenantId}/${randomUUID()}${ext ? `.${ext}` : ''}`;
+
+    await this.client.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        Body: buffer,
+        ContentType: contentType,
+      }),
+    );
+
+    return { url: `${this.publicEndpoint}/${this.bucket}/${key}`, key };
+  }
 }
