@@ -1,5 +1,7 @@
 # MatrixHR — Roadmap
 
+> **Stale as of 17 September 2026.** This document predates the current codebase — Payroll, ATS, Performance, LMS, AI, and Marketplace, all listed below as "Defer," already exist. See [`ENGINEERING_ROADMAP.md`](../ENGINEERING_ROADMAP.md) at the repo root for the current delivery plan.
+
 ## MVP Boundary
 
 **Ship in Months 1–6:** Auth, Employee DB, Leave, Attendance, Onboarding, WhatsApp, Self-Service Portal (subset)

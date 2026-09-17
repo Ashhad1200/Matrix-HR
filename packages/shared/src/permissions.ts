@@ -60,6 +60,7 @@ const ALL_NAV: Record<string, NavItem> = {
   extensions: { href: '/extensions', label: 'Extensions', icon: 'Puzzle' },
   timesheets: { href: '/timesheets', label: 'Timesheets', icon: 'Timer' },
   oneOnOnes: { href: '/one-on-ones', label: '1-on-1s', icon: 'MessagesSquare' },
+  platform: { href: '/platform', label: 'Platform', icon: 'Building2' },
 };
 
 function nav(...keys: string[]): NavItem[] {
@@ -120,6 +121,16 @@ const ESS_ACTIONS: PermissionActions = {
 export function getPermissionsForRole(role: string): UserPermissions {
   switch (role) {
     case ROLES.SUPER_ADMIN:
+      return {
+        portal: 'admin',
+        nav: nav(
+          'dashboard', 'employees', 'leave', 'attendance', 'timesheets', 'payroll', 'recruitment',
+          'atsKanban', 'preboarding', 'onboarding', 'performance', 'enps', 'oneOnOnes', 'lms',
+          'reports', 'whatsapp', 'settings', 'customFields', 'workflows', 'audit',
+          'marketplace', 'extensions', 'ai', 'platform',
+        ),
+        actions: ADMIN_ACTIONS,
+      };
     case ROLES.COMPANY_ADMIN:
     case ROLES.HR_MANAGER:
       return {

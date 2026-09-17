@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Patch, Body, Param, UseGuards } from '@nestjs/common';
 import { LmsService } from './lms.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { TenantId } from '../common/decorators';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles, TenantId } from '../common/decorators';
+import { UserRole } from '@matrixhr/database';
 
 @Controller('lms')
 @UseGuards(JwtAuthGuard)
@@ -13,6 +15,8 @@ export class LmsController {
     return this.lms.getCourses(tenantId);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.COMPANY_ADMIN, UserRole.HR_MANAGER)
   @Post('courses')
   createCourse(@TenantId() tenantId: string, @Body() body: any) {
     return this.lms.createCourse(tenantId, body);

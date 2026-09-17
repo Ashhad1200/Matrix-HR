@@ -38,6 +38,9 @@ import { TimesheetsModule } from './timesheets/timesheets.module';
 import { ApiKeysModule } from './api-keys/api-keys.module';
 import { EorModule } from './eor/eor.module';
 import { SsoModule } from './sso/sso.module';
+import { UploadsModule } from './uploads/uploads.module';
+import { EntitlementsModule } from './entitlements/entitlements.module';
+import { PlatformModule } from './platform/platform.module';
 
 @Module({
   imports: [
@@ -79,6 +82,9 @@ import { SsoModule } from './sso/sso.module';
     ApiKeysModule,
     EorModule,
     SsoModule,
+    UploadsModule,
+    EntitlementsModule,
+    PlatformModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

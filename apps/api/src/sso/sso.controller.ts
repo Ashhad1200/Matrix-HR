@@ -3,7 +3,8 @@ import { IsString, IsOptional, IsBoolean, IsArray } from 'class-validator';
 import { SsoService } from './sso.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles, TenantId } from '../common/decorators';
+import { EntitlementGuard } from '../common/guards/entitlement.guard';
+import { Roles, RequireFeature, TenantId } from '../common/decorators';
 import { UserRole } from '@matrixhr/database';
 
 class UpsertSsoConfigDto {
@@ -40,15 +41,17 @@ class UpsertSsoConfigDto {
 export class SsoController {
   constructor(private sso: SsoService) {}
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, EntitlementGuard)
   @Roles(UserRole.COMPANY_ADMIN)
+  @RequireFeature('sso.saml')
   @Get('config')
   getConfig(@TenantId() tenantId: string) {
     return this.sso.getConfig(tenantId);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, EntitlementGuard)
   @Roles(UserRole.COMPANY_ADMIN)
+  @RequireFeature('sso.saml')
   @Put('config')
   upsertConfig(@TenantId() tenantId: string, @Body() dto: UpsertSsoConfigDto) {
     return this.sso.upsertConfig(tenantId, dto);

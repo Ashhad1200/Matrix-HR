@@ -56,10 +56,22 @@ export class OnboardingService {
   }
 
   async completeTask(progressId: string, taskId: string) {
-    return this.prisma.onboardingTaskProgress.update({
+    const result = await this.prisma.onboardingTaskProgress.update({
       where: { progressId_taskId: { progressId, taskId } },
       data: { status: 'COMPLETED', completedAt: new Date() },
     });
+
+    const remaining = await this.prisma.onboardingTaskProgress.count({
+      where: { progressId, status: { not: 'COMPLETED' } },
+    });
+    if (remaining === 0) {
+      await this.prisma.onboardingProgress.update({
+        where: { id: progressId },
+        data: { status: 'completed', completedAt: new Date() },
+      });
+    }
+
+    return result;
   }
 
   async getDashboard(tenantId: string) {

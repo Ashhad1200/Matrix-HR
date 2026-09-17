@@ -308,6 +308,9 @@ async function main() {
     passwordHash,
   });
 
+  const { seedCommercial } = await import('./seed-commercial');
+  await seedCommercial(prisma, tenant.id);
+
   console.log('Seed complete!');
   console.log(`  Employees: ${bulk.employeeCount}`);
   console.log('  Tenant: acme.matrixhr.com');

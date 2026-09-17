@@ -2,13 +2,15 @@ import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } f
 import { CustomFieldsService } from './custom-fields.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles, TenantId } from '../common/decorators';
+import { EntitlementGuard } from '../common/guards/entitlement.guard';
+import { Roles, RequireFeature, TenantId } from '../common/decorators';
 import { UserRole } from '@matrixhr/database';
 import { CreateCustomFieldDto, UpdateCustomFieldDto } from './dto';
 
 @Controller('custom-fields')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, EntitlementGuard)
 @Roles(UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN)
+@RequireFeature('custom_fields.manage')
 export class CustomFieldsController {
   constructor(private customFields: CustomFieldsService) {}
 

@@ -10,8 +10,8 @@ fi
 
 echo "==> Building shared packages..."
 pnpm --filter @matrixhr/shared build
+pnpm db:generate
 pnpm --filter @matrixhr/database build
-pnpm db:generate 2>/dev/null || true
 
 echo "==> Preparing database..."
 export DATABASE_URL="${DATABASE_URL:-postgresql://matrixhr:matrixhr@postgres:5432/matrixhr?schema=public}"

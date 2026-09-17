@@ -209,6 +209,9 @@ export default function TimesheetsPage() {
                             <span className="truncate font-semibold">{e.project?.key ?? 'GEN'}</span>
                             <span className="tabular-nums">{Number(e.hours)}h</span>
                           </div>
+                          {e.note && (
+                            <p className="mt-0.5 truncate text-[11px] text-[hsl(var(--muted-foreground))]" title={e.note}>{e.note}</p>
+                          )}
                           <div className="mt-1 flex items-center justify-between gap-1">
                             <Badge variant={statusVariant(e.status)} className="px-1.5 py-0 text-[10px]">{e.status}</Badge>
                             {e.status === 'draft' && (

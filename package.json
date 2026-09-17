@@ -26,9 +26,12 @@
     "test:api": "pnpm exec tsx scripts/test-apis.ts",
     "test:rbac": "pnpm exec tsx scripts/rbac-api-test.ts",
     "test:bamboo": "pnpm exec tsx scripts/bamboo-comparison-test.ts",
-    "test:ui": "node scripts/ui-test.mjs"
+    "test:ui": "node scripts/ui-test.mjs",
+    "test:e2e": "node scripts/run-e2e.js test --config=e2e/playwright.config.ts",
+    "test:e2e:report": "node scripts/run-e2e.js show-report e2e/report"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "playwright": "^1.60.0",
     "tsx": "^4.19.2",
     "turbo": "^2.3.3",

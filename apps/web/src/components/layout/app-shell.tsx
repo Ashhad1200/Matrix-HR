@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Search } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
+import { Search, ShieldAlert } from 'lucide-react';
 import { RoleSidebar } from './role-sidebar';
 import { NotificationBell } from './notification-bell';
 import { ThemeToggle } from './theme-toggle';
@@ -23,8 +24,14 @@ const PORTAL_BADGE: Record<string, string> = {
   ess: 'bg-brand-100 text-brand-800 dark:bg-brand-900/60 dark:text-brand-200',
 };
 
+function isRouteAllowed(pathname: string, navHrefs: string[]) {
+  return navHrefs.some((href) => pathname === href || pathname.startsWith(`${href}/`));
+}
+
 function AppShellInner({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
   const [paletteOpen, setPaletteOpen] = useState(false);
 
   useEffect(() => {
@@ -38,6 +45,15 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
+  const navHrefs = user?.permissions.nav.map((n) => n.href) ?? [];
+  const allowed = !user || isRouteAllowed(pathname, navHrefs);
+
+  useEffect(() => {
+    if (user && !allowed) {
+      router.replace('/dashboard');
+    }
+  }, [user, allowed, router]);
+
   if (loading || !user) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-3">
@@ -47,6 +63,17 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
         <div className="h-1 w-32 overflow-hidden rounded-full bg-[hsl(var(--muted))]">
           <div className="skeleton h-full w-full" />
         </div>
+      </div>
+    );
+  }
+
+  if (!allowed) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center gap-3 text-center">
+        <ShieldAlert className="h-10 w-10 text-[hsl(var(--muted-foreground))]" />
+        <p className="text-sm font-medium text-[hsl(var(--muted-foreground))]">
+          You don&apos;t have access to this page. Redirecting…
+        </p>
       </div>
     );
   }

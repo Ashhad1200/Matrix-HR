@@ -24,6 +24,27 @@ export class TimesheetsService {
     });
   }
 
+  async updateProject(tenantId: string, id: string, dto: { name?: string; status?: 'active' | 'archived' }) {
+    const project = await this.prisma.project.findFirst({ where: { id, tenantId } });
+    if (!project) throw new NotFoundException('Project not found');
+    return this.prisma.project.update({
+      where: { id },
+      data: { ...(dto.name ? { name: dto.name } : {}), ...(dto.status ? { status: dto.status } : {}) },
+    });
+  }
+
+  async deleteProject(tenantId: string, id: string) {
+    const project = await this.prisma.project.findFirst({
+      where: { id, tenantId },
+      include: { _count: { select: { entries: true } } },
+    });
+    if (!project) throw new NotFoundException('Project not found');
+    if (project._count.entries > 0) {
+      throw new BadRequestException('This project has logged time entries and cannot be deleted — archive it instead');
+    }
+    return this.prisma.project.delete({ where: { id } });
+  }
+
   // ── Entries ───────────────────────────────────────────────────────────────
   async getMyWeek(tenantId: string, employeeId: string | null, weekStart?: string) {
     if (!employeeId) throw new ForbiddenException('No employee profile linked');

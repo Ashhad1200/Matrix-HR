@@ -19,11 +19,13 @@ describe('EmployeesService tenant isolation', () => {
   const audit = { log: jest.fn() };
   const webhooks = { dispatch: jest.fn() };
   const onboarding = { startOnboarding: jest.fn() };
+  const entitlements = { recordUsage: jest.fn() };
   const service = new EmployeesService(
     prisma as never,
     audit as never,
     webhooks as never,
     onboarding as never,
+    entitlements as never,
   );
 
   beforeEach(() => {

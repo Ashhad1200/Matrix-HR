@@ -87,15 +87,20 @@ export default function MarketplacePage() {
     <div className="space-y-6">
       <PageHeader
         title="Marketplace"
-        description={`Pre-built connectors across the BambooHR integration pillars · ${connectedCount} connected`}
+        description={`Pre-built connectors across HR, payroll, identity, and productivity tools · ${connectedCount} connected`}
       />
+
+      <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+        Marketplace connectors are in preview: connecting and syncing works against your MatrixHR data, but no live OAuth
+        connection or data transfer to the external provider happens yet. Production integrations are on the roadmap.
+      </div>
 
       {error && <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-700 dark:bg-rose-950 dark:text-rose-300">{error}</p>}
       {syncResult && (
         <div className="flex items-center gap-3 rounded-xl border border-brand-300 bg-brand-50 px-4 py-3 text-sm animate-rise dark:border-brand-800 dark:bg-brand-950">
           <RefreshCw className="h-4 w-4 text-brand-600" />
           <span>
-            <strong className="capitalize">{syncResult.app}</strong> synced —{' '}
+            <strong className="capitalize">{syncResult.app}</strong> simulated sync —{' '}
             {Object.entries(syncResult.records ?? {}).map(([k, v]) => `${v} ${k}`).join(', ') || 'no records'}
           </span>
         </div>

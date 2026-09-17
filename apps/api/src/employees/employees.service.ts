@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { WebhooksService } from '../webhooks/webhooks.service';
 import { OnboardingService } from '../onboarding/onboarding.service';
+import { EntitlementsService } from '../entitlements/entitlements.service';
 import { CreateEmployeeDto, UpdateEmployeeDto, SelfUpdateEmployeeDto } from './dto';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class EmployeesService {
     private audit: AuditService,
     private webhooks: WebhooksService,
     private onboarding: OnboardingService,
+    private entitlements: EntitlementsService,
   ) {}
 
   async findAll(tenantId: string, filters?: {
@@ -98,6 +100,7 @@ export class EmployeesService {
     await this.audit.log({
       tenantId, userId, action: 'CREATE', entity: 'Employee', entityId: employee.id, after: employee,
     });
+    await this.entitlements.recordUsage(tenantId, 'employee.created');
 
     return employee;
   }

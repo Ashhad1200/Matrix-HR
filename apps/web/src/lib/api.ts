@@ -26,7 +26,31 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return res.json();
 }
 
+async function uploadFile<T>(path: string, file: File): Promise<T> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  const form = new FormData();
+  form.append('file', file);
+
+  // No Content-Type header here on purpose — the browser sets multipart/form-data
+  // with the correct boundary itself; forcing application/json (like `request` does) breaks it.
+  const res = await fetch(`${API_URL}${path}`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: form,
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: res.statusText }));
+    throw new ApiError(res.status, err.message || 'Upload failed');
+  }
+
+  return res.json();
+}
+
 export const api = {
+  uploads: {
+    upload: (file: File) => uploadFile<{ url: string; key: string }>('/uploads', file),
+  },
   auth: {
     signup: (data: { email: string; password: string; companyName: string; subdomain: string }) =>
       request<any>('/auth/signup', { method: 'POST', body: JSON.stringify(data) }),
@@ -40,6 +64,9 @@ export const api = {
       request<any>(`/employees?${new URLSearchParams(params || {})}`),
     get: (id: string) => request<any>(`/employees/${id}`),
     create: (data: any) => request<any>('/employees', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: any) => request<any>(`/employees/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    addDocument: (id: string, data: { type: string; name: string; fileUrl: string; expiryDate?: string }) =>
+      request<any>(`/employees/${id}/documents`, { method: 'POST', body: JSON.stringify(data) }),
     updateSelf: (data: { phone?: string; address?: string; emergencyContact?: string }) =>
       request<any>('/employees/me/self', { method: 'PATCH', body: JSON.stringify(data) }),
     myPayslips: () => request<any>('/employees/me/payslips'),
@@ -193,5 +220,19 @@ export const api = {
   notifications: {
     list: () => request<any>('/notifications'),
     markRead: (id: string) => request<any>(`/notifications/${id}/read`, { method: 'PATCH' }),
+  },
+  platform: {
+    tenants: () => request<any>('/platform/tenants'),
+    tenant: (id: string) => request<any>(`/platform/tenants/${id}`),
+    plans: () => request<any>('/platform/plans'),
+    assignPlan: (tenantId: string, planCode: string) =>
+      request<any>(`/platform/tenants/${tenantId}/subscription`, { method: 'POST', body: JSON.stringify({ planCode }) }),
+    setStatus: (tenantId: string, status: string) =>
+      request<any>(`/platform/tenants/${tenantId}/subscription/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+    createOverride: (tenantId: string, data: { featureKey: string; enabled?: boolean; limit?: number; reason: string }) =>
+      request<any>(`/platform/tenants/${tenantId}/overrides`, { method: 'POST', body: JSON.stringify(data) }),
+    deleteOverride: (tenantId: string, overrideId: string) =>
+      request<any>(`/platform/tenants/${tenantId}/overrides/${overrideId}`, { method: 'DELETE' }),
+    audit: (limit = 100) => request<any>(`/platform/audit?limit=${limit}`),
   },
 };

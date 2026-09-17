@@ -4,9 +4,10 @@ import { EmployeesController } from './employees.controller';
 import { AuditModule } from '../audit/audit.module';
 import { WebhooksModule } from '../webhooks/webhooks.module';
 import { OnboardingModule } from '../onboarding/onboarding.module';
+import { EntitlementsModule } from '../entitlements/entitlements.module';
 
 @Module({
-  imports: [AuditModule, WebhooksModule, OnboardingModule],
+  imports: [AuditModule, WebhooksModule, OnboardingModule, EntitlementsModule],
   controllers: [EmployeesController],
   providers: [EmployeesService],
   exports: [EmployeesService],

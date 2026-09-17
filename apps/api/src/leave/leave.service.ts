@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, BadRequestException, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { WhatsAppService } from '../whatsapp/whatsapp.service';
@@ -9,7 +9,7 @@ export class LeaveService {
   constructor(
     private prisma: PrismaService,
     private notifications: NotificationsService,
-    private whatsapp: WhatsAppService,
+    @Inject(forwardRef(() => WhatsAppService)) private whatsapp: WhatsAppService,
   ) {}
 
   async getPolicies(tenantId: string) {

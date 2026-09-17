@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
+import { EntitlementsService } from '../entitlements/entitlements.service';
 
 const SYSTEM_PROMPT = `You are Ask MatrixHR, an HR assistant for a Pakistani/GCC HR & payroll SaaS platform.
 Answer concisely in plain English. Cover leave, attendance, onboarding, payroll (FBR tax, EOBI, PF), and labour law when relevant.
@@ -14,9 +15,12 @@ export class AiService {
   constructor(
     private prisma: PrismaService,
     private config: ConfigService,
+    private entitlements: EntitlementsService,
   ) {}
 
   async askMatrixHR(tenantId: string, employeeId: string | undefined, question: string) {
+    await this.entitlements.recordUsage(tenantId, 'ai.calls');
+
     const context = await this.buildContext(tenantId, employeeId);
     const geminiAnswer = await this.callGemini(
       `${context}\n\nUser question: ${question}`,

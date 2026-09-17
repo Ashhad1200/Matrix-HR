@@ -1,13 +1,16 @@
 import { Controller, Post, Body, UseGuards, BadRequestException } from '@nestjs/common';
 import { AiService } from './ai.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { CurrentUser, TenantId } from '../common/decorators';
+import { EntitlementGuard } from '../common/guards/entitlement.guard';
+import { CurrentUser, RequireFeature, TenantId } from '../common/decorators';
 
 @Controller('ai')
 @UseGuards(JwtAuthGuard)
 export class AiController {
   constructor(private ai: AiService) {}
 
+  @UseGuards(EntitlementGuard)
+  @RequireFeature('ai.ask')
   @Post('ask')
   ask(
     @TenantId() tenantId: string,

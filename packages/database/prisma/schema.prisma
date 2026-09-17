@@ -166,6 +166,8 @@ model Tenant {
   projects           Project[]
   timeEntries        TimeEntry[]
   ssoConfig          SsoConfig?
+  subscription       Subscription?
+  usageEvents        UsageEvent[]
 }
 
 model User {
@@ -1166,4 +1168,129 @@ model SsoConfig {
   updatedAt    DateTime @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+// ─── Commercial Back Office (ENGINEERING_ROADMAP.md Phase 1) ────────────────
+// Billing/invoicing is intentionally out of scope for v1 — Subscription.status
+// is set manually by a platform operator. See ENGINEERING_ROADMAP.md §4 Phase 1.
+
+model ProductFeature {
+  id          String   @id @default(cuid())
+  key         String   @unique // e.g. "payroll.run", "sso.saml"
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+}
+
+model Plan {
+  id        String        @id @default(cuid())
+  code      String        @unique // "starter", "growth", "pro", "enterprise"
+  name      String
+  isActive  Boolean       @default(true)
+  createdAt DateTime      @default(now())
+
+  versions PlanVersion[]
+}
+
+model PlanVersion {
+  id                  String   @id @default(cuid())
+  planId              String
+  version             Int
+  pricePkrMonthly     Decimal? @db.Decimal(12, 2)
+  includedEmployees   Int      @default(0)
+  perEmployeePricePkr Decimal? @db.Decimal(12, 2)
+  isCurrent           Boolean  @default(true)
+  createdAt           DateTime @default(now())
+
+  plan          Plan               @relation(fields: [planId], references: [id], onDelete: Cascade)
+  entitlements  PlanEntitlement[]
+  subscriptions Subscription[]
+
+  @@unique([planId, version])
+  @@index([planId])
+}
+
+model PlanEntitlement {
+  id            String  @id @default(cuid())
+  planVersionId String
+  featureKey    String
+  enabled       Boolean @default(true)
+  limit         Int? // null = unlimited
+
+  planVersion PlanVersion @relation(fields: [planVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([planVersionId, featureKey])
+  @@index([planVersionId])
+}
+
+model Subscription {
+  id            String    @id @default(cuid())
+  tenantId      String    @unique
+  planVersionId String
+  status        String    @default("trialing") // trialing, active, past_due, suspended, cancelled, expired
+  startedAt     DateTime  @default(now())
+  renewsAt      DateTime?
+  cancelledAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  tenant      Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  planVersion PlanVersion           @relation(fields: [planVersionId], references: [id])
+  items       SubscriptionItem[]
+  overrides   EntitlementOverride[]
+
+  @@index([planVersionId])
+  @@index([status])
+}
+
+model SubscriptionItem {
+  id             String @id @default(cuid())
+  subscriptionId String
+  featureKey     String
+  quantity       Int    @default(1)
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+}
+
+model EntitlementOverride {
+  id              String    @id @default(cuid())
+  subscriptionId  String
+  featureKey      String
+  enabled         Boolean?
+  limit           Int?
+  reason          String
+  createdByUserId String
+  effectiveFrom   DateTime  @default(now())
+  effectiveTo     DateTime?
+  createdAt       DateTime  @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+}
+
+model UsageEvent {
+  id         String   @id @default(cuid())
+  tenantId   String
+  metricKey  String // "employee.created", "whatsapp.messages", "ai.calls"
+  quantity   Int      @default(1)
+  occurredAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, metricKey, occurredAt])
+}
+
+model PlatformAuditLog {
+  id             String   @id @default(cuid())
+  operatorUserId String
+  action         String
+  targetType     String
+  targetId       String
+  detail         Json?
+  createdAt      DateTime @default(now())
+
+  @@index([targetType, targetId])
 }

@@ -1,12 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
+import { LeaveService } from '../leave/leave.service';
+import { EntitlementsService } from '../entitlements/entitlements.service';
+import { UserRole } from '@matrixhr/database';
+
+const APPROVER_ROLES: UserRole[] = [UserRole.MANAGER, UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN, UserRole.SUPER_ADMIN];
 
 @Injectable()
 export class WhatsAppService {
   constructor(
     private prisma: PrismaService,
     private config: ConfigService,
+    @Inject(forwardRef(() => LeaveService)) private leave: LeaveService,
+    private entitlements: EntitlementsService,
   ) {}
 
   async sendMessage(tenantId: string, phone: string, body: string, templateName?: string) {
@@ -39,7 +46,7 @@ export class WhatsAppService {
       }
     }
 
-    return this.prisma.whatsAppMessage.create({
+    const message = await this.prisma.whatsAppMessage.create({
       data: {
         tenantId,
         recipientPhone: phone,
@@ -49,6 +56,8 @@ export class WhatsAppService {
         direction: 'outbound',
       },
     });
+    await this.entitlements.recordUsage(tenantId, 'whatsapp.messages');
+    return message;
   }
 
   async sendLeaveApprovalRequest(
@@ -86,14 +95,39 @@ export class WhatsAppService {
       return this.sendMessage(tenantId, phone, `📊 Leave Balance\n\n${lines.join('\n')}`);
     }
 
-    if (upper.startsWith('APPROVE ')) {
-      const requestId = text.split(' ')[1];
-      return this.sendMessage(tenantId, phone, `Approved request ${requestId}. Please use the web app to confirm.`);
+    if (upper.startsWith('APPROVE ') || upper.startsWith('REJECT ')) {
+      const isApprove = upper.startsWith('APPROVE ');
+      const requestId = text.trim().split(/\s+/)[1];
+      if (!requestId) {
+        return this.sendMessage(tenantId, phone, `Usage: ${isApprove ? 'APPROVE' : 'REJECT'} <request-id>`);
+      }
+
+      const approver = await this.prisma.user.findFirst({
+        where: { tenant: { id: tenantId }, employee: { phone: { contains: phone.slice(-10) } } },
+        include: { employee: true },
+      });
+      if (!approver?.employeeId) {
+        return this.sendMessage(tenantId, phone, 'We could not verify your account for this action.');
+      }
+      if (!APPROVER_ROLES.includes(approver.role)) {
+        return this.sendMessage(tenantId, phone, 'Your account is not authorized to approve or reject leave requests.');
+      }
+
+      try {
+        if (isApprove) {
+          await this.leave.approveRequest(tenantId, requestId, approver.employeeId);
+          return this.sendMessage(tenantId, phone, `✅ Approved request ${requestId}.`);
+        }
+        await this.leave.rejectRequest(tenantId, requestId, approver.employeeId, 'Rejected via WhatsApp');
+        return this.sendMessage(tenantId, phone, `❌ Rejected request ${requestId}.`);
+      } catch (err: any) {
+        return this.sendMessage(tenantId, phone, `Could not process request ${requestId}: ${err.message || 'unknown error'}`);
+      }
     }
 
     return this.sendMessage(
       tenantId, phone,
-      'MatrixHR Commands:\n• balance - View leave balance\n• attendance - This month attendance\n• team - Who\'s out today',
+      'MatrixHR Commands:\n• BALANCE - View leave balance\n• APPROVE <id> - Approve a pending leave request (managers/HR/admins)\n• REJECT <id> - Reject a pending leave request (managers/HR/admins)',
     );
   }
 

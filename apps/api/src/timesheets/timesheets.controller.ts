@@ -22,6 +22,22 @@ export class TimesheetsController {
     return this.timesheets.createProject(tenantId, dto);
   }
 
+  @Patch('projects/:id')
+  @Roles(UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN)
+  updateProject(
+    @TenantId() tenantId: string,
+    @Param('id') id: string,
+    @Body() dto: { name?: string; status?: 'active' | 'archived' },
+  ) {
+    return this.timesheets.updateProject(tenantId, id, dto);
+  }
+
+  @Delete('projects/:id')
+  @Roles(UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN)
+  deleteProject(@TenantId() tenantId: string, @Param('id') id: string) {
+    return this.timesheets.deleteProject(tenantId, id);
+  }
+
   @Get('entries')
   getMyWeek(
     @TenantId() tenantId: string,

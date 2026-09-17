@@ -1,5 +1,7 @@
 # MatrixHR — Year 2 Expansion Plan
 
+> **Pod structure and GTM timeline may still be directionally useful for hiring triggers, but the module-to-pod mapping predates the current codebase.** See [`ENGINEERING_ROADMAP.md`](../ENGINEERING_ROADMAP.md) at the repo root for the current phased delivery plan and GCC localization sequencing.
+
 ## Engineering Pod Structure (Month 7+)
 
 | Pod | Modules | Hire Trigger |

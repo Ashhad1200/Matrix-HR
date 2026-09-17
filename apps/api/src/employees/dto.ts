@@ -1,4 +1,5 @@
 import { IsString, IsOptional, IsEmail, IsNumber, IsEnum } from 'class-validator';
+import { PartialType } from '@nestjs/swagger';
 
 export class CreateEmployeeDto {
   @IsString()
@@ -47,7 +48,9 @@ export class CreateEmployeeDto {
   baseSalary?: number;
 }
 
-export class UpdateEmployeeDto extends CreateEmployeeDto {
+// PartialType makes every CreateEmployeeDto field (including employeeCode/firstName/
+// lastName, which are required for create) optional here — updates are partial by nature.
+export class UpdateEmployeeDto extends PartialType(CreateEmployeeDto) {
   @IsOptional()
   @IsEnum(['ACTIVE', 'ON_LEAVE', 'SUSPENDED', 'TERMINATED', 'RESIGNED'])
   status?: 'ACTIVE' | 'ON_LEAVE' | 'SUSPENDED' | 'TERMINATED' | 'RESIGNED';

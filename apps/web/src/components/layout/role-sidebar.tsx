@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, User, Calendar, Clock, DollarSign, Target, GraduationCap, Sparkles,
   Users, Inbox, Briefcase, UserPlus, MessageCircle, BarChart3, Settings, Store, Sliders,
-  GitBranch, Shield, Kanban, FileSignature, Heart, Puzzle, Timer, MessagesSquare,
+  GitBranch, Shield, Kanban, FileSignature, Heart, Puzzle, Timer, MessagesSquare, Building2,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -15,7 +15,7 @@ import type { NavItemWithBadge } from '@/context/auth-context';
 const ICON_MAP: Record<string, LucideIcon> = {
   LayoutDashboard, User, Calendar, Clock, DollarSign, Target, GraduationCap, Sparkles,
   Users, Inbox, Briefcase, UserPlus, MessageCircle, BarChart3, Settings, Store, Sliders,
-  GitBranch, Shield, Kanban, FileSignature, Heart, Puzzle, Timer, MessagesSquare,
+  GitBranch, Shield, Kanban, FileSignature, Heart, Puzzle, Timer, MessagesSquare, Building2,
 };
 
 const PORTAL_LABELS: Record<string, string> = {

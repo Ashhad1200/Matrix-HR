@@ -63,8 +63,12 @@ export default function AiPage() {
           {answer && (
             <div className="space-y-2">
               <div className="rounded-lg bg-[hsl(var(--muted))] p-4 whitespace-pre-wrap">{answer}</div>
-              {source === 'gemini' && (
+              {source === 'gemini' ? (
                 <p className="text-xs text-[hsl(var(--muted-foreground))]">Powered by Google Gemini</p>
+              ) : (
+                <p className="text-xs text-amber-600 dark:text-amber-400">
+                  AI is currently unavailable — this is a rule-based answer, not a generated one.
+                </p>
               )}
             </div>
           )}

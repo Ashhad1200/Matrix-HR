@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { EntitlementsService } from '../entitlements/entitlements.service';
 import { DEFAULT_LEAVE_POLICIES, getPermissionsForRole } from '@matrixhr/shared';
 import { SignUpDto, LoginDto } from './dto';
 
@@ -19,6 +20,7 @@ export class AuthService {
     private jwt: JwtService,
     private config: ConfigService,
     private audit: AuditService,
+    private entitlements: EntitlementsService,
   ) {}
 
   async signUp(dto: SignUpDto) {
@@ -209,10 +211,14 @@ export class AuthService {
         : item,
     );
 
+    const entitlements =
+      user.role === 'SUPER_ADMIN' ? null : await this.entitlements.resolve(user.tenantId);
+
     return {
       ...user,
       permissions: { ...permissions, nav },
       badges: { pendingApprovals, unreadNotifications },
+      entitlements,
     };
   }
 
