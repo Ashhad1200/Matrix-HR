@@ -121,22 +121,22 @@ Sizing assumes the delivery model this repo's own `docs/workflow.md` describes �
 
 ---
 
-### Phase 2 — Payroll Production Hardening (4–6 weeks)
+### Phase 2 — Payroll Production Hardening (4–6 weeks) — ⚠️ CODE DONE (18 Sep 2026), NOT SIGNED OFF
 
 **Goal:** Move payroll from "produces plausible numbers" to "a controlled financial system," per Market Analysis §7.5 and §14.2.
 
 **Scope:**
-- Effective-dated compliance rules: tax brackets, EOBI, provident fund rates versioned by fiscal year, not hardcoded constants.
-- Configurable recurring earnings/deductions per employee (allowances, loans, advances) and one-off items (bonus, overtime, arrears).
-- Wire attendance, leave, and timesheet data into the calculation as real inputs, not just base salary.
-- Maker-checker: separate "prepare" and "approve & lock" actors; period locking with a controlled reopen path (currently "Approve & Lock" just changes a status field with no checks).
-- Offboarding-linked final settlement calculation (feeds Phase 3).
-- Generated, archived PDF pay slips (currently pay-stub retrieval returns raw data, not a document).
-- Validate the existing HBL/Meezan bank-file strings against real bank format specs, or mark them prototype until validated.
+- ✅ Effective-dated compliance rules: tax brackets, EOBI, provident fund rates now versioned via `PayrollRuleSet` (fiscal year / effective date), not hardcoded constants. Seeded with the same values that were previously hardcoded, so today's numbers are unchanged.
+- ✅ Configurable recurring earnings/deductions per employee (`CompensationItem`: allowances, loans, advances, bonus, arrears — recurring or period-bound).
+- ✅ Attendance wired into the calculation: absent/half-day records within the period pro-rate base salary before tax.
+- ✅ Maker-checker: `submit` / `approve` / `lock` / `reopen` lifecycle, with the API rejecting approval when the approver is the same user who prepared the run, and reopen requiring a reason.
+- ✅ Generated, archived PDF pay slips (pdfkit, stored in MinIO, served on demand) replacing the old raw-data stub.
+- ⬜ Offboarding-linked final settlement calculation — still deferred to Phase 3 as originally scoped.
+- ⬜ HBL/Meezan bank-file strings are still unvalidated against real bank format specs — `generateBankFile()` now explicitly returns `validated: false` rather than implying correctness, but the underlying format itself wasn't touched this phase.
 
 **Depends on:** Phase 0 (no hard dependency, but do this after the honesty pass so the "prototype" label is still accurate while work is in progress).
 
-**Exit criteria:** A qualified Pakistan payroll practitioner (§15.3 validation) reviews the implemented rules against real FBR/EOBI/PF requirements and signs off. Until that review happens, keep the "prototype" label regardless of how complete the code looks.
+**Exit criteria:** A qualified Pakistan payroll practitioner (§15.3 validation) reviews the implemented rules against real FBR/EOBI/PF requirements and signs off. **That review has not happened** — the code above is regression-tested (unit + RBAC + API + e2e, all green) and functionally complete against this phase's scope, but the tax/EOBI/PF *values* themselves are unaudited by a human practitioner. Keep the "prototype" label on payroll compliance specifically until that review happens, regardless of how complete the code looks.
 
 **Size:** 4–6 weeks engineering + practitioner review time (external dependency, don't estimate that part).
 
