@@ -1,4 +1,17 @@
 import {
+
+/** Valid 24-char Pakistani IBAN (ISO 13616 mod-97 check digits). */
+function pkIban(bankCode: string, account16: string): string {
+  const bban = `${bankCode}${account16}`;
+  const rearranged = `${bban}PK00`;
+  let rem = 0;
+  for (const ch of rearranged) {
+    const digits = /[A-Z]/.test(ch) ? String(ch.charCodeAt(0) - 55) : ch;
+    for (const d of digits) rem = (rem * 10 + Number(d)) % 97;
+  }
+  return `PK${String(98 - rem).padStart(2, '0')}${bban}`;
+}
+
   PrismaClient,
   LeaveRequestStatus,
   AttendanceStatus,
@@ -116,7 +129,7 @@ export async function seedBulkData(
         status: EmployeeStatus.ACTIVE,
         baseSalary: 120000 + i * 8000,
         bankAccount: `PK${String(1000000000 + i)}`,
-        iban: `PK36MEZN${String(100000000000 + i)}`,
+        iban: pkIban('MEZN', String(1000000000000000 + i)),
       },
     });
     activeEmployees.push(emp);

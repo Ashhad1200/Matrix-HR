@@ -5,6 +5,9 @@ import { PayrollRules } from './engines/payroll-engine.interface';
 import { PayslipPdfService } from './payslip-pdf.service';
 import { UploadsService } from '../uploads/uploads.service';
 import { CreateCompensationItemDto } from './dto';
+import { IntegrationSyncService } from '../integrations/integration-sync.service';
+import { buildBankFile } from './bank-file';
+import { buildJournal } from './journal';
 
 @Injectable()
 export class PayrollService {
@@ -13,6 +16,7 @@ export class PayrollService {
     private engineFactory: PayrollEngineFactory,
     private payslipPdf: PayslipPdfService,
     private uploads: UploadsService,
+    private syncLogs: IntegrationSyncService,
   ) {}
 
   // ── Period helpers ──────────────────────────────────────────────────────
@@ -396,24 +400,52 @@ export class PayrollService {
     return { url };
   }
 
-  /**
-   * ponytail: these are illustrative field layouts, not validated against
-   * real HBL/Meezan bank specifications — see ENGINEERING_ROADMAP.md Phase 2.
-   * Do not use for a real disbursement until a bank confirms the format.
-   */
+  private assertDisbursable(run: { status: string }, what: string) {
+    if (run.status !== 'APPROVED' && run.status !== 'LOCKED') {
+      throw new BadRequestException(`${what} can only be produced for an approved or locked payroll run`);
+    }
+  }
+
+  /** Validated bank file: bad rows are excluded and reported, never shipped. See bank-file.ts. */
   generateBankFile(run: Awaited<ReturnType<typeof this.getPayrollRun>>, bank: string) {
-    const lines = run.items.map((item) => {
-      const emp = item.employee;
-      switch (bank) {
-        case 'meezan':
-          return `${emp.iban || emp.bankAccount},${emp.firstName} ${emp.lastName},${item.netSalary},Salary ${run.period}`;
-        case 'hbl':
-          return `HBL|${emp.iban}|${item.netSalary}|${emp.employeeCode}|Salary`;
-        default:
-          return `${emp.employeeCode},${emp.firstName} ${emp.lastName},${emp.iban || emp.bankAccount},${item.netSalary}`;
-      }
+    this.assertDisbursable(run, 'A bank file');
+    return buildBankFile(run.items, run.period, bank);
+  }
+
+  /** Balanced payroll journal CSV for QuickBooks import; recorded in the integration's sync log. */
+  async exportJournal(tenantId: string, runId: string) {
+    const run = await this.getPayrollRun(tenantId, runId);
+    this.assertDisbursable(run, 'A journal export');
+
+    const integration = await this.prisma.tenantIntegration.findUnique({
+      where: { tenantId_provider: { tenantId, provider: 'quickbooks' } },
     });
-    return { bank, period: run.period, format: 'csv', content: lines.join('\n'), validated: false };
+    if (!integration || integration.status !== 'connected') {
+      throw new BadRequestException('QuickBooks is not connected — connect it in the Marketplace first');
+    }
+
+    const startedAt = new Date();
+    const accounts = ((integration.config as any)?.accounts ?? {}) as Record<string, string>;
+    const journal = buildJournal(run.items, run.period, accounts);
+    await this.syncLogs.record({
+      tenantId,
+      provider: 'quickbooks',
+      direction: 'OUTBOUND',
+      processed: run.items.length,
+      failed: journal.balanced ? 0 : run.items.length,
+      startedAt,
+      message: journal.balanced
+        ? `Exported journal ${journal.journalNo} (${journal.rows} lines, gross ${journal.totals.gross})`
+        : `Journal ${journal.journalNo} did not balance — not usable`,
+      details: { period: run.period, totals: journal.totals },
+    });
+    return {
+      filename: `${journal.journalNo}.csv`,
+      contentType: 'text/csv',
+      content: journal.content,
+      balanced: journal.balanced,
+      totals: journal.totals,
+    };
   }
 
   /** Annual W-2 wage & tax statements aggregated from approved payroll items. */

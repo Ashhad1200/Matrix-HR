@@ -154,6 +154,8 @@ model Tenant {
   workflowDefs       WorkflowDefinition[]
   workflowInstances  WorkflowInstance[]
   offboardingCases   OffboardingCase[]
+  integrationSyncLogs IntegrationSyncLog[]
+  biometricDevices   BiometricDevice[]
   webhooks           Webhook[]
   tenantIntegrations TenantIntegration[]
   enpsSurveys        EnpsSurvey[]
@@ -286,6 +288,8 @@ model Employee {
   bankAccount      String?
   iban             String?
   ntn              String?
+  // Biometric terminal PIN (ZKTeco PINs are numeric, employee codes usually are not)
+  biometricPin     String?
   // Custom fields
   customFields     Json?
   createdAt        DateTime       @default(now())
@@ -317,6 +321,7 @@ model Employee {
   timeEntries  TimeEntry[]
 
   @@unique([tenantId, employeeCode])
+  @@unique([tenantId, biometricPin])
   @@index([tenantId])
   @@index([tenantId, status])
   @@index([tenantId, departmentId])
@@ -1041,6 +1046,11 @@ model Webhook {
   events    String[] // employee.created, employee.terminated, leave.approved
   secret    String
   isActive  Boolean  @default(true)
+  consecutiveFailures Int       @default(0)
+  lastSuccessAt       DateTime?
+  lastFailureAt       DateTime?
+  lastError           String?
+  disabledReason      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -1055,14 +1065,55 @@ model WebhookDelivery {
   webhookId  String
   event      String
   payload    Json
-  status     String   @default("pending") // pending, delivered, failed
+  status     String   @default("pending") // pending, retrying, delivered, failed (dead)
   response   String?
   attempts   Int      @default(0)
+  nextAttemptAt DateTime?
+  lastError  String?
+  deliveredAt DateTime?
   createdAt  DateTime @default(now())
 
   webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
 
   @@index([webhookId, status])
+  @@index([status, nextAttemptAt])
+}
+
+// One row per integration run/push so customers can see what moved and what failed.
+model IntegrationSyncLog {
+  id               String   @id @default(cuid())
+  tenantId         String
+  provider         String
+  direction        String   // INBOUND, OUTBOUND
+  status           String   // SUCCESS, PARTIAL, FAILED
+  recordsProcessed Int      @default(0)
+  recordsFailed    Int      @default(0)
+  message          String?
+  details          Json?
+  startedAt        DateTime @default(now())
+  finishedAt       DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, provider, startedAt])
+}
+
+// A registered biometric terminal that pushes attendance via the ZKTeco ADMS protocol.
+model BiometricDevice {
+  id           String    @id @default(cuid())
+  tenantId     String
+  serialNumber String    @unique
+  name         String
+  location     String?
+  isActive     Boolean   @default(true)
+  lastSeenAt   DateTime?
+  lastPushAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
 }
 
 model TenantIntegration {

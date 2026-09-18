@@ -162,7 +162,7 @@ Sizing assumes the delivery model this repo's own `docs/workflow.md` describes �
 
 ---
 
-### Phase 4 — Make Integrations Real (3–4 weeks)
+### Phase 4 — Make Integrations Real (3–4 weeks) — ✅ CODE DONE (18 Sep 2026), exit criteria PARTLY met
 
 **Goal:** Turn at least the highest-value stubs from Phase 0's relabeling into actual working integrations, per Market Analysis §7.14 and §9.4.
 
@@ -171,6 +171,10 @@ Sizing assumes the delivery model this repo's own `docs/workflow.md` describes �
 - Pick 2–3 integrations to actually build, prioritized by the target segment: one accounting export (QuickBooks or a local equivalent), one biometric device sync (ZKTeco, per `docs/year2-expansion.md`'s own marketplace phase 1), one bank file consumer/producer validated against Phase 2's output.
 - Webhook delivery retry, failure queue, and a visible health status per integration.
 - Honest catalog status for everything not yet built: "Available," "Beta," "Planned," "Partner-provided" — no unlabeled "Connect" button for something with nothing behind it.
+
+**Built:** (1) `TenantIntegration` tokens and webhook signing secrets are AES-256-GCM encrypted at rest (`CredentialCipherService`, key from `CREDENTIAL_KEY`; production refuses to boot without it; legacy plaintext rows are migrated on startup) and are never returned by the API. (2) Webhooks: HMAC-SHA256 signatures (`X-Webhook-Signature` over `timestamp.body` — the secret is no longer sent as a header), persisted retries with backoff (1m/5m/30m/2h/6h, 6 attempts), a failure queue with manual redelivery, per-webhook health (healthy/degraded/failing/disabled, auto-disable after 15 consecutive failures), and an SSRF guard on tenant-supplied URLs. (3) `IntegrationSyncLog` — every push/export is recorded (direction, processed/failed counts, message) and surfaced in the Marketplace. (4) Catalog honesty: every app is `available`/`beta`/`planned`; 20 of 22 were stubs and are now `planned` and cannot be connected; the fake "Sync Now" counter was deleted. (5) **ZKTeco ADMS receiver** (beta): registered terminals push punches to `/iclock/cdata`; they become idempotent `BIOMETRIC` attendance records (device time converted from the tenant timezone), unmatched PINs/garbage lines are counted and shown in the sync log. Employees now have an optional `biometricPin`. (6) **QuickBooks journal export** (beta): a balanced payroll journal CSV for approved/locked runs, plan-gated (`accounting.export`, Growth+), logged as an outbound run. (7) **Bank-file validation**: PK IBAN mod-97 check, duplicate/zero-net detection; invalid rows are left out of the file and reported. Seed IBANs were 20 chars (invalid) and are now valid.
+
+**Not met / known limits:** the exit criterion asks for real data "in both directions" — ZKTeco is inbound-only (no server→device commands) and QuickBooks is a file export, not an API/OAuth connection, so no single integration is bidirectional yet. ZKTeco is verified against the ADMS protocol shape with simulated pushes, **not against physical terminals**; its only authentication is the registered serial number (inherent to the protocol). The QuickBooks CSV column layout follows QBO's journal-import template but has not been imported into a real QuickBooks company. Bank-file *data* is validated; the HBL/Meezan *column layouts* remain unconfirmed by the banks (`validated: false`). No OAuth flows exist yet (encrypted storage is ready for them); there is no credential key-rotation tool; the SSRF guard resolves DNS separately from the request (rebinding is theoretically possible); the webhook worker is an in-process poller, not a queue.
 
 **Depends on:** Phase 1 (gating integrations by plan — e.g. accounting export as a Growth+ feature).
 

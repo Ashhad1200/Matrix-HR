@@ -42,12 +42,15 @@ import { UploadsModule } from './uploads/uploads.module';
 import { EntitlementsModule } from './entitlements/entitlements.module';
 import { PlatformModule } from './platform/platform.module';
 import { OffboardingModule } from './offboarding/offboarding.module';
+import { CredentialCipherModule } from './crypto/credential-cipher.module';
+import { BiometricModule } from './biometric/biometric.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['../../.env', '.env'] }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     PrismaModule,
+    CredentialCipherModule,
     AuditModule,
     NotificationsModule,
     AuthModule,
@@ -87,6 +90,7 @@ import { OffboardingModule } from './offboarding/offboarding.module';
     EntitlementsModule,
     PlatformModule,
     OffboardingModule,
+    BiometricModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

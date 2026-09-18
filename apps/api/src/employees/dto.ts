@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEmail, IsNumber, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsEmail, IsNumber, IsEnum, Matches } from 'class-validator';
 import { PartialType } from '@nestjs/swagger';
 
 export class CreateEmployeeDto {
@@ -22,6 +22,11 @@ export class CreateEmployeeDto {
   @IsOptional()
   @IsString()
   cnic?: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^[A-Za-z0-9]{1,20}$/, { message: 'biometricPin must be 1-20 letters/digits' })
+  biometricPin?: string;
 
   @IsOptional()
   @IsString()

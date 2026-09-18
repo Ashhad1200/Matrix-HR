@@ -2,7 +2,8 @@ import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards } from '@n
 import { PayrollService } from './payroll.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles, CurrentUser, TenantId } from '../common/decorators';
+import { Roles, CurrentUser, TenantId, RequireFeature } from '../common/decorators';
+import { EntitlementGuard } from '../common/guards/entitlement.guard';
 import { UserRole } from '@matrixhr/database';
 import { CreateCompensationItemDto, ReopenPayrollRunDto } from './dto';
 
@@ -57,6 +58,13 @@ export class PayrollController {
   @Get('runs/:id/items/:itemId/payslip')
   getPayslip(@TenantId() tenantId: string, @Param('itemId') itemId: string) {
     return this.payroll.getPayslipUrl(tenantId, itemId);
+  }
+
+  @UseGuards(EntitlementGuard)
+  @RequireFeature('accounting.export')
+  @Get('runs/:id/journal')
+  journal(@TenantId() tenantId: string, @Param('id') id: string) {
+    return this.payroll.exportJournal(tenantId, id);
   }
 
   @Get('runs/:id/bank-file')

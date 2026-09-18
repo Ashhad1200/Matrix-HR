@@ -71,11 +71,21 @@ export class EmployeesService {
     return employee;
   }
 
+  private async assertBiometricPinFree(tenantId: string, pin?: string, exceptEmployeeId?: string) {
+    if (!pin) return;
+    const clash = await this.prisma.employee.findFirst({
+      where: { tenantId, biometricPin: pin, ...(exceptEmployeeId ? { NOT: { id: exceptEmployeeId } } : {}) },
+      select: { id: true },
+    });
+    if (clash) throw new ConflictException('Biometric PIN is already assigned to another employee');
+  }
+
   async create(tenantId: string, userId: string, dto: CreateEmployeeDto) {
     const existing = await this.prisma.employee.findUnique({
       where: { tenantId_employeeCode: { tenantId, employeeCode: dto.employeeCode } },
     });
     if (existing) throw new ConflictException('Employee code already exists');
+    await this.assertBiometricPinFree(tenantId, dto.biometricPin);
 
     const employee = await this.prisma.employee.create({
       data: {
@@ -86,6 +96,7 @@ export class EmployeesService {
         email: dto.email,
         phone: dto.phone,
         cnic: dto.cnic,
+        biometricPin: dto.biometricPin,
         designationId: dto.designationId,
         departmentId: dto.departmentId,
         managerId: dto.managerId,
@@ -107,6 +118,7 @@ export class EmployeesService {
 
   async update(tenantId: string, userId: string, id: string, dto: UpdateEmployeeDto) {
     const before = await this.findOne(tenantId, id);
+    await this.assertBiometricPinFree(tenantId, dto.biometricPin, id);
     const employee = await this.prisma.employee.update({
       where: { id },
       data: {

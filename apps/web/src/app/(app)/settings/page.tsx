@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import {
-  Sliders, GitBranch, Shield, ChevronRight, KeyRound, Fingerprint, Globe2, MonitorSmartphone, BookOpen,
+  Sliders, GitBranch, Shield, ChevronRight, KeyRound, Fingerprint, Globe2, MonitorSmartphone, BookOpen, Webhook, ScanFace,
 } from 'lucide-react';
 
 const settingsLinks = [
@@ -12,6 +12,8 @@ const settingsLinks = [
   { href: '/settings/workflows', label: 'Workflows', description: 'Multi-level approval automation for profile changes', icon: GitBranch },
   { href: '/settings/audit', label: 'Audit Log', description: 'Review system activity and changes', icon: Shield },
   { href: '/settings/api-keys', label: 'API Keys', description: 'Tenant keys for the public REST API', icon: KeyRound },
+  { href: '/settings/webhooks', label: 'Webhooks', description: 'Send signed event notifications to external systems', icon: Webhook },
+  { href: '/settings/devices', label: 'Biometric devices', description: 'Register and monitor ZKTeco attendance terminals', icon: ScanFace },
   { href: '/settings/sso', label: 'Single Sign-On', description: 'SAML identity provider configuration', icon: Fingerprint },
   { href: '/settings/eor', label: 'Global Hiring (EOR)', description: 'Employer-of-record coverage in 150+ countries', icon: Globe2 },
   { href: '/kiosk', label: 'Kiosk Mode', description: 'Shared-device attendance clock for deskless teams', icon: MonitorSmartphone },

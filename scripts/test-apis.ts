@@ -126,8 +126,10 @@ async function main() {
   payrollRunId = runs.data?.[0]?.id;
   if (payrollRunId) {
     await req('GET', `/payroll/runs/${payrollRunId}`);
-    await req('GET', `/payroll/runs/${payrollRunId}/bank-file?bank=meezan`);
   }
+  // Bank files only exist for approved/locked runs.
+  const lockedRunId = runs.data?.find((r: any) => r.status === 'LOCKED' || r.status === 'APPROVED')?.id;
+  if (lockedRunId) await req('GET', `/payroll/runs/${lockedRunId}/bank-file?bank=meezan`);
 
   // Recruitment
   const jobs = await req('GET', '/recruitment/jobs');

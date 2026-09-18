@@ -68,6 +68,8 @@ services:
       DATABASE_URL: postgresql://matrixhr:matrixhr@postgres:5432/matrixhr?schema=public
       REDIS_URL: redis://redis:6379
       JWT_SECRET: dev-secret-change-in-production-32chars
+      # Dev only: lets webhooks target localhost/host.docker.internal. Never set in production.
+      WEBHOOK_ALLOW_PRIVATE_TARGETS: "true"
       JWT_REFRESH_SECRET: dev-refresh-secret-change-in-prod
       WEB_URL: http://localhost:3000
       API_URL: http://localhost:3001

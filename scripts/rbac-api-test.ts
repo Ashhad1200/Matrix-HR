@@ -202,6 +202,14 @@ const PROBES: Probe[] = [
   { method: 'POST', path: '/offboarding/nonexistent/complete', expect: { hr: 'deny', manager: 'deny', employee: 'deny', none: 'deny' } },
   { method: 'POST', path: '/offboarding/nonexistent/decision', body: { action: 'APPROVE' }, expect: { employee: 'deny', none: 'deny' } },
 
+  // Integrations (Phase 4)
+  { method: 'GET', path: '/biometric/devices', expect: { admin: 'allow', hr: 'allow', manager: 'deny', employee: 'deny', none: 'deny' } },
+  { method: 'GET', path: '/marketplace/zkteco/logs', expect: { admin: 'allow', hr: 'allow', manager: 'deny', employee: 'deny', none: 'deny' } },
+  { method: 'POST', path: '/marketplace/zkteco/connect', expect: { manager: 'deny', employee: 'deny', none: 'deny' } },
+  { method: 'GET', path: '/payroll/runs/nonexistent/journal', expect: { manager: 'deny', employee: 'deny', none: 'deny' } },
+  { method: 'GET', path: '/webhooks/nonexistent/deliveries', expect: { manager: 'deny', employee: 'deny', none: 'deny' } },
+  { method: 'POST', path: '/webhooks/nonexistent/test', expect: { manager: 'deny', employee: 'deny', none: 'deny' } },
+
   // Recruitment (HR/admin)
   { method: 'GET', path: '/recruitment/jobs', expect: { admin: 'allow', employee: 'deny' } },
 

@@ -34,10 +34,10 @@ export class MarketplaceController {
     return this.marketplace.disconnect(tenantId, id);
   }
 
-  @Post(':id/sync')
+  @Get(':id/logs')
   @UseGuards(RolesGuard)
   @Roles(UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN)
-  sync(@TenantId() tenantId: string, @Param('id') id: string) {
-    return this.marketplace.sync(tenantId, id);
+  logs(@TenantId() tenantId: string, @Param('id') id: string) {
+    return this.marketplace.logs(tenantId, id);
   }
 }

@@ -130,6 +130,7 @@ export const api = {
     reopen: (id: string, reason: string) => request<any>(`/payroll/runs/${id}/reopen`, { method: 'POST', body: JSON.stringify({ reason }) }),
     payslipUrl: (runId: string, itemId: string) => request<{ url: string }>(`/payroll/runs/${runId}/items/${itemId}/payslip`),
     bankFile: (id: string, bank: string) => request<any>(`/payroll/runs/${id}/bank-file?bank=${bank}`),
+    journal: (id: string) => request<any>(`/payroll/runs/${id}/journal`),
     compensationItems: (employeeId?: string) => request<any>(`/payroll/compensation-items${employeeId ? `?employeeId=${employeeId}` : ''}`),
     createCompensationItem: (data: { employeeId: string; type: string; label: string; amount: number; recurring?: boolean; startPeriod?: string; endPeriod?: string }) =>
       request<any>('/payroll/compensation-items', { method: 'POST', body: JSON.stringify(data) }),
@@ -241,7 +242,28 @@ export const api = {
     categories: () => request<any>('/marketplace/categories'),
     connect: (id: string) => request<any>(`/marketplace/${id}/connect`, { method: 'POST' }),
     disconnect: (id: string) => request<any>(`/marketplace/${id}/disconnect`, { method: 'POST' }),
-    sync: (id: string) => request<any>(`/marketplace/${id}/sync`, { method: 'POST' }),
+    logs: (appId: string) => request<any>(`/marketplace/${appId}/logs`),
+  },
+  webhooks: {
+    list: () => request<any>('/webhooks'),
+    create: (data: { url: string; events: string[]; secret?: string }) =>
+      request<any>('/webhooks', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: { url?: string; events?: string[]; secret?: string; isActive?: boolean }) =>
+      request<any>(`/webhooks/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    remove: (id: string) => request<any>(`/webhooks/${id}`, { method: 'DELETE' }),
+    deliveries: (id: string, status?: string) =>
+      request<any>(`/webhooks/${id}/deliveries${status ? `?status=${encodeURIComponent(status)}` : ''}`),
+    test: (id: string) => request<any>(`/webhooks/${id}/test`, { method: 'POST' }),
+    redeliver: (deliveryId: string) =>
+      request<any>(`/webhooks/deliveries/${deliveryId}/redeliver`, { method: 'POST' }),
+  },
+  biometric: {
+    devices: () => request<any>('/biometric/devices'),
+    createDevice: (data: { serialNumber: string; name: string; location?: string }) =>
+      request<any>('/biometric/devices', { method: 'POST', body: JSON.stringify(data) }),
+    updateDevice: (id: string, data: { name?: string; location?: string; isActive?: boolean }) =>
+      request<any>(`/biometric/devices/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    removeDevice: (id: string) => request<any>(`/biometric/devices/${id}`, { method: 'DELETE' }),
   },
   notifications: {
     list: () => request<any>('/notifications'),
