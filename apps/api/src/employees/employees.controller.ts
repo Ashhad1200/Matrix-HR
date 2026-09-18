@@ -6,7 +6,9 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles, CurrentUser, TenantId } from '../common/decorators';
 import { UserRole } from '@matrixhr/database';
+import { viewerOf } from '../common/data-scope';
 import { CreateEmployeeDto, UpdateEmployeeDto, SelfUpdateEmployeeDto, ImportCsvDto } from './dto';
+import { CreateDepartmentDto, CreateDesignationDto, AddDocumentDto } from './structure-dto';
 
 @Controller('employees')
 @UseGuards(JwtAuthGuard)
@@ -16,6 +18,7 @@ export class EmployeesController {
   @Get()
   findAll(
     @TenantId() tenantId: string,
+    @CurrentUser() user: { id: string; role: string; employeeId?: string },
     @Query('departmentId') departmentId?: string,
     @Query('status') status?: string,
     @Query('search') search?: string,
@@ -26,7 +29,7 @@ export class EmployeesController {
       departmentId, status, search,
       page: page ? parseInt(page) : 1,
       limit: limit ? parseInt(limit) : 20,
-    });
+    }, viewerOf(user));
   }
 
   @Get('org-chart')
@@ -42,7 +45,7 @@ export class EmployeesController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.COMPANY_ADMIN, UserRole.HR_MANAGER)
   @Post('departments')
-  createDepartment(@TenantId() tenantId: string, @Body() body: { name: string; parentId?: string }) {
+  createDepartment(@TenantId() tenantId: string, @Body() body: CreateDepartmentDto) {
     return this.employees.createDepartment(tenantId, body);
   }
 
@@ -77,7 +80,7 @@ export class EmployeesController {
   @Post('designations')
   createDesignation(
     @TenantId() tenantId: string,
-    @Body() body: { name: string; grade?: string; departmentId?: string },
+    @Body() body: CreateDesignationDto,
   ) {
     return this.employees.createDesignation(tenantId, body);
   }
@@ -94,8 +97,12 @@ export class EmployeesController {
   }
 
   @Get(':id')
-  findOne(@TenantId() tenantId: string, @Param('id') id: string) {
-    return this.employees.findOne(tenantId, id);
+  findOne(
+    @TenantId() tenantId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: { id: string; role: string; employeeId?: string },
+  ) {
+    return this.employees.findOneFor(tenantId, id, viewerOf(user));
   }
 
   @UseGuards(RolesGuard)
@@ -125,8 +132,9 @@ export class EmployeesController {
   addDocument(
     @TenantId() tenantId: string,
     @Param('id') employeeId: string,
-    @Body() body: { type: string; name: string; fileUrl: string; expiryDate?: string },
+    @Body() body: AddDocumentDto,
+    @CurrentUser() user: { id: string; role: string; employeeId?: string },
   ) {
-    return this.employees.addDocument(tenantId, employeeId, body);
+    return this.employees.addDocument(tenantId, employeeId, body, viewerOf(user));
   }
 }

@@ -70,6 +70,8 @@ services:
       JWT_SECRET: dev-secret-change-in-production-32chars
       # Dev only: lets webhooks target localhost/host.docker.internal. Never set in production.
       WEBHOOK_ALLOW_PRIVATE_TARGETS: "true"
+      # Dev only: the isolation/RBAC test suites send more than the production 100 req/min.
+      THROTTLE_LIMIT: "100000"
       JWT_REFRESH_SECRET: dev-refresh-secret-change-in-prod
       WEB_URL: http://localhost:3000
       API_URL: http://localhost:3001

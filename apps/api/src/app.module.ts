@@ -48,7 +48,8 @@ import { BiometricModule } from './biometric/biometric.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['../../.env', '.env'] }),
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    // Default 100 req/min per client; THROTTLE_LIMIT exists so test suites can exceed it locally.
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: Number(process.env.THROTTLE_LIMIT) || 100 }]),
     PrismaModule,
     CredentialCipherModule,
     AuditModule,
@@ -68,7 +69,7 @@ import { BiometricModule } from './biometric/biometric.module';
     ReportsModule,
     AiModule,
     MarketplaceModule,
-    DevModule,
+    ...(process.env.NODE_ENV === 'production' ? [] : [DevModule]),
     ApprovalsModule,
     CustomFieldsModule,
     WorkflowsModule,

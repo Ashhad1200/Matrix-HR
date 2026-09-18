@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { assertInTenant } from '../common/data-scope';
 
 @Injectable()
 export class RecruitmentService {
@@ -16,7 +17,9 @@ export class RecruitmentService {
   async createJob(tenantId: string, data: {
     title: string; department?: string; description?: string; requirements?: string;
   }) {
-    return this.prisma.jobPosting.create({ data: { tenantId, ...data } });
+    return this.prisma.jobPosting.create({
+      data: { tenantId, title: data.title, department: data.department, description: data.description, requirements: data.requirements },
+    });
   }
 
   async getApplications(tenantId: string, jobId?: string) {
@@ -31,7 +34,13 @@ export class RecruitmentService {
     jobId: string; firstName: string; lastName: string; email: string;
     phone?: string; resumeUrl?: string; source?: string;
   }) {
-    return this.prisma.jobApplication.create({ data: { tenantId, ...data } });
+    await assertInTenant(this.prisma, tenantId, [{ model: 'jobPosting', id: data.jobId, label: 'job' }]);
+    return this.prisma.jobApplication.create({
+      data: {
+        tenantId, jobId: data.jobId, firstName: data.firstName, lastName: data.lastName, email: data.email,
+        phone: data.phone, resumeUrl: data.resumeUrl, source: data.source,
+      },
+    });
   }
 
   async updateApplicationStatus(tenantId: string, id: string, status: string) {

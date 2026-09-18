@@ -1,9 +1,16 @@
-import { Controller, Post } from '@nestjs/common';
+import { Controller, Post, UseGuards } from '@nestjs/common';
+import { UserRole } from '@matrixhr/database';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import { seedBulkData } from '@matrixhr/database';
 
+// Dev-only tooling: never registered in production (see app.module) and never anonymous.
 @Controller('dev')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.COMPANY_ADMIN)
 export class DevController {
   constructor(private prisma: PrismaService) {}
 

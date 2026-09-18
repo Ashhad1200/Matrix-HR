@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Viewer, isHrPlus, scopedEmployeeIds, employeeIdFilter, assertInTenant } from '../common/data-scope';
 
 @Injectable()
 export class PerformanceService {
@@ -27,21 +28,31 @@ export class PerformanceService {
     });
   }
 
-  async getGoals(tenantId: string, employeeId?: string) {
+  async getGoals(tenantId: string, employeeId: string | undefined, viewer: Viewer) {
+    const allowed = await scopedEmployeeIds(this.prisma, tenantId, viewer);
     return this.prisma.goal.findMany({
-      where: { tenantId, ...(employeeId ? { employeeId } : {}) },
+      where: { tenantId, ...employeeIdFilter(allowed, employeeId) },
       include: { employee: { select: { firstName: true, lastName: true } } },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async createGoal(tenantId: string, data: {
-    employeeId: string; title: string; description?: string; dueDate?: string; cycleId?: string;
+  /** Non-HR users may only set goals for people inside their own visibility (themself / their reports). */
+  async createGoal(tenantId: string, viewer: Viewer, data: {
+    employeeId?: string; title: string; description?: string; dueDate?: string; cycleId?: string;
   }) {
+    const allowed = await scopedEmployeeIds(this.prisma, tenantId, viewer);
+    const employeeId = data.employeeId ?? viewer.employeeId;
+    if (!employeeId) throw new ForbiddenException('No employee profile is linked to this account');
+    if (allowed !== null && !allowed.includes(employeeId)) throw new ForbiddenException('You cannot set goals for this employee');
+    await assertInTenant(this.prisma, tenantId, [
+      { model: 'employee', id: employeeId },
+      { model: 'reviewCycle', id: data.cycleId, label: 'cycle' },
+    ]);
     return this.prisma.goal.create({
       data: {
         tenantId,
-        employeeId: data.employeeId,
+        employeeId,
         title: data.title,
         description: data.description,
         dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
@@ -50,16 +61,24 @@ export class PerformanceService {
     });
   }
 
-  async updateGoalProgress(goalId: string, progress: number) {
+  async updateGoalProgress(tenantId: string, viewer: Viewer, goalId: string, progress: number) {
+    const goal = await this.prisma.goal.findFirst({ where: { id: goalId, tenantId } });
+    if (!goal) throw new NotFoundException('Goal not found');
+    const allowed = await scopedEmployeeIds(this.prisma, tenantId, viewer);
+    if (allowed !== null && !allowed.includes(goal.employeeId)) throw new ForbiddenException('You cannot update this goal');
     return this.prisma.goal.update({
       where: { id: goalId },
       data: { progress: Math.min(100, Math.max(0, progress)) },
     });
   }
 
-  async getReviews(tenantId: string, cycleId?: string) {
+  async getReviews(tenantId: string, cycleId: string | undefined, viewer: Viewer) {
+    const allowed = await scopedEmployeeIds(this.prisma, tenantId, viewer);
+    const visible = allowed === null
+      ? {}
+      : { OR: [{ employeeId: { in: allowed } }, ...(viewer.employeeId ? [{ reviewerId: viewer.employeeId }] : [])] };
     const reviews = await this.prisma.performanceReview.findMany({
-      where: { tenantId, ...(cycleId ? { cycleId } : {}) },
+      where: { tenantId, ...visible, ...(cycleId ? { cycleId } : {}) },
       include: { cycle: { select: { id: true, name: true, type: true } } },
       orderBy: { createdAt: 'desc' },
     });
@@ -67,7 +86,7 @@ export class PerformanceService {
     // Resolve employee/reviewer names in one query
     const ids = [...new Set(reviews.flatMap((r) => [r.employeeId, r.reviewerId]))];
     const employees = await this.prisma.employee.findMany({
-      where: { id: { in: ids } },
+      where: { tenantId, id: { in: ids } },
       select: { id: true, firstName: true, lastName: true, designation: { select: { name: true } } },
     });
     const empMap = new Map(employees.map((e) => [e.id, e]));
@@ -80,6 +99,11 @@ export class PerformanceService {
   }
 
   async createReview(tenantId: string, data: { cycleId: string; employeeId: string; reviewerId: string }) {
+    await assertInTenant(this.prisma, tenantId, [
+      { model: 'reviewCycle', id: data.cycleId, label: 'cycle' },
+      { model: 'employee', id: data.employeeId },
+      { model: 'employee', id: data.reviewerId, label: 'reviewer' },
+    ]);
     return this.prisma.performanceReview.create({
       data: {
         tenantId,
@@ -90,13 +114,27 @@ export class PerformanceService {
     });
   }
 
+  /**
+   * HR can edit anything; the assigned reviewer writes the manager rating and feedback; the employee
+   * being reviewed can only give their own self-rating.
+   */
   async submitReview(
     tenantId: string,
+    viewer: Viewer,
     id: string,
     data: { selfRating?: number; managerRating?: number; feedback?: string; status?: string },
   ) {
     const review = await this.prisma.performanceReview.findFirst({ where: { id, tenantId } });
-    if (!review) return null;
+    if (!review) throw new NotFoundException('Review not found');
+
+    const hr = isHrPlus(viewer.role);
+    const isReviewer = !!viewer.employeeId && viewer.employeeId === review.reviewerId;
+    const isSubject = !!viewer.employeeId && viewer.employeeId === review.employeeId;
+    if (!hr && !isReviewer && !isSubject) throw new ForbiddenException('You cannot update this review');
+    if (!hr && !isReviewer && (data.managerRating != null || data.feedback !== undefined)) {
+      throw new ForbiddenException('Only the assigned reviewer can set the manager rating or feedback');
+    }
+
     return this.prisma.performanceReview.update({
       where: { id },
       data: {

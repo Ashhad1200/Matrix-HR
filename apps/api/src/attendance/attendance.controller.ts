@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles, CurrentUser, TenantId } from '../common/decorators';
 import { UserRole } from '@matrixhr/database';
-import { ClockInDto } from './dto';
+import { ClockInDto, RegularizationDto } from './dto';
 
 @Controller('attendance')
 @UseGuards(JwtAuthGuard)
@@ -48,7 +48,7 @@ export class AttendanceController {
   requestRegularization(
     @TenantId() tenantId: string,
     @CurrentUser('employeeId') employeeId: string,
-    @Body() body: { date: string; reason: string; requestedClockIn?: string; requestedClockOut?: string },
+    @Body() body: RegularizationDto,
   ) {
     return this.attendance.requestRegularization(tenantId, employeeId, body);
   }

@@ -1,10 +1,19 @@
 import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Viewer, isHrPlus, assertInTenant } from '../common/data-scope';
 import { AuditService } from '../audit/audit.service';
 import { WebhooksService } from '../webhooks/webhooks.service';
 import { OnboardingService } from '../onboarding/onboarding.service';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import { CreateEmployeeDto, UpdateEmployeeDto, SelfUpdateEmployeeDto } from './dto';
+
+// What a colleague may see of another colleague: enough for a people directory, no pay, ID or bank data.
+const DIRECTORY_SELECT = {
+  id: true, employeeCode: true, firstName: true, lastName: true, email: true, photoUrl: true, status: true,
+  designation: { select: { id: true, name: true } },
+  department: { select: { id: true, name: true } },
+  manager: { select: { id: true, firstName: true, lastName: true } },
+} as const;
 
 @Injectable()
 export class EmployeesService {
@@ -22,9 +31,10 @@ export class EmployeesService {
     search?: string;
     page?: number;
     limit?: number;
-  }) {
-    const page = filters?.page || 1;
-    const limit = filters?.limit || 20;
+  }, viewer?: Viewer) {
+    const full = !viewer || isHrPlus(viewer.role);
+    const page = Math.max(1, filters?.page || 1);
+    const limit = Math.min(100, Math.max(1, filters?.limit || 20));
     const where: any = { tenantId };
 
     if (filters?.departmentId) where.departmentId = filters.departmentId;
@@ -35,22 +45,33 @@ export class EmployeesService {
         { lastName: { contains: filters.search, mode: 'insensitive' } },
         { email: { contains: filters.search, mode: 'insensitive' } },
         { employeeCode: { contains: filters.search, mode: 'insensitive' } },
-        { cnic: { contains: filters.search } },
+        // Searching by CNIC would let anyone confirm a colleague's CNIC, so only HR may.
+        ...(full ? [{ cnic: { contains: filters.search } }] : []),
       ];
     }
 
     const [data, total] = await Promise.all([
       this.prisma.employee.findMany({
         where,
-        include: { department: true, designation: true, manager: { select: { id: true, firstName: true, lastName: true } } },
+        ...((full
+          ? { include: { department: true, designation: true, manager: { select: { id: true, firstName: true, lastName: true } } } }
+          : { select: DIRECTORY_SELECT }) as {}),
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { firstName: 'asc' },
-      }),
+      }) as Promise<any[]>,
       this.prisma.employee.count({ where }),
     ]);
 
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+
+  /** Viewer-aware read: HR and the employee themself get the full record, everyone else the directory view. */
+  async findOneFor(tenantId: string, id: string, viewer: Viewer) {
+    if (isHrPlus(viewer.role) || viewer.employeeId === id) return this.findOne(tenantId, id);
+    const employee = await this.prisma.employee.findFirst({ where: { id, tenantId }, select: DIRECTORY_SELECT });
+    if (!employee) throw new NotFoundException('Employee not found');
+    return employee;
   }
 
   async findOne(tenantId: string, id: string) {
@@ -86,6 +107,11 @@ export class EmployeesService {
     });
     if (existing) throw new ConflictException('Employee code already exists');
     await this.assertBiometricPinFree(tenantId, dto.biometricPin);
+    await assertInTenant(this.prisma, tenantId, [
+      { model: 'employee', id: dto.managerId, label: 'manager' },
+      { model: 'department', id: dto.departmentId },
+      { model: 'designation', id: dto.designationId },
+    ]);
 
     const employee = await this.prisma.employee.create({
       data: {
@@ -119,6 +145,11 @@ export class EmployeesService {
   async update(tenantId: string, userId: string, id: string, dto: UpdateEmployeeDto) {
     const before = await this.findOne(tenantId, id);
     await this.assertBiometricPinFree(tenantId, dto.biometricPin, id);
+    await assertInTenant(this.prisma, tenantId, [
+      { model: 'employee', id: dto.managerId, label: 'manager' },
+      { model: 'department', id: dto.departmentId },
+      { model: 'designation', id: dto.designationId },
+    ]);
     const employee = await this.prisma.employee.update({
       where: { id },
       data: {
@@ -201,9 +232,12 @@ export class EmployeesService {
 
     return this.prisma.employee.findMany({
       where: { tenantId, managerId: managerEmployeeId, status: 'ACTIVE' },
-      include: {
-        designation: { select: { name: true } },
-        department: { select: { name: true } },
+      select: {
+        ...DIRECTORY_SELECT,
+        phone: true,
+        dateOfJoining: true,
+        employmentType: true,
+        workLocation: true,
       },
       orderBy: { firstName: 'asc' },
     });
@@ -266,7 +300,8 @@ export class EmployeesService {
   }
 
   async createDepartment(tenantId: string, data: { name: string; parentId?: string }) {
-    return this.prisma.department.create({ data: { tenantId, ...data } });
+    await assertInTenant(this.prisma, tenantId, [{ model: 'department', id: data.parentId, label: 'parent department' }]);
+    return this.prisma.department.create({ data: { tenantId, name: data.name, parentId: data.parentId } });
   }
 
   async getDesignations(tenantId: string) {
@@ -277,12 +312,16 @@ export class EmployeesService {
   }
 
   async createDesignation(tenantId: string, data: { name: string; grade?: string; departmentId?: string }) {
-    return this.prisma.designation.create({ data: { tenantId, ...data } });
+    await assertInTenant(this.prisma, tenantId, [{ model: 'department', id: data.departmentId }]);
+    return this.prisma.designation.create({ data: { tenantId, name: data.name, grade: data.grade, departmentId: data.departmentId } });
   }
 
   async addDocument(tenantId: string, employeeId: string, data: {
     type: string; name: string; fileUrl: string; expiryDate?: string;
-  }) {
+  }, viewer: Viewer) {
+    if (!isHrPlus(viewer.role) && viewer.employeeId !== employeeId) {
+      throw new ForbiddenException('You can only add documents to your own profile');
+    }
     await this.findOne(tenantId, employeeId);
     return this.prisma.employeeDocument.create({
       data: {

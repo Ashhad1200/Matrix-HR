@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsDateString, IsNumber, Min, Max, IsIn } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsNumber, Min, Max, IsIn, MaxLength } from 'class-validator';
 
 export class CreateProjectDto {
   @IsString()
@@ -55,4 +55,9 @@ export class RejectEntryDto {
   @IsOptional()
   @IsIn(['rejected'])
   status?: string;
+}
+
+export class UpdateProjectDto {
+  @IsOptional() @IsString() @MaxLength(120) name?: string;
+  @IsOptional() @IsIn(['active', 'archived']) status?: 'active' | 'archived';
 }

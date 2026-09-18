@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Viewer, isHrPlus, scopedEmployeeIds, employeeIdFilter, assertInTenant } from '../common/data-scope';
 
 @Injectable()
 export class OnboardingService {
@@ -13,6 +14,7 @@ export class OnboardingService {
   }
 
   async startOnboarding(tenantId: string, employeeId: string, templateId: string) {
+    await assertInTenant(this.prisma, tenantId, [{ model: 'employee', id: employeeId }]);
     const template = await this.prisma.onboardingTemplate.findFirst({
       where: { id: templateId, tenantId },
       include: { tasks: true },
@@ -40,11 +42,12 @@ export class OnboardingService {
     return progress;
   }
 
-  async getProgress(tenantId: string, employeeId?: string) {
+  async getProgress(tenantId: string, employeeId: string | undefined, viewer: Viewer) {
+    const allowed = await scopedEmployeeIds(this.prisma, tenantId, viewer);
     return this.prisma.onboardingProgress.findMany({
       where: {
         tenantId,
-        ...(employeeId ? { employeeId } : {}),
+        ...employeeIdFilter(allowed, employeeId),
       },
       include: {
         employee: { select: { id: true, firstName: true, lastName: true } },
@@ -55,7 +58,23 @@ export class OnboardingService {
     });
   }
 
-  async completeTask(progressId: string, taskId: string) {
+  /** HR, the employee being onboarded, or their direct manager may tick a task off. */
+  async completeTask(tenantId: string, viewer: Viewer, progressId: string, taskId: string) {
+    const progress = await this.prisma.onboardingProgress.findFirst({
+      where: { id: progressId, tenantId },
+      include: { employee: { select: { managerId: true } } },
+    });
+    if (!progress) throw new NotFoundException('Onboarding record not found');
+    const isSubject = !!viewer.employeeId && viewer.employeeId === progress.employeeId;
+    const isManager = viewer.role === 'MANAGER' && !!viewer.employeeId && progress.employee.managerId === viewer.employeeId;
+    if (!isHrPlus(viewer.role) && !isSubject && !isManager) {
+      throw new ForbiddenException('You cannot update this onboarding record');
+    }
+    const taskProgress = await this.prisma.onboardingTaskProgress.findUnique({
+      where: { progressId_taskId: { progressId, taskId } },
+    });
+    if (!taskProgress) throw new NotFoundException('Onboarding task not found');
+
     const result = await this.prisma.onboardingTaskProgress.update({
       where: { progressId_taskId: { progressId, taskId } },
       data: { status: 'COMPLETED', completedAt: new Date() },
@@ -81,7 +100,8 @@ export class OnboardingService {
     const completed = await this.prisma.onboardingProgress.count({
       where: { tenantId, status: 'completed' },
     });
-    const recent = await this.getProgress(tenantId);
+    // The dashboard route is HR-only, so the unrestricted view is intended here.
+    const recent = await this.getProgress(tenantId, undefined, { userId: 'system', role: 'HR_MANAGER' });
     return { inProgress, completed, recent: recent.slice(0, 10) };
   }
 }

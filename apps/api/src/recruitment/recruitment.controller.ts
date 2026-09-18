@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles, TenantId } from '../common/decorators';
 import { UserRole } from '@matrixhr/database';
+import { CreateJobDto, CreateApplicationDto } from './dto';
 
 @Controller('recruitment')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -17,7 +18,7 @@ export class RecruitmentController {
   }
 
   @Post('jobs')
-  createJob(@TenantId() tenantId: string, @Body() body: any) {
+  createJob(@TenantId() tenantId: string, @Body() body: CreateJobDto) {
     return this.recruitment.createJob(tenantId, body);
   }
 
@@ -27,7 +28,7 @@ export class RecruitmentController {
   }
 
   @Post('applications')
-  createApplication(@TenantId() tenantId: string, @Body() body: any) {
+  createApplication(@TenantId() tenantId: string, @Body() body: CreateApplicationDto) {
     return this.recruitment.createApplication(tenantId, body);
   }
 

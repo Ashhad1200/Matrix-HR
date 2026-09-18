@@ -5,6 +5,7 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles, CurrentUser, TenantId } from '../common/decorators';
 import { UserRole } from '@matrixhr/database';
 import { CreateLeaveRequestDto } from './dto';
+import { viewerOf } from '../common/data-scope';
 
 @Controller('leave')
 @UseGuards(JwtAuthGuard)
@@ -24,10 +25,11 @@ export class LeaveController {
   @Get('requests')
   getRequests(
     @TenantId() tenantId: string,
+    @CurrentUser() user: { id: string; role: string; employeeId?: string },
     @Query('employeeId') employeeId?: string,
     @Query('status') status?: string,
   ) {
-    return this.leave.getRequests(tenantId, { employeeId, status });
+    return this.leave.getRequests(tenantId, { employeeId, status }, viewerOf(user));
   }
 
   @Get('whos-out')

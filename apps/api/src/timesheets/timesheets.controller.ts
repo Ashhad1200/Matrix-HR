@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles, CurrentUser, TenantId } from '../common/decorators';
 import { UserRole } from '@matrixhr/database';
-import { CreateProjectDto, CreateTimeEntryDto, UpdateTimeEntryDto, SubmitWeekDto } from './dto';
+import { CreateProjectDto, CreateTimeEntryDto, UpdateTimeEntryDto, SubmitWeekDto, UpdateProjectDto } from './dto';
 
 @Controller('timesheets')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -27,7 +27,7 @@ export class TimesheetsController {
   updateProject(
     @TenantId() tenantId: string,
     @Param('id') id: string,
-    @Body() dto: { name?: string; status?: 'active' | 'archived' },
+    @Body() dto: UpdateProjectDto,
   ) {
     return this.timesheets.updateProject(tenantId, id, dto);
   }

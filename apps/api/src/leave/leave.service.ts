@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { WhatsAppService } from '../whatsapp/whatsapp.service';
 import { WorkflowEngineService, WorkflowActor } from '../workflows/workflow-engine.service';
+import { Viewer, scopedEmployeeIds, employeeIdFilter, assertInTenant } from '../common/data-scope';
 import { CreateLeaveRequestDto } from './dto';
 
 @Injectable()
@@ -39,11 +40,13 @@ export class LeaveService implements OnModuleInit {
     });
   }
 
-  async getRequests(tenantId: string, filters?: { employeeId?: string; status?: string }) {
+  async getRequests(tenantId: string, filters: { employeeId?: string; status?: string } | undefined, viewer: Viewer) {
+    // Employees see their own requests, managers their reports', HR everyone's.
+    const allowed = await scopedEmployeeIds(this.prisma, tenantId, viewer);
     return this.prisma.leaveRequest.findMany({
       where: {
         tenantId,
-        ...(filters?.employeeId ? { employeeId: filters.employeeId } : {}),
+        ...employeeIdFilter(allowed, filters?.employeeId),
         ...(filters?.status ? { status: filters.status as any } : {}),
       },
       include: {
@@ -56,6 +59,7 @@ export class LeaveService implements OnModuleInit {
   }
 
   async createRequest(tenantId: string, employeeId: string, dto: CreateLeaveRequestDto, requestedByUserId?: string) {
+    await assertInTenant(this.prisma, tenantId, [{ model: 'leavePolicy', id: dto.policyId, label: 'leave type' }]);
     const start = new Date(dto.startDate);
     const end = new Date(dto.endDate);
     if (end < start) throw new BadRequestException('End date must be after start date');
@@ -222,9 +226,10 @@ export class LeaveService implements OnModuleInit {
         startDate: { lte: end },
         endDate: { gte: start },
       },
-      include: {
-        employee: { select: { id: true, firstName: true, lastName: true, department: true } },
-        policy: true,
+      select: {
+        id: true, startDate: true, endDate: true, days: true, isHalfDay: true, halfDayPeriod: true, status: true,
+        employee: { select: { id: true, firstName: true, lastName: true, department: { select: { id: true, name: true } } } },
+        policy: { select: { id: true, name: true, code: true } },
       },
     });
   }

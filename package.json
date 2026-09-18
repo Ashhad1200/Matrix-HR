@@ -27,6 +27,8 @@
     "test:rbac": "pnpm exec tsx scripts/rbac-api-test.ts",
     "test:offboarding": "pnpm exec tsx scripts/offboarding-api-test.ts",
     "test:integrations": "pnpm exec tsx scripts/integrations-api-test.ts",
+    "test:isolation": "pnpm exec tsx scripts/tenant-isolation-test.ts",
+    "test:scope": "pnpm exec tsx scripts/data-scope-test.ts",
     "test:bamboo": "pnpm exec tsx scripts/bamboo-comparison-test.ts",
     "test:ui": "node scripts/ui-test.mjs",
     "test:e2e": "node scripts/run-e2e.js test --config=e2e/playwright.config.ts",
