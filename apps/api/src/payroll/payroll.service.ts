@@ -84,7 +84,13 @@ export class PayrollService {
       if (['ALLOWANCE', 'BONUS', 'ARREARS'].includes(item.type)) taxableEarnings += amt;
       else if (['DEDUCTION', 'LOAN', 'ADVANCE'].includes(item.type)) postTaxDeductions += amt;
     }
-    return { taxableEarnings, postTaxDeductions };
+    // Approved expense claims not yet paid out are reimbursed with this run (non-taxable, on top of net).
+    const claims = await this.prisma.expenseClaim.findMany({
+      where: { tenantId, employeeId, status: 'APPROVED' },
+      select: { id: true, totalAmount: true },
+    });
+    const reimbursements = claims.reduce((sum, c) => sum + Number(c.totalAmount), 0);
+    return { taxableEarnings, postTaxDeductions, reimbursements, claimIds: claims.map((c) => c.id) };
   }
 
   // ── Attendance-derived unpaid time ──────────────────────────────────────
@@ -126,6 +132,9 @@ export class PayrollService {
   async deleteCompensationItem(tenantId: string, id: string) {
     const item = await this.prisma.compensationItem.findFirst({ where: { id, tenantId } });
     if (!item) throw new NotFoundException('Compensation item not found');
+    if (item.sourceType) {
+      throw new BadRequestException(`This item is managed by its ${item.sourceType === 'LoanRequest' ? 'loan' : 'source'} record — cancel that instead`);
+    }
     return this.prisma.compensationItem.delete({ where: { id } });
   }
 
@@ -162,11 +171,19 @@ export class PayrollService {
       .reduce((sum, b) => sum + Math.max(0, Number(b.entitled) + Number(b.carried) - Number(b.used) - Number(b.pending)), 0);
     const leaveEncashment = Math.round((baseSalary / 30) * encashableDays);
 
+    // Instalments due after the exit month would never be collected by payroll, so they are recovered here.
+    const future = await this.prisma.compensationItem.findMany({
+      where: { tenantId, employeeId, sourceType: 'LoanRequest', startPeriod: { gt: period } },
+      select: { amount: true },
+    });
+    const loanRecovery = future.reduce((sum, i) => sum + Number(i.amount), 0);
+
     const unpaidFraction = Math.min(1, absentFraction + afterExitFraction);
     const calc = engine.calculate(baseSalary, {
       rules,
       taxableEarnings: comp.taxableEarnings + leaveEncashment,
-      postTaxDeductions: comp.postTaxDeductions,
+      postTaxDeductions: comp.postTaxDeductions + loanRecovery,
+      postTaxAdditions: comp.reimbursements,
       unpaidFraction,
     });
 
@@ -179,54 +196,101 @@ export class PayrollService {
       leaveEncashmentDays: encashableDays,
       leaveEncashmentAmount: leaveEncashment,
       otherEarnings: comp.taxableEarnings,
-      recoveries: comp.postTaxDeductions,
+      recoveries: comp.postTaxDeductions + loanRecovery,
+      loanRecovery,
+      reimbursements: comp.reimbursements,
       gross: calc.gross,
       tax: calc.tax,
       eobi: calc.eobiAmount ?? 0,
       pf: calc.pfAmount ?? 0,
       net: calc.net,
       ruleSetId: rules?.ruleSetId ?? null,
-      // Gratuity, notice-period pay/recovery and unpaid-advance balances are not modelled.
+      // Gratuity and notice-period pay/recovery are not modelled. Loan instalments still due are recovered above.
       validated: false,
       notes: [
         'Draft figure: gratuity and notice-period shortfall/recovery are not calculated.',
+        ...(loanRecovery > 0 ? [`Includes recovery of ${loanRecovery} in loan/advance instalments that were still to be deducted.`] : []),
         'Tax is computed on this month\'s pro-rated earnings using the standard monthly method.',
       ],
     };
   }
 
+  /**
+   * Called when an employee's exit is signed off: future loan instalments were recovered (or written off) in
+   * the final settlement, so they must not be deducted again; approved claims were paid in the settlement.
+   */
+  async closeOutForExit(tenantId: string, employeeId: string, lastWorkingDay: Date) {
+    const period = lastWorkingDay.toISOString().slice(0, 7);
+    await this.prisma.$transaction([
+      this.prisma.compensationItem.deleteMany({
+        where: { tenantId, employeeId, sourceType: 'LoanRequest', startPeriod: { gt: period } },
+      }),
+      this.prisma.loanRequest.updateMany({
+        where: { tenantId, employeeId, status: 'APPROVED' },
+        data: { status: 'COMPLETED' },
+      }),
+      this.prisma.expenseClaim.updateMany({
+        where: { tenantId, employeeId, status: 'APPROVED' },
+        data: { status: 'REIMBURSED', reimbursedAt: new Date(), reimbursedInPeriod: `settlement:${period}` },
+      }),
+    ]);
+  }
+
   // ── Payroll run lifecycle: DRAFT -> REVIEW -> APPROVED -> LOCKED ───────
   async createPayrollRun(tenantId: string, period: string, preparedByUserId: string) {
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(period)) throw new BadRequestException('period must look like 2026-09');
     const existing = await this.prisma.payrollRun.findUnique({
       where: { tenantId_period: { tenantId, period } },
     });
     if (existing) throw new BadRequestException('Payroll run already exists for this period');
 
+    const run = await this.prisma.payrollRun.create({
+      data: { tenantId, period, status: 'DRAFT', preparedByUserId },
+    });
+    const items = await this.populateRun(tenantId, run.id, period);
+    return { run, items, summary: this.summarise(items) };
+  }
+
+  /** Recomputes every line of a DRAFT run from current data (new loans, claims, attendance, rules). */
+  async recalculateDraftRun(tenantId: string, runId: string) {
+    const run = await this.getRunOrThrow(tenantId, runId);
+    if (run.status !== 'DRAFT') throw new BadRequestException('Only a draft run can be recalculated');
+    await this.prisma.payrollItem.deleteMany({ where: { payrollRunId: runId } });
+    const items = await this.populateRun(tenantId, runId, run.period);
+    return { run, items, summary: this.summarise(items) };
+  }
+
+  private summarise(items: { grossSalary: unknown; netSalary: unknown }[]) {
+    return {
+      totalEmployees: items.length,
+      totalGross: items.reduce((s, i) => s + Number(i.grossSalary), 0),
+      totalNet: items.reduce((s, i) => s + Number(i.netSalary), 0),
+    };
+  }
+
+  private async populateRun(tenantId: string, runId: string, period: string) {
     const employees = await this.prisma.employee.findMany({
       where: { tenantId, status: 'ACTIVE', baseSalary: { not: null } },
     });
-
     const engine = await this.engineFactory.getEngine(tenantId);
     const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId }, select: { currency: true } });
     const country = tenant?.currency === 'USD' ? 'US' : 'PK';
     const rules = await this.resolveRules(country, period);
 
-    const run = await this.prisma.payrollRun.create({
-      data: { tenantId, period, status: 'DRAFT', preparedByUserId },
-    });
-
     const items: Awaited<ReturnType<typeof this.prisma.payrollItem.create>>[] = [];
     for (const emp of employees) {
-      const [{ taxableEarnings, postTaxDeductions }, unpaidFraction] = await Promise.all([
+      const [{ taxableEarnings, postTaxDeductions, reimbursements, claimIds }, unpaidFraction] = await Promise.all([
         this.resolveCompensation(tenantId, emp.id, period),
         this.resolveUnpaidFraction(tenantId, emp.id, period),
       ]);
 
-      const calc = engine.calculate(Number(emp.baseSalary), { rules, taxableEarnings, postTaxDeductions, unpaidFraction });
+      const calc = engine.calculate(Number(emp.baseSalary), {
+        rules, taxableEarnings, postTaxDeductions, postTaxAdditions: reimbursements, unpaidFraction,
+      });
 
       const item = await this.prisma.payrollItem.create({
         data: {
-          payrollRunId: run.id,
+          payrollRunId: runId,
           employeeId: emp.id,
           grossSalary: calc.gross,
           deductions: calc.deductions,
@@ -234,21 +298,13 @@ export class PayrollService {
           taxAmount: calc.tax,
           eobiAmount: calc.eobiAmount ?? 0,
           pfAmount: calc.pfAmount ?? 0,
-          breakdown: calc.breakdown as any,
+          // The claims folded into this line are recorded so locking marks exactly these as paid.
+          breakdown: { ...calc.breakdown, reimbursedClaimIds: claimIds } as any,
         },
       });
       items.push(item);
     }
-
-    return {
-      run,
-      items,
-      summary: {
-        totalEmployees: items.length,
-        totalGross: items.reduce((s, i) => s + Number(i.grossSalary), 0),
-        totalNet: items.reduce((s, i) => s + Number(i.netSalary), 0),
-      },
-    };
+    return items;
   }
 
   async submitForReview(tenantId: string, runId: string) {
@@ -288,10 +344,16 @@ export class PayrollService {
 
     await this.generatePayslipsForRun(tenantId, runId);
 
-    return this.prisma.payrollRun.update({
-      where: { id: runId },
-      data: { status: 'LOCKED', lockedAt: new Date() },
-    });
+    const items = await this.prisma.payrollItem.findMany({ where: { payrollRunId: runId }, select: { breakdown: true } });
+    const claimIds = items.flatMap((i) => ((i.breakdown as any)?.reimbursedClaimIds as string[] | undefined) ?? []);
+    const [locked] = await this.prisma.$transaction([
+      this.prisma.payrollRun.update({ where: { id: runId }, data: { status: 'LOCKED', lockedAt: new Date() } }),
+      this.prisma.expenseClaim.updateMany({
+        where: { id: { in: claimIds }, tenantId, status: 'APPROVED' },
+        data: { status: 'REIMBURSED', reimbursedAt: new Date(), reimbursedInPeriod: run.period },
+      }),
+    ]);
+    return locked;
   }
 
   /** Controlled reopen: requires a reason, always audited via the run's own reopened* fields. */
@@ -300,10 +362,18 @@ export class PayrollService {
     if (run.status !== 'LOCKED') throw new BadRequestException('Only a locked run can be reopened');
     if (!reason?.trim()) throw new BadRequestException('A reason is required to reopen a locked payroll run');
 
-    return this.prisma.payrollRun.update({
-      where: { id: runId },
-      data: { status: 'DRAFT', reopenedByUserId: operatorId, reopenedAt: new Date(), reopenReason: reason },
-    });
+    // Claims paid out by this run go back to "approved" so the recalculated draft pays them again.
+    const [reopened] = await this.prisma.$transaction([
+      this.prisma.payrollRun.update({
+        where: { id: runId },
+        data: { status: 'DRAFT', reopenedByUserId: operatorId, reopenedAt: new Date(), reopenReason: reason },
+      }),
+      this.prisma.expenseClaim.updateMany({
+        where: { tenantId, status: 'REIMBURSED', reimbursedInPeriod: run.period },
+        data: { status: 'APPROVED', reimbursedAt: null, reimbursedInPeriod: null },
+      }),
+    ]);
+    return reopened;
   }
 
   private async getRunOrThrow(tenantId: string, runId: string) {

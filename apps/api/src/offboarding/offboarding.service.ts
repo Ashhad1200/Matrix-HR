@@ -11,6 +11,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { WebhooksService } from '../webhooks/webhooks.service';
 import { PayrollService } from '../payroll/payroll.service';
 import { WorkflowEngineService, WorkflowActor, roleRank } from '../workflows/workflow-engine.service';
+import { tenantToday } from '../common/tenant-time';
 import { ClearItemDto, ExitInterviewDto, InitiateOffboardingDto, OffboardingDecisionDto } from './dto';
 
 const OPEN_STATUSES = ['PENDING_APPROVAL', 'CLEARANCE', 'EXIT_INTERVIEW', 'SETTLEMENT'] as const;
@@ -159,7 +160,7 @@ export class OffboardingService implements OnModuleInit {
     if (open) throw new BadRequestException('An offboarding case is already open for this employee');
 
     const lastWorkingDay = new Date(dto.lastWorkingDay);
-    const today = new Date(new Date().toISOString().slice(0, 10));
+    const today = new Date(await tenantToday(this.prisma, tenantId));
     if (!privileged && lastWorkingDay < today) {
       throw new BadRequestException('Last working day cannot be in the past');
     }
@@ -313,6 +314,9 @@ export class OffboardingService implements OnModuleInit {
           ]
         : []),
     ]);
+
+    // Future loan instalments were recovered in the settlement and approved claims paid in it — stop payroll doing either again.
+    await this.payroll.closeOutForExit(tenantId, c.employeeId, c.lastWorkingDay);
 
     await this.audit.log({
       tenantId, userId: actor.userId, action: 'COMPLETE', entity: 'OffboardingCase', entityId: id,

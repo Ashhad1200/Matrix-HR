@@ -220,6 +220,7 @@ export const api = {
     runs: () => request<any>('/payroll/runs'),
     createRun: (period: string) => request<any>(`/payroll/runs?period=${period}`, { method: 'POST' }),
     getRun: (id: string) => request<any>(`/payroll/runs/${id}`),
+    recalculate: (id: string) => request<any>(`/payroll/runs/${id}/recalculate`, { method: 'POST' }),
     submit: (id: string) => request<any>(`/payroll/runs/${id}/submit`, { method: 'POST' }),
     approve: (id: string) => request<any>(`/payroll/runs/${id}/approve`, { method: 'POST' }),
     lock: (id: string) => request<any>(`/payroll/runs/${id}/lock`, { method: 'POST' }),
@@ -231,6 +232,45 @@ export const api = {
     createCompensationItem: (data: { employeeId: string; type: string; label: string; amount: number; recurring?: boolean; startPeriod?: string; endPeriod?: string }) =>
       request<any>('/payroll/compensation-items', { method: 'POST', body: JSON.stringify(data) }),
     deleteCompensationItem: (id: string) => request<any>(`/payroll/compensation-items/${id}`, { method: 'DELETE' }),
+  },
+  expenses: {
+    categories: (all = false) => request<any>(`/expenses/categories${all ? '?all=true' : ''}`),
+    createCategory: (data: { name: string; maxAmountPerItem?: number; requiresReceipt?: boolean }) =>
+      request<any>('/expenses/categories', { method: 'POST', body: JSON.stringify(data) }),
+    updateCategory: (id: string, data: { name?: string; maxAmountPerItem?: number; requiresReceipt?: boolean; isActive?: boolean }) =>
+      request<any>(`/expenses/categories/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    claims: (params?: { status?: string; employeeId?: string }) => {
+      const query = new URLSearchParams();
+      if (params?.status) query.set('status', params.status);
+      if (params?.employeeId) query.set('employeeId', params.employeeId);
+      return request<any>(`/expenses/claims${query.size ? `?${query}` : ''}`);
+    },
+    inbox: () => request<any>('/expenses/inbox'),
+    get: (id: string) => request<any>(`/expenses/claims/${id}`),
+    create: (data: { title: string; description?: string; items: Array<{ categoryId: string; date: string; amount: number; description: string; receiptUrl?: string }> }) =>
+      request<any>('/expenses/claims', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: { title?: string; description?: string; items?: Array<{ categoryId: string; date: string; amount: number; description: string; receiptUrl?: string }> }) =>
+      request<any>(`/expenses/claims/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    remove: (id: string) => request<any>(`/expenses/claims/${id}`, { method: 'DELETE' }),
+    submit: (id: string) => request<any>(`/expenses/claims/${id}/submit`, { method: 'POST' }),
+    cancel: (id: string) => request<any>(`/expenses/claims/${id}/cancel`, { method: 'POST' }),
+    decide: (id: string, action: 'APPROVE' | 'REJECT', comment?: string) =>
+      request<any>(`/expenses/claims/${id}/decision`, { method: 'POST', body: JSON.stringify({ action, comment }) }),
+  },
+  loans: {
+    list: (params?: { status?: string; employeeId?: string }) => {
+      const query = new URLSearchParams();
+      if (params?.status) query.set('status', params.status);
+      if (params?.employeeId) query.set('employeeId', params.employeeId);
+      return request<any>(`/loans${query.size ? `?${query}` : ''}`);
+    },
+    inbox: () => request<any>('/loans/inbox'),
+    get: (id: string) => request<any>(`/loans/${id}`),
+    create: (data: { type: 'LOAN' | 'ADVANCE'; amount: number; installments?: number; firstDeductionPeriod: string; reason?: string }) =>
+      request<any>('/loans', { method: 'POST', body: JSON.stringify(data) }),
+    decide: (id: string, action: 'APPROVE' | 'REJECT', comment?: string) =>
+      request<any>(`/loans/${id}/decision`, { method: 'POST', body: JSON.stringify({ action, comment }) }),
+    cancel: (id: string) => request<any>(`/loans/${id}/cancel`, { method: 'POST' }),
   },
   offboarding: {
     list: (status?: string) => request<any>(`/offboarding${status ? `?status=${encodeURIComponent(status)}` : ''}`),

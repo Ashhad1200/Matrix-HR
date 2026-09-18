@@ -114,6 +114,7 @@ async function main() {
     { list: '/timesheets/projects', body: () => ({ key: `ISO${String(stamp).slice(-6)}`, name: `Iso project ${stamp}` }) },
     { list: '/integrations', body: () => ({ provider: `iso-${stamp}`, status: 'disconnected' }) },
     { list: '/webhooks', body: () => ({ url: `https://example.com/iso-${stamp}`, events: ['employee.created'] }) },
+    { list: '/expenses/categories', body: () => ({ name: `Iso category ${stamp}`, maxAmountPerItem: 1000 }) },
   ];
   const ensureFixtures = async (token: string) => {
     for (const f of fixtures) {
@@ -135,6 +136,17 @@ async function main() {
   const gStaff = await login('sara.ahmed@globex.com');
   if (!((await call(gStaff.token, 'GET', '/timesheets/entries')).json ?? []).length) {
     await call(gStaff.token, 'POST', '/timesheets/entries', { date: new Date().toISOString().slice(0, 10), hours: 2, note: 'iso' });
+  }
+  // Expense claims and loans belong to a person, so the victim's staff member files them.
+  if (!((await call(gStaff.token, 'GET', '/expenses/claims')).json ?? []).length) {
+    const cats = (await call(globex.token, 'GET', '/expenses/categories')).json ?? [];
+    if (cats[0]) {
+      await call(gStaff.token, 'POST', '/expenses/claims', { title: 'iso claim', items: [{ categoryId: cats[0].id, date: new Date().toISOString().slice(0, 10), amount: 500, description: 'iso' }] });
+    }
+  }
+  if (!((await call(gStaff.token, 'GET', '/loans')).json ?? []).length) {
+    const next = new Date(); next.setMonth(next.getMonth() + 1);
+    await call(gStaff.token, 'POST', '/loans', { type: 'LOAN', amount: 30000, installments: 3, firstDeductionPeriod: next.toISOString().slice(0, 7) });
   }
   const gManager = await login('ali.khan@globex.com');
   if (gEmps[1] && !((await call(gManager.token, 'GET', '/one-on-ones')).json ?? []).length) {

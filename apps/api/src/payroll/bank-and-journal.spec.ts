@@ -51,6 +51,13 @@ describe('buildJournal', () => {
     expect(j.date).toBe('2026-09-30');
   });
 
+  it('books reimbursements as their own debit and still balances', () => {
+    const j = buildJournal([{ grossSalary: 100000, taxAmount: 5000, eobiAmount: 370, pfAmount: 8000, netSalary: 86630 + 4500, breakdown: { reimbursements: 4500 } }], '2026-09');
+    expect(j.balanced).toBe(true);
+    expect(j.content).toContain('Expense Reimbursements,4500.00');
+    expect(j.content).not.toContain('adjustment');
+  });
+
   it('omits empty lines and honours custom account names with commas', () => {
     const j = buildJournal([item(1000, 0, 0, 0, 1000)], '2026-02', { salaryExpense: 'Wages, Payroll' });
     expect(j.content).toContain('"Wages, Payroll"');

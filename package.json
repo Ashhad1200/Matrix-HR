@@ -32,6 +32,7 @@
     "test:auth": "pnpm exec tsx scripts/auth-security-test.ts",
     "test:whatsapp": "pnpm exec tsx scripts/whatsapp-security-test.ts",
     "test:ops": "pnpm exec tsx scripts/ops-hardening-test.ts",
+    "test:expenses": "pnpm exec tsx scripts/expenses-loans-api-test.ts",
     "test:bamboo": "pnpm exec tsx scripts/bamboo-comparison-test.ts",
     "test:ui": "node scripts/ui-test.mjs",
     "test:e2e": "node scripts/run-e2e.js test --config=e2e/playwright.config.ts",

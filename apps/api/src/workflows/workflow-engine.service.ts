@@ -20,6 +20,14 @@ const DEFAULT_STEPS: Record<string, WorkflowStep[]> = {
     { order: 1, role: 'HR_MANAGER', action: 'approve' },
   ],
   'offboarding.termination': [{ order: 0, role: 'HR_MANAGER', action: 'approve' }],
+  'expense.claim': [
+    { order: 0, role: 'MANAGER', action: 'approve' },
+    { order: 1, role: 'HR_MANAGER', action: 'approve' },
+  ],
+  'loan.request': [
+    { order: 0, role: 'HR_MANAGER', action: 'approve' },
+    { order: 1, role: 'COMPANY_ADMIN', action: 'approve' },
+  ],
 };
 
 const ROLE_RANK: Record<string, number> = {

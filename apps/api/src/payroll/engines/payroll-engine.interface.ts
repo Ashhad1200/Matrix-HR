@@ -29,6 +29,8 @@ export interface PayrollCalcContext {
   taxableEarnings?: number;
   /** Post-tax deductions for the period: loans, advances, other deductions. */
   postTaxDeductions?: number;
+  /** Non-taxable additions paid on top of net pay: approved expense reimbursements. Not part of gross. */
+  postTaxAdditions?: number;
   /** 0..1 fraction of the period that was unpaid (absence/half-day), reduces base pay pro-rata. */
   unpaidFraction?: number;
 }

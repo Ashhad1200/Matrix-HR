@@ -35,6 +35,7 @@ export class UsPayrollEngine implements PayrollEngine {
     const unpaidFraction = Math.min(Math.max(context.unpaidFraction ?? 0, 0), 1);
     const taxableEarnings = context.taxableEarnings ?? 0;
     const postTaxDeductions = context.postTaxDeductions ?? 0;
+    const postTaxAdditions = context.postTaxAdditions ?? 0;
 
     const baseAfterUnpaid = Number(grossSalary) * (1 - unpaidFraction);
     const gross = baseAfterUnpaid + taxableEarnings;
@@ -43,7 +44,7 @@ export class UsPayrollEngine implements PayrollEngine {
     const socialSecurity = Math.round(Math.min(annualGross, SOCIAL_SECURITY_WAGE_BASE) / 12 * SOCIAL_SECURITY_RATE);
     const medicare = Math.round(gross * MEDICARE_RATE);
     const deductions = tax + socialSecurity + medicare + postTaxDeductions;
-    const net = gross - deductions;
+    const net = gross - deductions + postTaxAdditions;
 
     return {
       gross,
@@ -61,6 +62,7 @@ export class UsPayrollEngine implements PayrollEngine {
         socialSecurity,
         medicare,
         postTaxDeductions,
+        reimbursements: postTaxAdditions,
         net,
         country: 'US',
       },

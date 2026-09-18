@@ -220,6 +220,17 @@ const PROBES: Probe[] = [
   { method: 'POST', path: '/auth/mfa/setup', expect: { none: 'deny' } },
   { method: 'GET', path: '/health', expect: { none: 'public', employee: 'public' } },
 
+  // Expenses & loans (Phase 6a)
+  { method: 'GET', path: '/expenses/categories', expect: { admin: 'allow', hr: 'allow', manager: 'allow', employee: 'allow', none: 'deny' } },
+  { method: 'POST', path: '/expenses/categories', body: { name: 'rbac-probe-category' }, expect: { manager: 'deny', employee: 'deny', none: 'deny' } },
+  { method: 'GET', path: '/expenses/inbox', expect: { admin: 'allow', hr: 'allow', manager: 'allow', employee: 'deny', none: 'deny' } },
+  { method: 'GET', path: '/expenses/claims', expect: { admin: 'allow', employee: 'allow', none: 'deny' } },
+  { method: 'POST', path: '/expenses/claims/nonexistent/decision', body: { action: 'APPROVE' }, expect: { employee: 'deny', none: 'deny' } },
+  { method: 'GET', path: '/loans', expect: { admin: 'allow', employee: 'allow', none: 'deny' } },
+  { method: 'GET', path: '/loans/inbox', expect: { admin: 'allow', hr: 'allow', manager: 'deny', employee: 'deny', none: 'deny' } },
+  { method: 'POST', path: '/loans/nonexistent/decision', body: { action: 'APPROVE' }, expect: { manager: 'deny', employee: 'deny', none: 'deny' } },
+  { method: 'POST', path: '/payroll/runs/nonexistent/recalculate', expect: { manager: 'deny', employee: 'deny', none: 'deny' } },
+
   // Recruitment (HR/admin)
   { method: 'GET', path: '/recruitment/jobs', expect: { admin: 'allow', employee: 'deny' } },
 

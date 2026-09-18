@@ -28,6 +28,11 @@ export class PayrollController {
     return this.payroll.getPayrollRun(tenantId, id);
   }
 
+  @Post('runs/:id/recalculate')
+  recalculate(@TenantId() tenantId: string, @Param('id') id: string) {
+    return this.payroll.recalculateDraftRun(tenantId, id);
+  }
+
   @Post('runs/:id/submit')
   submit(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.payroll.submitForReview(tenantId, id);

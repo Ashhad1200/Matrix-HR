@@ -46,7 +46,7 @@ test.describe('Offboarding — approval chain, clearance, exit interview, settle
 
     const form = page.getByTestId('offboarding-start-form');
     await form.locator('select').first().selectOption({ label: `Offboard Tester (${code})` });
-    await form.locator('input[type="date"]').fill(new Date().toISOString().slice(0, 10));
+    await form.locator('input[type="date"]').fill(new Date().toLocaleDateString('en-CA'));
     await form.getByRole('button', { name: /Start offboarding/ }).click();
 
     await expect(page.getByTestId('offboarding-status')).toHaveText(/pending approval/i);

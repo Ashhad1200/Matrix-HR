@@ -57,6 +57,7 @@ export default function PayrollPage() {
   const [journalResult, setJournalResult] = useState<JournalResult | null>(null);
   const [exportError, setExportError] = useState('');
   const [exportBusy, setExportBusy] = useState<'bank' | 'journal' | null>(null);
+  const showReimbursements = Boolean(selected?.items?.some((item: any) => Number(item.breakdown?.reimbursements) > 0));
 
   function load() {
     api.payroll.runs().then(setRuns).catch(console.error);
@@ -175,14 +176,17 @@ export default function PayrollPage() {
 
       {selected && (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle>Payroll {selected.period}</CardTitle>
               <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">{STATUS_HELP[selected.status]}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {selected.status === 'DRAFT' && (
-                <Button disabled={busy} onClick={() => act(() => api.payroll.submit(selected.id))}>Submit for Review</Button>
+                <>
+                  <Button data-testid="payroll-recalculate" variant="secondary" disabled={busy} onClick={() => act(() => api.payroll.recalculate(selected.id))}>Recalculate</Button>
+                  <Button disabled={busy} onClick={() => act(() => api.payroll.submit(selected.id))}>Submit for Review</Button>
+                </>
               )}
               {selected.status === 'REVIEW' && (
                 <PermissionGate action="payroll" subAction="approve">
@@ -200,6 +204,7 @@ export default function PayrollPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
+            {selected.status === 'DRAFT' && <p className="text-sm text-[hsl(var(--muted-foreground))]">Recalculate after approving loans or expense claims so this draft picks them up.</p>}
             {showReopen && (
               <div className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950">
                 <input
@@ -228,6 +233,7 @@ export default function PayrollPage() {
                   <th className="p-2">Tax</th>
                   <th className="p-2">EOBI</th>
                   <th className="p-2">PF</th>
+                  {showReimbursements && <th className="p-2">Reimbursements</th>}
                   <th className="p-2">Net</th>
                   {selected.status === 'LOCKED' && <th className="p-2">Payslip</th>}
                 </tr>
@@ -240,6 +246,7 @@ export default function PayrollPage() {
                     <td className="p-2">{formatCurrency(Number(item.taxAmount))}</td>
                     <td className="p-2">{formatCurrency(Number(item.eobiAmount))}</td>
                     <td className="p-2">{formatCurrency(Number(item.pfAmount))}</td>
+                    {showReimbursements && <td className="p-2">{Number(item.breakdown?.reimbursements) > 0 ? formatCurrency(Number(item.breakdown.reimbursements)) : '—'}</td>}
                     <td className="p-2 font-medium">{formatCurrency(Number(item.netSalary))}</td>
                     {selected.status === 'LOCKED' && (
                       <td className="p-2">
@@ -260,6 +267,7 @@ export default function PayrollPage() {
               </tbody>
             </table>
             </div>
+            {showReimbursements && <p className="text-xs text-[hsl(var(--muted-foreground))]">Net includes non-taxable expense reimbursements.</p>}
 
             {(selected.status === 'APPROVED' || selected.status === 'LOCKED') && (
               <section className="space-y-4 border-t border-[hsl(var(--border))] pt-6">

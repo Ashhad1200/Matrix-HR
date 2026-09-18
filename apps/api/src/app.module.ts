@@ -45,6 +45,8 @@ import { OffboardingModule } from './offboarding/offboarding.module';
 import { CredentialCipherModule } from './crypto/credential-cipher.module';
 import { MailModule } from './mail/mail.service';
 import { HealthModule } from './health/health.module';
+import { ExpensesModule } from './expenses/expenses.module';
+import { LoansModule } from './loans/loans.module';
 import { BiometricModule } from './biometric/biometric.module';
 
 @Module({
@@ -56,6 +58,8 @@ import { BiometricModule } from './biometric/biometric.module';
     CredentialCipherModule,
     MailModule,
     HealthModule,
+    ExpensesModule,
+    LoansModule,
     AuditModule,
     NotificationsModule,
     AuthModule,

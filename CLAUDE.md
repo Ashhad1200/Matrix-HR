@@ -48,6 +48,7 @@ pnpm test:whatsapp           # signed webhook, consent, one-time approval codes,
 pnpm test:ops                # health, request ids, error shapes, CORS, headers
 pnpm test:offboarding        # workflow engine + offboarding
 pnpm test:integrations       # credentials encryption, webhooks, ZKTeco, QuickBooks export, bank file
+pnpm test:expenses           # expense claims, loans/advances, payroll reimbursement, recovery at exit
 
 # Single Jest test (apps/api)
 pnpm --filter @matrixhr/api test -- employees.service.spec.ts

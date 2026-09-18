@@ -23,10 +23,12 @@ const FEATURES: { key: string; name: string }[] = [
   { key: 'eor.quote', name: 'Global Hiring (EOR)' },
   { key: 'attendance.biometric', name: 'Biometric Attendance Devices' },
   { key: 'accounting.export', name: 'Accounting Export' },
+  { key: 'expenses.manage', name: 'Expense Claims & Reimbursement' },
+  { key: 'loans.manage', name: 'Loans & Salary Advances' },
 ];
 
 const STARTER = ['employees.core', 'leave.manage', 'attendance.manage', 'self_service.basic', 'timesheets.manage'];
-const GROWTH = [...STARTER, 'payroll.run', 'recruitment.manage', 'onboarding.manage', 'whatsapp.send', 'attendance.biometric', 'accounting.export'];
+const GROWTH = [...STARTER, 'payroll.run', 'recruitment.manage', 'onboarding.manage', 'whatsapp.send', 'attendance.biometric', 'accounting.export', 'expenses.manage', 'loans.manage'];
 const PRO = [...GROWTH, 'performance.manage', 'lms.manage', 'reports.advanced', 'api.access', 'custom_fields.manage', 'workflows.manage'];
 const ENTERPRISE = [...PRO, 'ai.ask', 'sso.saml', 'marketplace.connect', 'extensions.manage', 'eor.quote'];
 

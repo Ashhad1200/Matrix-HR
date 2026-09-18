@@ -44,6 +44,8 @@ type Settlement = {
   leaveEncashmentAmount: number | string;
   otherEarnings: number | string;
   recoveries: number | string;
+  loanRecovery?: number | string;
+  reimbursements?: number | string;
   gross: number | string;
   tax: number | string;
   eobi: number | string;
@@ -546,6 +548,8 @@ function SettlementSection({ settlement }: { settlement: Settlement }) {
     ['EOBI', formatCurrency(Number(settlement.eobi))],
     ['PF', formatCurrency(Number(settlement.pf))],
     ['Recoveries', formatCurrency(Number(settlement.recoveries))],
+    ...(Number(settlement.loanRecovery) > 0 ? [['Loan/advance recovery (instalments still due)', formatCurrency(Number(settlement.loanRecovery))] as [string, string]] : []),
+    ...(Number(settlement.reimbursements) > 0 ? [['Expense reimbursements (approved claims)', formatCurrency(Number(settlement.reimbursements))] as [string, string]] : []),
   ];
 
   return (

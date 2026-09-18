@@ -217,7 +217,7 @@ Sizing assumes the delivery model this repo's own `docs/workflow.md` describes �
 
 ---
 
-### Phase 6 — High-Priority Product Completeness (6–8 weeks, parallelizable into sub-tracks)
+### Phase 6 — High-Priority Product Completeness (6–8 weeks, parallelizable into sub-tracks) — 🔶 IN PROGRESS: 6a done (19 Sep 2026)
 
 **Goal:** Close the "High" tier of the Feature Gap Matrix (§8) now that Phase 1's entitlement system exists to gate all of it correctly from day one.
 
@@ -231,6 +231,26 @@ Sizing assumes the delivery model this repo's own `docs/workflow.md` describes �
 - Custom roles and configurable permissions (replaces the hardcoded five-role model in `permissions.ts` — sequence this carefully, it's the same file the frontend nav and every `RolesGuard` depend on).
 - Multi-company/multi-legal-entity support.
 - File storage done properly (documents, resumes, pay slips, exports through one storage adapter — Phase 0 may have shipped a minimal version; this is the complete one with lifecycle/expiry).
+
+**Sub-track status**
+
+| Sub-track | State |
+|---|---|
+| **6a Expenses, reimbursements, loans, advances** | ✅ done (below) |
+| Shift assignment, overtime, attendance→payroll reconciliation | ⬜ not started |
+| Benefits and dependents | ⬜ not started |
+| Compensation structures (bands, cycles) | ⬜ not started |
+| Recruitment (requisitions, scorecards, offers) | ⬜ not started |
+| Dynamic reporting engine | ⬜ not started |
+| Custom roles / configurable permissions | ⬜ not started (sequence carefully — `permissions.ts` + every `RolesGuard`) |
+| Multi-company / legal entities | ⬜ not started |
+| File storage lifecycle | ⬜ not started |
+
+**6a built:** expense categories (per-item cap, receipt-required) and claims with server-computed totals, date rules (no future dates, ≤ 180 days old, judged in the *tenant's* timezone) and receipt URLs from the existing upload endpoint; approvals run on the Phase 3 workflow engine (manager → HR, requester can't approve their own); loans and salary advances with policy limits (loan ≤ 6× salary, advance ≤ 1×, no instalment above half of salary, one open request per type, first deduction within 12 months) approved HR → admin, which writes an **exact per-period deduction row** (`CompensationItem`, `sourceType=LoanRequest`, cents-exact, last instalment absorbs the remainder) that payroll already understands, moved forward automatically if the requested month's payroll is already frozen. Approved claims are paid as **non-taxable reimbursements on top of net** in the next payroll run (`postTaxAdditions` in both engines, its own line on the payslip and QuickBooks journal); only the claims actually included in a run are marked reimbursed when it locks, and they revert when it is reopened. Payroll drafts can now be **recalculated**, and run periods are validated. **Closes the Phase 3 gap:** the final settlement now recovers instalments still to come and pays unreimbursed approved claims, and completing the exit stops payroll deducting them again. Plan-gated (`expenses.manage`, `loans.manage`, Growth+). Tests: `pnpm test:expenses` (62 checks incl. lock/reopen and the full exit path), loan-schedule + journal unit specs, 5 e2e specs, and both resources are in the isolation and RBAC suites. UI built by Codex (`/expenses`, `/loans`, payroll/offboarding additions).
+
+**6a bugs found on the way:** the server judged "today" in UTC, so between midnight and 5 AM in Karachi every user's own date counted as "in the future" (expenses, loans and offboarding now use a tenant-timezone `tenantToday`); payroll `period` was an unvalidated query string; a completed offboarding could leave future loan deductions live.
+
+**6a known limits:** policy limits are constants, not per-tenant settings; loans are interest-free and there is no early/partial repayment or a record of the cash disbursement itself; one currency per tenant, no mileage/per-diem rules, reimbursements are always non-taxable (an accountant should confirm that treatment for your jurisdiction); receipts are stored but not inspected; reimbursement rides the salary bank file rather than a separate payment; the US engine received the same `postTaxAdditions` field but has not been exercised with it beyond the shared code path.
 
 **Depends on:** Phase 1 (entitlement gating), Phase 2 (compensation/expenses touch payroll).
 

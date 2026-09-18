@@ -21,6 +21,7 @@ export type PayslipData = {
     eobiEmployee?: number;
     pfEmployee?: number;
     postTaxDeductions?: number;
+    reimbursements?: number;
     net: number;
   };
 };
@@ -64,6 +65,7 @@ export class PayslipPdfService {
       if (data.breakdown.unpaidDeduction) row('Unpaid Absence Deduction', `-${money(data.breakdown.unpaidDeduction)}`);
       if (data.breakdown.taxableEarnings) row('Allowances / Bonus', money(data.breakdown.taxableEarnings));
       row('Gross Pay', money(data.breakdown.gross), true);
+      if (data.breakdown.reimbursements) row('Expense Reimbursements (non-taxable)', money(data.breakdown.reimbursements));
       doc.moveDown();
       line();
 

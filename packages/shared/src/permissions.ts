@@ -49,6 +49,8 @@ const ALL_NAV: Record<string, NavItem> = {
   onboarding: { href: '/onboarding', label: 'Onboarding', icon: 'UserPlus' },
   offboarding: { href: '/offboarding', label: 'Offboarding', icon: 'UserMinus' },
   security: { href: '/security', label: 'Security', icon: 'Shield' },
+  expenses: { href: '/expenses', label: 'Expenses', icon: 'Receipt' },
+  loans: { href: '/loans', label: 'Loans & Advances', icon: 'Banknote' },
   whatsapp: { href: '/whatsapp', label: 'WhatsApp', icon: 'MessageCircle' },
   reports: { href: '/reports', label: 'Reports', icon: 'BarChart3' },
   settings: { href: '/settings', label: 'Settings', icon: 'Settings' },
@@ -129,7 +131,7 @@ export function getPermissionsForRole(role: string): UserPermissions {
           'dashboard', 'employees', 'leave', 'attendance', 'timesheets', 'payroll', 'recruitment',
           'atsKanban', 'preboarding', 'onboarding', 'offboarding', 'performance', 'enps', 'oneOnOnes', 'lms',
           'reports', 'whatsapp', 'settings', 'customFields', 'workflows', 'audit',
-          'marketplace', 'extensions', 'ai', 'security', 'platform',
+          'marketplace', 'extensions', 'ai', 'security', 'expenses', 'loans', 'platform',
         ),
         actions: ADMIN_ACTIONS,
       };
@@ -141,21 +143,21 @@ export function getPermissionsForRole(role: string): UserPermissions {
           'dashboard', 'employees', 'leave', 'attendance', 'timesheets', 'payroll', 'recruitment',
           'atsKanban', 'preboarding', 'onboarding', 'offboarding', 'performance', 'enps', 'oneOnOnes', 'lms',
           'reports', 'whatsapp', 'settings', 'customFields', 'workflows', 'audit',
-          'marketplace', 'extensions', 'ai', 'security',
+          'marketplace', 'extensions', 'ai', 'security', 'expenses', 'loans',
         ),
         actions: ADMIN_ACTIONS,
       };
     case ROLES.MANAGER:
       return {
         portal: 'manager',
-        nav: nav('dashboard', 'team', 'approvals', 'offboarding', 'oneOnOnes', 'leave', 'performance', 'attendance', 'timesheets', 'reports', 'myProfile', 'myPay', 'ai', 'security'),
+        nav: nav('dashboard', 'team', 'approvals', 'offboarding', 'oneOnOnes', 'leave', 'performance', 'attendance', 'timesheets', 'reports', 'myProfile', 'myPay', 'ai', 'security', 'expenses', 'loans'),
         actions: MANAGER_ACTIONS,
       };
     case ROLES.EMPLOYEE:
     default:
       return {
         portal: 'ess',
-        nav: nav('dashboard', 'myProfile', 'leave', 'attendance', 'timesheets', 'myPay', 'performance', 'lms', 'offboarding', 'ai', 'security'),
+        nav: nav('dashboard', 'myProfile', 'leave', 'attendance', 'timesheets', 'myPay', 'performance', 'lms', 'offboarding', 'ai', 'security', 'expenses', 'loans'),
         actions: ESS_ACTIONS,
       };
   }

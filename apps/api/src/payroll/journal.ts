@@ -4,6 +4,7 @@ export type JournalAccounts = {
   eobiPayable: string;
   pfPayable: string;
   recoveries: string;
+  reimbursements: string;
   salariesPayable: string;
 };
 
@@ -13,6 +14,7 @@ export const DEFAULT_ACCOUNTS: JournalAccounts = {
   eobiPayable: 'EOBI Payable',
   pfPayable: 'Provident Fund Payable',
   recoveries: 'Employee Recoveries',
+  reimbursements: 'Expense Reimbursements',
   salariesPayable: 'Salaries Payable',
 };
 
@@ -22,6 +24,8 @@ export type JournalItem = {
   taxAmount: unknown;
   eobiAmount: unknown;
   pfAmount: unknown;
+  /** Payroll item breakdown; `reimbursements` (approved expense claims paid with the run) is read from it. */
+  breakdown?: unknown;
 };
 
 type Row = { account: string; debit: number; credit: number; memo: string };
@@ -55,11 +59,14 @@ export function buildJournal(
   const tax = sum((i) => i.taxAmount);
   const eobi = sum((i) => i.eobiAmount);
   const pf = sum((i) => i.pfAmount);
+  // Reimbursements are paid on top of net pay and are not part of gross.
+  const reimb = sum((i) => (i.breakdown as any)?.reimbursements);
   // Everything else taken out of gross (loans, advances, other deductions).
-  const other = gross - net - tax - eobi - pf;
+  const other = gross + reimb - net - tax - eobi - pf;
 
   const memo = `Payroll ${period}`;
   const rows: Row[] = [{ account: a.salaryExpense, debit: gross, credit: 0, memo }];
+  if (reimb) rows.push({ account: a.reimbursements, debit: reimb, credit: 0, memo: `${memo} (expense reimbursements)` });
   if (tax) rows.push({ account: a.incomeTaxPayable, debit: 0, credit: tax, memo });
   if (eobi) rows.push({ account: a.eobiPayable, debit: 0, credit: eobi, memo });
   if (pf) rows.push({ account: a.pfPayable, debit: 0, credit: pf, memo });

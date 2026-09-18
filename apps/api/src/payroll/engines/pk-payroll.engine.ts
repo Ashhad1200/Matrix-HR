@@ -49,6 +49,7 @@ export class PkPayrollEngine implements PayrollEngine {
     const unpaidFraction = Math.min(Math.max(context.unpaidFraction ?? 0, 0), 1);
     const taxableEarnings = context.taxableEarnings ?? 0;
     const postTaxDeductions = context.postTaxDeductions ?? 0;
+    const postTaxAdditions = context.postTaxAdditions ?? 0;
 
     const baseAfterUnpaid = Number(grossSalary) * (1 - unpaidFraction);
     const gross = baseAfterUnpaid + taxableEarnings;
@@ -57,7 +58,8 @@ export class PkPayrollEngine implements PayrollEngine {
     const eobi = this.calculateEobi(gross, rules);
     const pf = this.calculatePf(gross, rules);
     const deductions = tax + eobi.employee + pf.employee + postTaxDeductions;
-    const net = gross - deductions;
+    // Reimbursements repay money the employee already spent, so they are neither taxed nor pensionable.
+    const net = gross - deductions + postTaxAdditions;
 
     return {
       gross,
@@ -78,6 +80,7 @@ export class PkPayrollEngine implements PayrollEngine {
         pfEmployee: pf.employee,
         pfEmployer: pf.employer,
         postTaxDeductions,
+        reimbursements: postTaxAdditions,
         net,
         country: 'PK',
         ruleSetId: rules.ruleSetId ?? 'default-hardcoded',
