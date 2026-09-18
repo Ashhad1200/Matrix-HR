@@ -44,9 +44,10 @@ export class LeaveController {
   createRequest(
     @TenantId() tenantId: string,
     @CurrentUser('employeeId') employeeId: string,
+    @CurrentUser('id') userId: string,
     @Body() dto: CreateLeaveRequestDto,
   ) {
-    return this.leave.createRequest(tenantId, employeeId, dto);
+    return this.leave.createRequest(tenantId, employeeId, dto, userId);
   }
 
   @UseGuards(RolesGuard)
@@ -55,9 +56,9 @@ export class LeaveController {
   approve(
     @TenantId() tenantId: string,
     @Param('id') id: string,
-    @CurrentUser('employeeId') approverId: string,
+    @CurrentUser() user: { id: string; role: string; employeeId?: string },
   ) {
-    return this.leave.approveRequest(tenantId, id, approverId);
+    return this.leave.approveRequest(tenantId, id, { userId: user.id, role: user.role, employeeId: user.employeeId });
   }
 
   @UseGuards(RolesGuard)
@@ -66,9 +67,9 @@ export class LeaveController {
   reject(
     @TenantId() tenantId: string,
     @Param('id') id: string,
-    @CurrentUser('employeeId') approverId: string,
+    @CurrentUser() user: { id: string; role: string; employeeId?: string },
     @Body('reason') reason?: string,
   ) {
-    return this.leave.rejectRequest(tenantId, id, approverId, reason);
+    return this.leave.rejectRequest(tenantId, id, { userId: user.id, role: user.role, employeeId: user.employeeId }, reason);
   }
 }

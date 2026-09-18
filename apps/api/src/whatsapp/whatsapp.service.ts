@@ -113,12 +113,13 @@ export class WhatsAppService {
         return this.sendMessage(tenantId, phone, 'Your account is not authorized to approve or reject leave requests.');
       }
 
+      const actor = { userId: approver.id, role: approver.role, employeeId: approver.employeeId };
       try {
         if (isApprove) {
-          await this.leave.approveRequest(tenantId, requestId, approver.employeeId);
+          await this.leave.approveRequest(tenantId, requestId, actor);
           return this.sendMessage(tenantId, phone, `✅ Approved request ${requestId}.`);
         }
-        await this.leave.rejectRequest(tenantId, requestId, approver.employeeId, 'Rejected via WhatsApp');
+        await this.leave.rejectRequest(tenantId, requestId, actor, 'Rejected via WhatsApp');
         return this.sendMessage(tenantId, phone, `❌ Rejected request ${requestId}.`);
       } catch (err: any) {
         return this.sendMessage(tenantId, phone, `Could not process request ${requestId}: ${err.message || 'unknown error'}`);

@@ -195,6 +195,13 @@ const PROBES: Probe[] = [
   { method: 'GET', path: '/payroll/runs', expect: { admin: 'allow', hr: 'allow', manager: 'deny', employee: 'deny' } },
   { method: 'GET', path: '/payroll/w2?year=2025', expect: { admin: 'allow', employee: 'deny' } },
 
+  // Offboarding
+  { method: 'GET', path: '/offboarding', expect: { admin: 'allow', hr: 'allow', manager: 'deny', employee: 'deny', none: 'deny' } },
+  { method: 'GET', path: '/offboarding/inbox', expect: { admin: 'allow', hr: 'allow', manager: 'allow', employee: 'deny', none: 'deny' } },
+  { method: 'GET', path: '/offboarding/mine', expect: { admin: 'allow', employee: 'allow', none: 'deny' } },
+  { method: 'POST', path: '/offboarding/nonexistent/complete', expect: { hr: 'deny', manager: 'deny', employee: 'deny', none: 'deny' } },
+  { method: 'POST', path: '/offboarding/nonexistent/decision', body: { action: 'APPROVE' }, expect: { employee: 'deny', none: 'deny' } },
+
   // Recruitment (HR/admin)
   { method: 'GET', path: '/recruitment/jobs', expect: { admin: 'allow', employee: 'deny' } },
 

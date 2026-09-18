@@ -142,13 +142,17 @@ Sizing assumes the delivery model this repo's own `docs/workflow.md` describes �
 
 ---
 
-### Phase 3 — Offboarding & Executable Workflow Engine (3–4 weeks)
+### Phase 3 — Offboarding & Executable Workflow Engine (3–4 weeks) — ✅ DONE (18 Sep 2026)
 
 **Goal:** Two related critical gaps from Market Analysis §7.7 and the Feature Gap Matrix (§8): there is no offboarding flow at all, and "workflow definitions exist" but nothing executes them.
 
 **Scope:**
 - Resignation → clearance checklist → exit interview → access removal → final settlement (reuses Phase 2's settlement calculation).
 - A real execution engine behind the existing `Workflow`/`WorkflowInstance` models — currently these are CRUD records with no runtime that actually walks steps, notifies approvers, or advances state. Leave, expenses (Phase 6), and offboarding approvals should all route through this one engine rather than each module reimplementing its own approve/reject.
+
+**Built:** `WorkflowEngineService` executes tenant-configurable `WorkflowDefinition` steps (falls back to built-in defaults per trigger): role-rank authorization per step, direct-manager check for MANAGER steps, segregation of duties (requester can never act on their own request), an atomic step transition so concurrent approvers can't double-fire, a per-step audit trail (`WorkflowStepAction`), and per-entity handlers. Leave approvals (including the WhatsApp APPROVE/REJECT path) now run on it — which also fixed a latent bug where an already-approved leave request could be approved/rejected again and double-adjust balances. `OffboardingModule`: resignation/termination → approval chain → 4-item clearance checklist → exit interview → final settlement (reuses the payroll engine, rules and attendance inputs; pro-rata final month, annual-leave encashment at base/30, loan/advance recovery) → COMPANY_ADMIN sign-off that closes the employee record, writes employment history, deactivates the user and kills their sessions. Web UI at `/offboarding` (built by Codex CLI) adapts to employee / manager / HR / admin.
+
+**Known limits (be honest with customers):** settlement is flagged `validated: false` — gratuity, notice-period shortfall/recovery and outstanding loan *balances* (only the current-period installment) are not modelled and it needs the same practitioner review as Phase 2; the clearance checklist is a fixed template (not yet tenant-editable); the older `PATCH /employees/:id {status: TERMINATED}` path still exists and bypasses offboarding (deliberate emergency path — consider gating it in Phase 5); only leave and offboarding use the engine so far (expenses join in Phase 6).
 
 **Depends on:** Phase 2 (final settlement math).
 

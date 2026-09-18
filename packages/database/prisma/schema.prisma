@@ -153,6 +153,7 @@ model Tenant {
   customFieldDefs    CustomFieldDefinition[]
   workflowDefs       WorkflowDefinition[]
   workflowInstances  WorkflowInstance[]
+  offboardingCases   OffboardingCase[]
   webhooks           Webhook[]
   tenantIntegrations TenantIntegration[]
   enpsSurveys        EnpsSurvey[]
@@ -307,6 +308,7 @@ model Employee {
   onboardingProgress OnboardingProgress[]
   payrollItems PayrollItem[]
   compensationItems CompensationItem[]
+  offboardingCases OffboardingCase[]
   goals        Goal[]
   courseEnrollments CourseEnrollment[]
   jobApplications JobApplication[]
@@ -945,13 +947,89 @@ model WorkflowInstance {
   currentStep  Int      @default(0)
   status       String   @default("pending") // pending, approved, rejected
   metadata     Json?
+  requestedByUserId String?
+  subjectEmployeeId String?
+  completedAt  DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   tenant     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   definition WorkflowDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  actions    WorkflowStepAction[]
 
   @@index([tenantId, status])
+  @@index([tenantId, entityType, entityId])
+}
+
+model WorkflowStepAction {
+  id          String   @id @default(cuid())
+  instanceId  String
+  stepIndex   Int
+  actorUserId String
+  actorRole   String
+  action      String   // APPROVE, REJECT
+  comment     String?
+  createdAt   DateTime @default(now())
+
+  instance WorkflowInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  @@index([instanceId])
+}
+
+// ─── Offboarding ─────────────────────────────────────────────────────────────
+
+enum OffboardingStatus {
+  PENDING_APPROVAL
+  CLEARANCE
+  EXIT_INTERVIEW
+  SETTLEMENT
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
+model OffboardingCase {
+  id                 String            @id @default(cuid())
+  tenantId           String
+  employeeId         String
+  type               String            // RESIGNATION, TERMINATION
+  reason             String?
+  noticeDate         DateTime          @default(now())
+  lastWorkingDay     DateTime
+  status             OffboardingStatus @default(PENDING_APPROVAL)
+  initiatedByUserId  String
+  workflowInstanceId String?
+  exitInterview      Json?
+  exitInterviewAt    DateTime?
+  settlement         Json?
+  completedByUserId  String?
+  completedAt        DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  tenant         Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  employee       Employee                   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  clearanceItems OffboardingClearanceItem[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, employeeId])
+}
+
+model OffboardingClearanceItem {
+  id              String    @id @default(cuid())
+  caseId          String
+  title           String
+  department      String
+  assignedRole    UserRole
+  status          String    @default("PENDING") // PENDING, CLEARED
+  clearedByUserId String?
+  clearedAt       DateTime?
+  notes           String?
+  sortOrder       Int       @default(0)
+
+  offboardingCase OffboardingCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
 }
 
 // ─── Integrations & Webhooks (Phase 5) ───────────────────────────────────────

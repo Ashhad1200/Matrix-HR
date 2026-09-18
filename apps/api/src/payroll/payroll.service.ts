@@ -125,6 +125,72 @@ export class PayrollService {
     return this.prisma.compensationItem.delete({ where: { id } });
   }
 
+  // ── Final settlement (offboarding) ──────────────────────────────────────
+  // Reuses the same engine/rules/attendance/compensation inputs as a normal
+  // payroll run: the last partial month is pro-rated, unused annual leave is
+  // encashed at base/30, and active loans/advances are recovered.
+  async calculateFinalSettlement(tenantId: string, employeeId: string, lastWorkingDay: Date) {
+    const emp = await this.prisma.employee.findFirst({ where: { id: employeeId, tenantId } });
+    if (!emp) throw new NotFoundException('Employee not found');
+    if (emp.baseSalary == null) throw new BadRequestException('Employee has no base salary on record');
+
+    const period = lastWorkingDay.toISOString().slice(0, 7);
+    const { daysInMonth } = this.periodRange(period);
+    const workedDays = lastWorkingDay.getUTCDate();
+    const afterExitFraction = (daysInMonth - workedDays) / daysInMonth;
+
+    const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId }, select: { currency: true } });
+    const country = tenant?.currency === 'USD' ? 'US' : 'PK';
+    const [engine, rules, comp, absentFraction, balances] = await Promise.all([
+      this.engineFactory.getEngine(tenantId),
+      this.resolveRules(country, period),
+      this.resolveCompensation(tenantId, employeeId, period),
+      this.resolveUnpaidFraction(tenantId, employeeId, period),
+      this.prisma.leaveBalance.findMany({
+        where: { tenantId, employeeId, year: lastWorkingDay.getUTCFullYear() },
+        include: { policy: true },
+      }),
+    ]);
+
+    const baseSalary = Number(emp.baseSalary);
+    const encashableDays = balances
+      .filter((b) => /annual/i.test(`${b.policy.name} ${b.policy.code}`))
+      .reduce((sum, b) => sum + Math.max(0, Number(b.entitled) + Number(b.carried) - Number(b.used) - Number(b.pending)), 0);
+    const leaveEncashment = Math.round((baseSalary / 30) * encashableDays);
+
+    const unpaidFraction = Math.min(1, absentFraction + afterExitFraction);
+    const calc = engine.calculate(baseSalary, {
+      rules,
+      taxableEarnings: comp.taxableEarnings + leaveEncashment,
+      postTaxDeductions: comp.postTaxDeductions,
+      unpaidFraction,
+    });
+
+    return {
+      period,
+      lastWorkingDay: lastWorkingDay.toISOString().slice(0, 10),
+      baseSalary,
+      workedDays,
+      daysInMonth,
+      leaveEncashmentDays: encashableDays,
+      leaveEncashmentAmount: leaveEncashment,
+      otherEarnings: comp.taxableEarnings,
+      recoveries: comp.postTaxDeductions,
+      gross: calc.gross,
+      tax: calc.tax,
+      eobi: calc.eobiAmount ?? 0,
+      pf: calc.pfAmount ?? 0,
+      net: calc.net,
+      ruleSetId: rules?.ruleSetId ?? null,
+      // Gratuity, notice-period pay/recovery and unpaid-advance balances are not modelled.
+      validated: false,
+      notes: [
+        'Draft figure: gratuity and notice-period shortfall/recovery are not calculated.',
+        'Tax is computed on this month\'s pro-rated earnings using the standard monthly method.',
+      ],
+    };
+  }
+
   // ── Payroll run lifecycle: DRAFT -> REVIEW -> APPROVED -> LOCKED ───────
   async createPayrollRun(tenantId: string, period: string, preparedByUserId: string) {
     const existing = await this.prisma.payrollRun.findUnique({

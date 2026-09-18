@@ -135,6 +135,24 @@ export const api = {
       request<any>('/payroll/compensation-items', { method: 'POST', body: JSON.stringify(data) }),
     deleteCompensationItem: (id: string) => request<any>(`/payroll/compensation-items/${id}`, { method: 'DELETE' }),
   },
+  offboarding: {
+    list: (status?: string) => request<any>(`/offboarding${status ? `?status=${encodeURIComponent(status)}` : ''}`),
+    inbox: () => request<any>('/offboarding/inbox'),
+    mine: () => request<any>('/offboarding/mine'),
+    get: (id: string) => request<any>(`/offboarding/${id}`),
+    initiate: (data: { employeeId?: string; type: 'RESIGNATION' | 'TERMINATION'; lastWorkingDay: string; reason?: string }) =>
+      request<any>('/offboarding', { method: 'POST', body: JSON.stringify(data) }),
+    decide: (id: string, action: 'APPROVE' | 'REJECT', comment?: string) =>
+      request<any>(`/offboarding/${id}/decision`, { method: 'POST', body: JSON.stringify({ action, comment }) }),
+    clearItem: (id: string, itemId: string, notes?: string) =>
+      request<any>(`/offboarding/${id}/clearance/${itemId}/clear`, { method: 'POST', body: JSON.stringify({ notes }) }),
+    submitExitInterview: (id: string, data: { primaryReason: string; feedback?: string; rating: number; wouldRecommend: boolean }) =>
+      request<any>(`/offboarding/${id}/exit-interview`, { method: 'POST', body: JSON.stringify(data) }),
+    recalculateSettlement: (id: string) =>
+      request<any>(`/offboarding/${id}/settlement/recalculate`, { method: 'POST' }),
+    complete: (id: string) => request<any>(`/offboarding/${id}/complete`, { method: 'POST' }),
+    cancel: (id: string) => request<any>(`/offboarding/${id}/cancel`, { method: 'POST' }),
+  },
   recruitment: {
     jobs: () => request<any>('/recruitment/jobs'),
     createJob: (data: any) => request<any>('/recruitment/jobs', { method: 'POST', body: JSON.stringify(data) }),

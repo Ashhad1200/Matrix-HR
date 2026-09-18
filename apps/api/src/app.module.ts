@@ -41,6 +41,7 @@ import { SsoModule } from './sso/sso.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { EntitlementsModule } from './entitlements/entitlements.module';
 import { PlatformModule } from './platform/platform.module';
+import { OffboardingModule } from './offboarding/offboarding.module';
 
 @Module({
   imports: [
@@ -85,6 +86,7 @@ import { PlatformModule } from './platform/platform.module';
     UploadsModule,
     EntitlementsModule,
     PlatformModule,
+    OffboardingModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

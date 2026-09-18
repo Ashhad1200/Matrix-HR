@@ -13,6 +13,7 @@ const AUTH_DIR = resolve(__dirname, '.auth');
 
 const ROLES = {
   admin: 'admin@acme.com',
+  hr: 'hr@acme.com',
   manager: 'ali.khan@acme.com',
   employee: 'sara.ahmed@acme.com',
 } as const;

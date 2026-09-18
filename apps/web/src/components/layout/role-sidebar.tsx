@@ -6,7 +6,7 @@ import {
   LayoutDashboard, User, Calendar, Clock, DollarSign, Target, GraduationCap, Sparkles,
   Users, Inbox, Briefcase, UserPlus, MessageCircle, BarChart3, Settings, Store, Sliders,
   GitBranch, Shield, Kanban, FileSignature, Heart, Puzzle, Timer, MessagesSquare, Building2,
-  type LucideIcon,
+  UserMinus, type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
@@ -16,6 +16,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   LayoutDashboard, User, Calendar, Clock, DollarSign, Target, GraduationCap, Sparkles,
   Users, Inbox, Briefcase, UserPlus, MessageCircle, BarChart3, Settings, Store, Sliders,
   GitBranch, Shield, Kanban, FileSignature, Heart, Puzzle, Timer, MessagesSquare, Building2,
+  UserMinus,
 };
 
 const PORTAL_LABELS: Record<string, string> = {
@@ -27,7 +28,7 @@ const PORTAL_LABELS: Record<string, string> = {
 const GROUPS: { label: string | null; hrefs: string[] }[] = [
   { label: null, hrefs: ['/dashboard'] },
   { label: 'Workspace', hrefs: ['/my-profile', '/team', '/approvals', '/one-on-ones'] },
-  { label: 'People', hrefs: ['/employees', '/recruitment', '/recruitment/kanban', '/recruitment/preboarding', '/onboarding'] },
+  { label: 'People', hrefs: ['/employees', '/recruitment', '/recruitment/kanban', '/recruitment/preboarding', '/onboarding', '/offboarding'] },
   { label: 'Time', hrefs: ['/leave', '/attendance', '/timesheets'] },
   { label: 'Pay', hrefs: ['/payroll', '/my-pay'] },
   { label: 'Talent', hrefs: ['/performance', '/performance/enps', '/lms'] },
