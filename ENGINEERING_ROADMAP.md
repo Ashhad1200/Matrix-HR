@@ -184,7 +184,7 @@ Sizing assumes the delivery model this repo's own `docs/workflow.md` describes �
 
 ---
 
-### Phase 5 — Security, Audit, and Safe WhatsApp (2–3 weeks)
+### Phase 5 — Security, Audit, and Safe WhatsApp (2–3 weeks) — ✅ DONE for the roadmap scope (18 Sep 2026); hardening limits below
 
 **Goal:** Close the multi-tenant isolation risk (§14.6) and make WhatsApp actually safe to expand (§7.13, §14.5-adjacent).
 
@@ -194,6 +194,20 @@ Sizing assumes the delivery model this repo's own `docs/workflow.md` describes �
 - WhatsApp webhook signature verification (currently unverified — a documented gap from this session and from §7.13).
 - Make the inbound approve/reject command actually execute against the Phase 3 workflow engine, with a short-lived signed action token rather than trusting the raw message content.
 - Opt-in/opt-out and consent tracking for WhatsApp messaging.
+
+**Chosen approach for isolation:** RLS is still *not* active. The scope item allowed "RLS **or** a systematic proof", and this phase built the proof: `pnpm test:isolation` discovers every route from the OpenAPI document, harvests both tenants' ids across admin/manager/employee, replays each tenant's ids against every id-addressed route from the other tenant (132 replays, including mutations), and scans every response for the other tenant's ids or `tenantId`. It passes. It has limits: it can only replay routes for which a tenant has data (7 id-routes had none and were reviewed by reading the code instead), and it cannot prove the absence of a bug in a path it doesn't reach — RLS remains worthwhile defence-in-depth (Phase 9).
+
+**Real vulnerabilities found and fixed while building it** (none were known before this phase):
+- `POST /whatsapp/webhook` was **unauthenticated** and accepted `{tenantId, from, text}` — anyone could approve a leave request as a manager by spoofing their phone number.
+- Any employee could read **every colleague's salary, CNIC, bank account/IBAN, NTN, DOB and addresses** (`GET /employees`), plus everyone's leave requests, onboarding and goals.
+- The performance controller had **no role guards**: any employee could create review cycles/reviews and edit anyone's goals/reviews, including other tenants' by id. `lms.updateProgress`, `lms.enroll` and `onboarding.completeTask` trusted bare ids with no tenant or owner check.
+- Untyped request bodies let callers **override `tenantId`** on departments/designations/courses/jobs/applications; client-supplied foreign keys (manager, department, policy, cycle, job, course…) were never checked against the tenant.
+- `POST /dev/seed-bulk` was unauthenticated and always loaded.
+- `GET /auth/me` returned the caller's **bcrypt hash and 2FA secret**; refresh-token "hashes" were bcrypt over a JWT (only the first 72 bytes, identical for every token of a user), so any refresh token matched any session; refresh tokens never rotated; a new tenant's refresh token could never be redeemed; deactivated users could still log in.
+
+**Built:** authorization/visibility helpers (`common/data-scope.ts`: directory vs full employee view, self/reports/HR row scoping, tenant-reference checks) and validated DTOs on every write route; auth hardening — TOTP MFA (RFC 6238 vectors tested; secret encrypted at rest; recovery codes hashed; replay-proof; wrong codes count toward lockout), password reset (30 min, single-use, hashed, revokes sessions and access tokens via `tokenVersion`), change-password, refresh rotation, logout, per-route rate limits (login 10/min, reset/forgot/signup 5–10/min, verified on an instance without test overrides); **WhatsApp**: Meta HMAC signature verification over the raw body, subscription handshake, tenant resolved from the business number, exact-match sender identity, **one-time 8-character approval codes bound to the approver, 24 h expiry, single use** (a raw request id is not accepted), consent/opt-in gating with STOP/START and self-service + HR-attested consent, message-id dedup, audit-trail entries; operations — production config guard (refuses to boot on dev defaults), CORS allow-list, error filter (no stack/Prisma leakage, request ids), structured JSON access logs, `/health` + `/health/ready`, API docs off in production, security headers on the web app, error pages, token refresh in the web client, targeted DB indexes, a **verified baseline Prisma migration**, and `docs/DEPLOYMENT.md` + `docs/OPERATIONS.md`.
+
+**Known limits (be honest with customers):** the web app still keeps tokens in `localStorage` (an XSS could steal a session) and has no strict `script-src` CSP; MFA is opt-in per user (no enforce-for-admins policy, no QR image, not applied to SSO logins); rate-limit counters are per process (need Redis with multiple replicas); password-reset email is verified only against the dev outbox, not a real SMTP server; the WhatsApp flow is verified with signed simulated webhooks, **not against Meta's live API**; because consent is required, WhatsApp approval requests to managers are logged as `blocked_no_consent` until each manager opts in (HR can attest consent at `PUT /whatsapp/consents`); blue-green is a documented runbook, not provisioned or rehearsed infrastructure; the `Session` table is never pruned and there is no credential-key rotation tool.
 
 **Depends on:** Phase 3 (workflow engine for the WhatsApp action to call into).
 

@@ -125,7 +125,7 @@ export class LeaveService implements OnModuleInit {
         );
         if (employee.manager.phone) {
           await this.whatsapp.sendLeaveApprovalRequest(
-            tenantId, employee.manager.phone,
+            tenantId, managerUser.id, employee.manager.phone,
             `${employee.firstName} ${employee.lastName}`, days, request.policy.name, request.id,
           );
         }

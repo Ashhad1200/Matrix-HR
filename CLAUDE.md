@@ -38,6 +38,16 @@ pnpm db:studio               # prisma studio
 pnpm test:api                # scripts/test-apis.ts   — hits ~40 endpoints end-to-end as admin
 pnpm test:rbac               # scripts/rbac-api-test.ts — role x endpoint allow/deny matrix (admin/hr/manager/employee/none)
 pnpm test:ui                 # scripts/ui-test.mjs    — Playwright: login + nav smoke test per role
+pnpm test:e2e                # Playwright suite in e2e/ (needs the stack + web on :3000)
+
+# Security / feature suites (need the stack running; Acme AND Globex seeded — see packages/database/prisma/seed-globex.ts)
+pnpm test:isolation          # OpenAPI-driven cross-tenant replay: no route may leak another tenant's data
+pnpm test:scope              # row/field-level authorization inside a tenant + mass-assignment/foreign-key tricks
+pnpm test:auth               # reset, change-password, TOTP MFA, refresh rotation, lockout (uses a throwaway tenant)
+pnpm test:whatsapp           # signed webhook, consent, one-time approval codes, audit
+pnpm test:ops                # health, request ids, error shapes, CORS, headers
+pnpm test:offboarding        # workflow engine + offboarding
+pnpm test:integrations       # credentials encryption, webhooks, ZKTeco, QuickBooks export, bank file
 
 # Single Jest test (apps/api)
 pnpm --filter @matrixhr/api test -- employees.service.spec.ts
@@ -63,6 +73,17 @@ Build order matters: `@matrixhr/shared` and `@matrixhr/database` must be generat
 - **`packages/shared/src/permissions.ts` (`getPermissionsForRole`) is the single source of truth** for what each role (`SUPER_ADMIN`/`COMPANY_ADMIN`/`HR_MANAGER` → portal `admin`, `MANAGER` → portal `manager`, `EMPLOYEE` → portal `ess`) can see (`nav: NavItem[]`) and do (`actions: PermissionActions`). `auth.service.ts` returns this on login/`/auth/me`; the frontend renders nav purely from `user.permissions.nav` — there is no separate hardcoded frontend nav list.
 - The frontend enforces route access too: `apps/web/src/components/layout/app-shell.tsx` guards every `(app)` route by checking the current pathname against `user.permissions.nav` hrefs (prefix match) and redirects to `/dashboard` if not permitted. If you add a new page, it is only reachable once its top-level path is added to the relevant role's `nav` in `permissions.ts` — don't rely on hiding the sidebar link alone.
 - Backend authorization is still the real boundary (guards + `@Roles`); the frontend guard is defense-in-depth/UX, not a substitute for API-side checks.
+
+### Data visibility rules (Phase 5) — apply when adding endpoints
+- Never trust ids/`tenantId` from a request body. Use DTO classes (the global `ValidationPipe` whitelists), build the
+  Prisma `data` from named fields (never `...body`), and verify client-supplied foreign keys with
+  `assertInTenant(...)` from `apps/api/src/common/data-scope.ts`.
+- Row scoping: `scopedEmployeeIds` / `employeeIdFilter` give "self for employees, self + reports for managers, all
+  for HR+". `EmployeesService` returns a *directory* projection (no pay/ID/bank fields) to anyone below HR.
+- Auth is more than a guard: object-level rules (own record, direct manager, assigned reviewer) live in services.
+- `GET /auth/me` must never return credential columns; refresh tokens are matched by SHA-256, and password
+  changes bump `User.tokenVersion` to revoke outstanding access tokens.
+- Production refuses to boot on dev defaults (`common/production-config.ts`); see `docs/DEPLOYMENT.md`.
 
 ### API module pattern
 Each business domain under `apps/api/src/<domain>/` is flat and self-contained: `<domain>.module.ts`, `<domain>.controller.ts`, `<domain>.service.ts`, `dto.ts`, `<domain>.service.spec.ts`. There are ~35 such modules (employees, leave, attendance, payroll, recruitment, performance, lms, onboarding, timesheets, reports, settings-adjacent modules like custom-fields/workflows/audit/api-keys/sso, etc.) — follow the existing module's shape when adding a new one rather than inventing a new layout.

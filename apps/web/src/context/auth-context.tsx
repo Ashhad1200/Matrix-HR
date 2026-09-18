@@ -31,6 +31,7 @@ export type AuthUser = {
   } | null;
   permissions: UserPermissions & { nav: NavItemWithBadge[] };
   badges: AuthBadges;
+  twoFaEnabled: boolean;
 };
 
 type AuthContextValue = {
@@ -71,6 +72,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [loadUser]);
 
   function logout() {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (refreshToken) void api.auth.logout({ refreshToken }).catch(() => undefined);
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     setUser(null);

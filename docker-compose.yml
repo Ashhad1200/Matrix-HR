@@ -72,6 +72,10 @@ services:
       WEBHOOK_ALLOW_PRIVATE_TARGETS: "true"
       # Dev only: the isolation/RBAC test suites send more than the production 100 req/min.
       THROTTLE_LIMIT: "100000"
+      AUTH_THROTTLE_LIMIT: "100000"
+      # Dev-only WhatsApp webhook credentials so the signed-webhook test can run locally.
+      WHATSAPP_APP_SECRET: dev-whatsapp-app-secret
+      WHATSAPP_VERIFY_TOKEN: dev-whatsapp-verify-token
       JWT_REFRESH_SECRET: dev-refresh-secret-change-in-prod
       WEB_URL: http://localhost:3000
       API_URL: http://localhost:3001

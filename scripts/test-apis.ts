@@ -2,6 +2,7 @@
  * MatrixHR API smoke test — hits all public + authenticated endpoints.
  * Usage: npx tsx scripts/test-apis.ts
  */
+import { createHmac } from 'crypto';
 import { config } from 'dotenv';
 import { resolve } from 'path';
 
@@ -161,11 +162,13 @@ async function main() {
 
   // WhatsApp
   await req('GET', '/whatsapp/messages');
-  await req('POST', '/whatsapp/webhook', {
-    tenantId,
-    from: '923001234567',
-    text: 'balance',
-  }, false);
+  // The webhook only accepts Meta-signed payloads (unsigned/"direct" ones are refused with 403).
+  {
+    const raw = JSON.stringify({ object: 'whatsapp_business_account', entry: [] });
+    const signature = `sha256=${createHmac('sha256', process.env.WHATSAPP_APP_SECRET || 'dev-whatsapp-app-secret').update(raw).digest('hex')}`;
+    const r = await fetch(`${API}/whatsapp/webhook`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Hub-Signature-256': signature }, body: raw });
+    results.push({ method: 'POST', path: '/whatsapp/webhook (signed)', status: r.status, ok: r.ok });
+  }
 
   // Tenant branding
   await req('PATCH', '/tenants/branding', { primaryColor: '#2563eb' });

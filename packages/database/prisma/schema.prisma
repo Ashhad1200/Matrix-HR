@@ -156,6 +156,8 @@ model Tenant {
   offboardingCases   OffboardingCase[]
   integrationSyncLogs IntegrationSyncLog[]
   biometricDevices   BiometricDevice[]
+  whatsappConsents   WhatsAppConsent[]
+  whatsappActionTokens WhatsAppActionToken[]
   webhooks           Webhook[]
   tenantIntegrations TenantIntegration[]
   enpsSurveys        EnpsSurvey[]
@@ -184,6 +186,10 @@ model User {
   status       UserStatus @default(ACTIVE)
   twoFaEnabled Boolean    @default(false)
   twoFaSecret  String?
+  twoFaRecoveryCodes String[] // sha256 hashes, single use
+  twoFaLastStep Int?           // last accepted TOTP time-step, blocks replay
+  passwordChangedAt DateTime?
+  tokenVersion Int @default(0) // bumped on password reset/change: tokens carrying an older value are dead
   failedAttempts Int      @default(0)
   lockedUntil  DateTime?
   emailVerified Boolean   @default(false)
@@ -199,6 +205,7 @@ model User {
 
   @@unique([tenantId, email])
   @@index([tenantId])
+  @@index([email])
 }
 
 model Session {
@@ -325,6 +332,7 @@ model Employee {
   @@index([tenantId])
   @@index([tenantId, status])
   @@index([tenantId, departmentId])
+  @@index([tenantId, managerId])
 }
 
 model EmployeeDocument {
@@ -355,6 +363,7 @@ model EmployeeFamily {
   createdAt  DateTime @default(now())
 
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  @@index([employeeId])
 }
 
 model EmployeeSkill {
@@ -366,6 +375,7 @@ model EmployeeSkill {
   createdAt   DateTime @default(now())
 
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  @@index([employeeId])
 }
 
 model EmploymentHistory {
@@ -380,6 +390,7 @@ model EmploymentHistory {
   createdAt     DateTime @default(now())
 
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  @@index([employeeId, effectiveFrom])
 }
 
 // ─── Leave Management ────────────────────────────────────────────────────────
@@ -580,6 +591,7 @@ model OnboardingTask {
 
   template OnboardingTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
   progress OnboardingTaskProgress[]
+  @@index([templateId])
 }
 
 model OnboardingProgress {
@@ -675,6 +687,7 @@ model PayrollItem {
   employee   Employee   @relation(fields: [employeeId], references: [id])
 
   @@index([payrollRunId])
+  @@index([employeeId])
 }
 
 /// Effective-dated national compliance rules (tax slabs, EOBI, PF). Global,
@@ -818,6 +831,8 @@ model PerformanceReview {
   cycle ReviewCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, cycleId])
+  @@index([tenantId, employeeId])
+  @@index([tenantId, reviewerId])
 }
 
 // ─── LMS ─────────────────────────────────────────────────────────────────────
@@ -853,6 +868,7 @@ model CourseEnrollment {
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@unique([courseId, employeeId])
+  @@index([employeeId])
 }
 
 // ─── Cross-Cutting ───────────────────────────────────────────────────────────
@@ -872,6 +888,7 @@ model AuditLog {
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, entity, createdAt])
+  @@index([tenantId, createdAt])
 }
 
 model Notification {
@@ -898,12 +915,47 @@ model WhatsAppMessage {
   body        String
   status      String   @default("sent") // sent, delivered, read, failed
   direction   String   @default("outbound")
+  externalId  String?  // WhatsApp message id (wamid) — dedupes Meta's webhook retries
   metadata    Json?
   createdAt   DateTime @default(now())
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  @@unique([tenantId, externalId])
   @@index([tenantId, createdAt])
+}
+
+// Business-initiated WhatsApp messages need the recipient's opt-in; STOP opts them out again.
+model WhatsAppConsent {
+  id        String   @id @default(cuid())
+  tenantId  String
+  phone     String   // digits only, normalised
+  status    String   // OPTED_IN, OPTED_OUT
+  source    String   // WHATSAPP_REPLY, SELF_SERVICE, ADMIN_ATTESTED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, phone])
+}
+
+// One-time codes embedded in outbound approval requests. A reply is only honoured if it carries a
+// live code that was issued to the sender themselves.
+model WhatsAppActionToken {
+  id         String    @id @default(cuid())
+  tenantId   String
+  userId     String
+  entityType String
+  entityId   String
+  codeHash   String
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, userId, codeHash])
 }
 
 // ─── Custom Fields & Workflows (Phase 2) ─────────────────────────────────────

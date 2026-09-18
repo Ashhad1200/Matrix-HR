@@ -1,22 +1,96 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
+export type AuthSession = {
+  user: any;
+  tenant: any;
+  accessToken: string;
+  refreshToken: string;
+};
+
+export type LoginResponse = AuthSession | { mfaRequired: true; mfaToken: string };
+
+export type WhatsAppConsent = {
+  phone: string | null;
+  status: 'OPTED_IN' | 'OPTED_OUT' | 'NOT_SET' | 'NO_PHONE';
+};
+
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);
+    this.name = 'ApiError';
+    Object.setPrototypeOf(this, new.target.prototype);
   }
+}
+
+let refreshPromise: Promise<string> | null = null;
+
+// A 401 from credential endpoints (login, mfa, reset...) means "wrong input", not "expired session", so only
+// /auth/me (the page-load check) and non-auth routes are worth a refresh attempt.
+const canRefresh = (path: string) => path === '/auth/me' || !path.startsWith('/auth/');
+
+function clearTokensAndRedirect() {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+  window.location.assign('/login');
+}
+
+async function refreshAccessToken(): Promise<string> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) throw new ApiError(401, 'Your session has expired');
+
+    const res = await fetch(`${API_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ message: res.statusText }));
+      throw new ApiError(res.status, err.message || 'Session refresh failed');
+    }
+
+    const tokens: { accessToken: string; refreshToken: string } = await res.json();
+    localStorage.setItem('accessToken', tokens.accessToken);
+    localStorage.setItem('refreshToken', tokens.refreshToken);
+    return tokens.accessToken;
+  })();
+
+  try {
+    return await refreshPromise;
+  } catch (error) {
+    clearTokensAndRedirect();
+    throw error;
+  } finally {
+    refreshPromise = null;
+  }
+}
+
+async function authenticatedRetryToken(tokenUsed: string | null): Promise<string> {
+  const currentToken = localStorage.getItem('accessToken');
+  if (currentToken && currentToken !== tokenUsed) return currentToken;
+  return refreshAccessToken();
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  const send = (accessToken: string | null) => fetch(`${API_URL}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        ...options.headers,
+      },
+    });
 
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  });
+  let res = await send(token);
+
+  if (res.status === 401 && canRefresh(path) && typeof window !== 'undefined') {
+    const newToken = await authenticatedRetryToken(token);
+    res = await send(newToken);
+  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
@@ -28,16 +102,23 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 async function uploadFile<T>(path: string, file: File): Promise<T> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-  const form = new FormData();
-  form.append('file', file);
+  const send = (accessToken: string | null) => {
+    const form = new FormData();
+    form.append('file', file);
+    // The browser must set the multipart boundary itself.
+    return fetch(`${API_URL}${path}`, {
+      method: 'POST',
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      body: form,
+    });
+  };
 
-  // No Content-Type header here on purpose — the browser sets multipart/form-data
-  // with the correct boundary itself; forcing application/json (like `request` does) breaks it.
-  const res = await fetch(`${API_URL}${path}`, {
-    method: 'POST',
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-    body: form,
-  });
+  let res = await send(token);
+
+  if (res.status === 401 && canRefresh(path) && typeof window !== 'undefined') {
+    const newToken = await authenticatedRetryToken(token);
+    res = await send(newToken);
+  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
@@ -55,7 +136,22 @@ export const api = {
     signup: (data: { email: string; password: string; companyName: string; subdomain: string }) =>
       request<any>('/auth/signup', { method: 'POST', body: JSON.stringify(data) }),
     login: (data: { email: string; password: string }) =>
-      request<any>('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+      request<LoginResponse>('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+    verifyMfa: (data: { mfaToken: string; code: string }) =>
+      request<AuthSession>('/auth/mfa/verify', { method: 'POST', body: JSON.stringify(data) }),
+    logout: (data: { refreshToken: string }) =>
+      request<{ success: true }>('/auth/logout', { method: 'POST', body: JSON.stringify(data) }),
+    forgotPassword: (data: { email: string }) =>
+      request<{ message: string }>('/auth/forgot-password', { method: 'POST', body: JSON.stringify(data) }),
+    resetPassword: (data: { token: string; password: string }) =>
+      request<{ message: string }>('/auth/reset-password', { method: 'POST', body: JSON.stringify(data) }),
+    changePassword: (data: { currentPassword: string; newPassword: string }) =>
+      request<AuthSession>('/auth/change-password', { method: 'POST', body: JSON.stringify(data) }),
+    mfaSetup: () => request<{ secret: string; otpauthUrl: string }>('/auth/mfa/setup', { method: 'POST' }),
+    mfaEnable: (data: { code: string }) =>
+      request<{ recoveryCodes: string[] }>('/auth/mfa/enable', { method: 'POST', body: JSON.stringify(data) }),
+    mfaDisable: (data: { password: string; code: string }) =>
+      request<{ success: true }>('/auth/mfa/disable', { method: 'POST', body: JSON.stringify(data) }),
     me: () => request<any>('/auth/me'),
   },
   dashboard: () => request<any>('/dashboard'),
@@ -227,6 +323,9 @@ export const api = {
   },
   whatsapp: {
     messages: () => request<any>('/whatsapp/messages'),
+    myConsent: () => request<WhatsAppConsent>('/whatsapp/consent/me'),
+    setMyConsent: (status: 'OPTED_IN' | 'OPTED_OUT') =>
+      request<WhatsAppConsent>('/whatsapp/consent/me', { method: 'PUT', body: JSON.stringify({ status }) }),
   },
   reports: {
     headcount: () => request<any>('/reports/headcount'),

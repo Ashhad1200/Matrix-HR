@@ -1,4 +1,5 @@
-import { Controller, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { MailService } from '../mail/mail.service';
 import { UserRole } from '@matrixhr/database';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -12,7 +13,12 @@ import { seedBulkData } from '@matrixhr/database';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.COMPANY_ADMIN)
 export class DevController {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private mail: MailService) {}
+
+  @Get('outbox')
+  outbox() {
+    return this.mail.outbox;
+  }
 
   @Post('seed-bulk')
   async seedBulk() {

@@ -13,7 +13,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { sub: string; tenantId: string; role: string }) {
+  async validate(payload: { sub: string; tenantId: string; role: string; tv?: number }) {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
       include: { tenant: true, employee: true },
@@ -22,6 +22,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user || user.status !== 'ACTIVE' || user.tenant.status !== 'ACTIVE') {
       throw new UnauthorizedException();
     }
+    // A password reset/change bumps tokenVersion, which kills every token minted before it.
+    if ((payload.tv ?? 0) !== user.tokenVersion) throw new UnauthorizedException();
 
     return {
       id: user.id,

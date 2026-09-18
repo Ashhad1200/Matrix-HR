@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { api } from '@/lib/api';
+import { api, ApiError, type AuthSession } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Users, CalendarCheck, Wallet, LineChart } from 'lucide-react';
@@ -21,12 +21,24 @@ const FEATURES = [
   { icon: LineChart, text: 'Reports, eNPS and 360s your leadership will read' },
 ];
 
+const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === undefined
+  ? process.env.NODE_ENV !== 'production'
+  : process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('admin@acme.com');
-  const [password, setPassword] = useState('Password123!');
+  const [email, setEmail] = useState(DEMO_MODE ? 'admin@acme.com' : '');
+  const [password, setPassword] = useState(DEMO_MODE ? 'Password123!' : '');
+  const [mfaToken, setMfaToken] = useState('');
+  const [mfaCode, setMfaCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  function finishLogin(session: AuthSession) {
+    localStorage.setItem('accessToken', session.accessToken);
+    localStorage.setItem('refreshToken', session.refreshToken);
+    router.push('/dashboard');
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -34,11 +46,32 @@ export default function LoginPage() {
     setError('');
     try {
       const res = await api.auth.login({ email, password });
-      localStorage.setItem('accessToken', res.accessToken);
-      localStorage.setItem('refreshToken', res.refreshToken);
-      router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Login failed');
+      if ('mfaRequired' in res) {
+        setMfaToken(res.mfaToken);
+        setMfaCode('');
+      } else {
+        finishLogin(res);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleMfaSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      finishLogin(await api.auth.verifyMfa({ mfaToken, code: mfaCode.trim() }));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Verification failed';
+      setError(message);
+      if (err instanceof ApiError && err.status === 401 && /expired/i.test(message)) {
+        setMfaToken('');
+        setMfaCode('');
+      }
     } finally {
       setLoading(false);
     }
@@ -85,27 +118,63 @@ export default function LoginPage() {
               M
             </div>
           </div>
-          <h2 className="font-display text-2xl font-bold tracking-tight">Welcome back</h2>
-          <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">Sign in to your workspace</p>
+          <h2 className="font-display text-2xl font-bold tracking-tight">
+            {mfaToken ? 'Verify your sign-in' : 'Welcome back'}
+          </h2>
+          <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
+            {mfaToken ? 'Enter a code from your authenticator app or a recovery code' : 'Sign in to your workspace'}
+          </p>
 
-          <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+          {mfaToken ? (
+            <form onSubmit={handleMfaSubmit} className="mt-8 space-y-4">
+              <div>
+                <label htmlFor="mfa-code" className="mb-1.5 block text-sm font-medium">Authentication code or recovery code</label>
+                <Input
+                  id="mfa-code"
+                  data-testid="mfa-code-input"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  value={mfaCode}
+                  onChange={(e) => setMfaCode(e.target.value)}
+                  required
+                  autoFocus
+                />
+              </div>
+              {error && (
+                <p data-testid="login-error" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-950 dark:text-rose-300">{error}</p>
+              )}
+              <Button data-testid="mfa-verify" type="submit" className="w-full" size="lg" disabled={loading}>
+                {loading ? 'Verifying…' : 'Verify'}
+              </Button>
+              <button
+                type="button"
+                className="w-full text-sm font-medium text-brand-600 hover:underline dark:text-brand-400"
+                onClick={() => { setMfaToken(''); setMfaCode(''); setError(''); }}
+              >
+                Back
+              </button>
+            </form>
+          ) : <form onSubmit={handleSubmit} className="mt-8 space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium">Work email</label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <label htmlFor="login-email" className="mb-1.5 block text-sm font-medium">Work email</label>
+              <Input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium">Password</label>
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <div className="mb-1.5 flex items-center justify-between">
+                <label htmlFor="login-password" className="text-sm font-medium">Password</label>
+                <Link href="/forgot-password" className="text-xs font-medium text-brand-600 hover:underline dark:text-brand-400">Forgot password?</Link>
+              </div>
+              <Input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
             {error && (
-              <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-950 dark:text-rose-300">{error}</p>
+              <p data-testid="login-error" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-950 dark:text-rose-300">{error}</p>
             )}
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
               {loading ? 'Signing in…' : 'Sign in'}
             </Button>
-          </form>
+          </form>}
 
-          <div className="mt-6">
+          {DEMO_MODE && !mfaToken && <div className="mt-6">
             <p className="mb-2 text-center text-xs font-medium uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
               Demo accounts
             </p>
@@ -121,7 +190,7 @@ export default function LoginPage() {
                 </button>
               ))}
             </div>
-          </div>
+          </div>}
 
           <p className="mt-6 text-center text-sm text-[hsl(var(--muted-foreground))]">
             No account?{' '}

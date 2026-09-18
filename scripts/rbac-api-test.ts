@@ -210,6 +210,16 @@ const PROBES: Probe[] = [
   { method: 'GET', path: '/webhooks/nonexistent/deliveries', expect: { manager: 'deny', employee: 'deny', none: 'deny' } },
   { method: 'POST', path: '/webhooks/nonexistent/test', expect: { manager: 'deny', employee: 'deny', none: 'deny' } },
 
+  // Phase 5: WhatsApp consent, dev tooling, audit, performance write paths
+  { method: 'GET', path: '/whatsapp/consents', expect: { admin: 'allow', hr: 'allow', manager: 'deny', employee: 'deny', none: 'deny' } },
+  { method: 'GET', path: '/whatsapp/consent/me', expect: { admin: 'allow', employee: 'allow', none: 'deny' } },
+  { method: 'GET', path: '/dev/outbox', expect: { admin: 'allow', hr: 'deny', manager: 'deny', employee: 'deny', none: 'deny' } },
+  { method: 'GET', path: '/audit/logs', expect: { admin: 'allow', hr: 'allow', manager: 'deny', employee: 'deny', none: 'deny' } },
+  { method: 'POST', path: '/performance/cycles', body: { name: 'x', startDate: '2030-01-01', endDate: '2030-02-01' }, expect: { manager: 'deny', employee: 'deny', none: 'deny' } },
+  { method: 'POST', path: '/performance/reviews', body: { cycleId: 'x', employeeId: 'y', reviewerId: 'z' }, expect: { manager: 'deny', employee: 'deny', none: 'deny' } },
+  { method: 'POST', path: '/auth/mfa/setup', expect: { none: 'deny' } },
+  { method: 'GET', path: '/health', expect: { none: 'public', employee: 'public' } },
+
   // Recruitment (HR/admin)
   { method: 'GET', path: '/recruitment/jobs', expect: { admin: 'allow', employee: 'deny' } },
 

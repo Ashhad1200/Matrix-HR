@@ -19,8 +19,8 @@ export class AuditController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
-    const pageNum = page ? parseInt(page) : 1;
-    const limitNum = limit ? parseInt(limit) : 50;
+    const pageNum = Math.max(1, parseInt(page ?? '1', 10) || 1);
+    const limitNum = Math.min(200, Math.max(1, parseInt(limit ?? '50', 10) || 50));
 
     return this.prisma.auditLog.findMany({
       where: {
