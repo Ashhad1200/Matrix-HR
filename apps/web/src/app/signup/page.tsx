@@ -7,6 +7,7 @@ import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Logo } from '@/components/brand/logo';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -39,8 +40,9 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[hsl(var(--muted))] p-4">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-[hsl(var(--muted))]/60 p-4">
+      <Link href="/" aria-label="MatrixHR home" className="rounded-md"><Logo /></Link>
+      <Card className="w-full max-w-md animate-rise">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Create your company</CardTitle>
           <p className="text-sm text-[hsl(var(--muted-foreground))]">Start your 30-day free trial</p>
@@ -48,32 +50,32 @@ export default function SignUpPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium">Company name</label>
-              <Input value={form.companyName} onChange={(e) => update('companyName', e.target.value)} required />
+              <label htmlFor="su-company" className="mb-1.5 block text-sm font-medium">Company name</label>
+              <Input id="su-company" autoComplete="organization" value={form.companyName} onChange={(e) => update('companyName', e.target.value)} required />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Subdomain</label>
+              <label htmlFor="su-subdomain" className="mb-1.5 block text-sm font-medium">Subdomain</label>
               <div className="flex items-center gap-2">
-                <Input value={form.subdomain} onChange={(e) => update('subdomain', e.target.value)} required />
+                <Input id="su-subdomain" value={form.subdomain} onChange={(e) => update('subdomain', e.target.value)} required />
                 <span className="text-sm text-[hsl(var(--muted-foreground))]">.matrixhr.com</span>
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Work email</label>
-              <Input type="email" value={form.email} onChange={(e) => update('email', e.target.value)} required />
+              <label htmlFor="su-email" className="mb-1.5 block text-sm font-medium">Work email</label>
+              <Input id="su-email" autoComplete="email" type="email" value={form.email} onChange={(e) => update('email', e.target.value)} required />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Password</label>
-              <Input type="password" value={form.password} onChange={(e) => update('password', e.target.value)} required />
+              <label htmlFor="su-password" className="mb-1.5 block text-sm font-medium">Password</label>
+              <Input id="su-password" autoComplete="new-password" type="password" value={form.password} onChange={(e) => update('password', e.target.value)} required />
             </div>
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p role="alert" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:bg-rose-950 dark:text-rose-300">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating...' : 'Create account'}
+              {loading ? 'Creating…' : 'Create account'}
             </Button>
           </form>
           <p className="mt-4 text-center text-sm text-[hsl(var(--muted-foreground))]">
             Already have an account?{' '}
-            <Link href="/login" className="text-brand-600 hover:underline">Sign in</Link>
+            <Link href="/login" className="font-medium text-brand-700 hover:underline dark:text-brand-400">Sign in</Link>
           </p>
         </CardContent>
       </Card>

@@ -35,9 +35,10 @@ const config: Config = {
         display: ['var(--font-display)', 'var(--font-body)', 'sans-serif'],
       },
       boxShadow: {
-        soft: '0 1px 2px rgba(8, 37, 28, 0.04), 0 4px 16px -4px rgba(8, 37, 28, 0.06)',
-        lifted: '0 2px 4px rgba(8, 37, 28, 0.06), 0 12px 32px -8px rgba(8, 37, 28, 0.14)',
+        soft: '0 1px 2px hsl(var(--shadow-tint) / 0.05), 0 4px 16px -4px hsl(var(--shadow-tint) / 0.07)',
+        lifted: '0 2px 4px hsl(var(--shadow-tint) / 0.06), 0 14px 36px -10px hsl(var(--shadow-tint) / 0.2)',
         glow: '0 0 0 1px rgba(42, 154, 109, 0.25), 0 8px 24px -6px rgba(42, 154, 109, 0.35)',
+        frame: '0 1px 0 hsl(0 0% 100% / 0.6) inset, 0 30px 80px -20px hsl(var(--shadow-tint) / 0.35), 0 8px 24px -8px hsl(var(--shadow-tint) / 0.18)',
       },
       keyframes: {
         rise: {

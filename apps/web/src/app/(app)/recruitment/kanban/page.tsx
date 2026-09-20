@@ -82,7 +82,7 @@ export default function RecruitmentKanbanPage() {
                 )}
               >
                 <div className="flex items-center justify-between px-3 py-2.5">
-                  <h3 className="text-xs font-bold uppercase tracking-wider">{stage}</h3>
+                  <h3 className="text-sm font-semibold capitalize">{stage.toLowerCase()}</h3>
                   <span className="rounded-full bg-[hsl(var(--card))] px-2 py-0.5 text-xs font-semibold tabular-nums shadow-soft">
                     {cards.length}
                   </span>

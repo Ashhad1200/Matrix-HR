@@ -20,10 +20,10 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="rounded-lg p-2 hover:bg-[hsl(var(--muted))]"
+      className="cursor-pointer rounded-lg p-2 text-[hsl(var(--muted-foreground))] transition-colors hover:bg-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]"
       aria-label="Toggle theme"
     >
-      {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      {dark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
     </button>
   );
 }

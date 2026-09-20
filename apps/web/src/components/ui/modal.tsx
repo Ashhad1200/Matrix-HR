@@ -30,12 +30,13 @@ export function Modal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={onClose} />
+      <div className="absolute inset-0 bg-[hsl(var(--shadow-tint))]/60 backdrop-blur-sm animate-fade-in" onClick={onClose} />
       <div
         role="dialog"
         aria-modal="true"
+        aria-label={title}
         className={cn(
-          'relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-lifted animate-scale-in',
+          'relative max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-lifted animate-scale-in',
           className,
         )}
       >

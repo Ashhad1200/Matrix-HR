@@ -219,7 +219,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="animate-rise">
-        <p className="text-sm font-medium uppercase tracking-wider text-brand-600 dark:text-brand-400">{dateLine}</p>
+        <p className="text-sm font-medium text-brand-700 dark:text-brand-400">{dateLine}</p>
         <h1 className="font-display text-3xl font-bold tracking-tight">
           {greeting()}, {firstName}
         </h1>

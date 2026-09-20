@@ -46,19 +46,19 @@ export function NotificationBell() {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="relative rounded-lg p-2 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]"
+        className="relative cursor-pointer rounded-lg p-2 text-[hsl(var(--muted-foreground))] transition-colors hover:bg-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]"
         aria-label="Notifications"
       >
-        <Bell className="h-5 w-5" />
+        <Bell className="h-[18px] w-[18px]" aria-hidden="true" />
         {unreadCount > 0 && (
-          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-bold text-white">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-80 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-lg">
+        <div className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-lifted animate-scale-in">
           <div className="border-b border-[hsl(var(--border))] px-4 py-3">
             <p className="font-medium">Notifications</p>
           </div>

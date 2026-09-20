@@ -1,8 +1,8 @@
 import { cn } from '@/lib/utils';
 
 const HUES = [
-  'bg-brand-600', 'bg-teal-600', 'bg-sky-600', 'bg-violet-600',
-  'bg-rose-600', 'bg-amber-600', 'bg-emerald-700', 'bg-indigo-600',
+  'bg-brand-700', 'bg-teal-700', 'bg-emerald-800', 'bg-cyan-800',
+  'bg-slate-600', 'bg-stone-600', 'bg-lime-800', 'bg-brand-900',
 ];
 
 const SIZES = {
@@ -35,13 +35,13 @@ export function Avatar({
 
   if (src) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt={name} className={cn('rounded-full object-cover', SIZES[size], className)} />;
+    return <img src={src} alt={name} className={cn('rounded-[28%] object-cover', SIZES[size], className)} />;
   }
 
   return (
     <div
       className={cn(
-        'flex shrink-0 items-center justify-center rounded-full font-semibold text-white',
+        'flex shrink-0 items-center justify-center rounded-[28%] font-semibold text-white',
         SIZES[size],
         hue,
         className,

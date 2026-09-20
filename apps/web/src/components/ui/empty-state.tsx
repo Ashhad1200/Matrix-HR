@@ -17,12 +17,12 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center rounded-xl border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--card))]/50 px-6 py-12 text-center',
+        'flex flex-col items-center justify-center rounded-xl border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--muted))]/40 px-6 py-14 text-center',
         className,
       )}
     >
-      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand-100 text-brand-700 dark:bg-brand-900/50 dark:text-brand-300">
-        <Icon className="h-6 w-6" />
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-100 text-brand-800 dark:bg-brand-900/50 dark:text-brand-300">
+        <Icon className="h-6 w-6" aria-hidden="true" />
       </div>
       <h3 className="font-display text-base font-semibold">{title}</h3>
       {description && (

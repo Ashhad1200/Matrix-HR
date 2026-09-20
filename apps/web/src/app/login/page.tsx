@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { api, ApiError, type AuthSession } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Logo } from '@/components/brand/logo';
 import { Users, CalendarCheck, Wallet, LineChart } from 'lucide-react';
 
 const DEMO_USERS = [
@@ -16,9 +17,9 @@ const DEMO_USERS = [
 
 const FEATURES = [
   { icon: Users, text: 'One directory for every employee record' },
-  { icon: CalendarCheck, text: 'Leave, attendance & timesheets that approve themselves' },
-  { icon: Wallet, text: 'Payroll engines for PK, US and 150+ EOR countries' },
-  { icon: LineChart, text: 'Reports, eNPS and 360s your leadership will read' },
+  { icon: CalendarCheck, text: 'Leave, attendance and timesheets with approvals built in' },
+  { icon: Wallet, text: 'Payroll engines for Pakistan and the US, with bank files' },
+  { icon: LineChart, text: 'Reports, eNPS and reviews your leadership will read' },
 ];
 
 const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === undefined
@@ -78,28 +79,26 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
-      {/* Brand panel */}
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-brand-950 via-[#0c3526] to-brand-800 p-12 text-white lg:flex">
-        <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-brand-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-40 -left-20 h-96 w-96 rounded-full bg-emerald-400/10 blur-3xl" />
+    <div className="grid min-h-dvh lg:grid-cols-2">
+      {/* Brand panel: `dark` scopes the dark tokens to this panel only */}
+      <div className="dark relative hidden flex-col justify-between overflow-hidden bg-brand-950 p-12 text-white lg:flex">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-[0.55]"
+          style={{ backgroundImage: 'radial-gradient(60% 50% at 85% 0%, rgba(76,181,136,0.28), transparent 70%), radial-gradient(50% 40% at 0% 100%, rgba(42,154,109,0.22), transparent 70%)' }}
+        />
 
-        <div className="relative flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 font-display text-lg font-bold backdrop-blur">
-            M
-          </div>
-          <span className="font-display text-xl font-bold tracking-tight">MatrixHR</span>
-        </div>
+        <Logo />
 
         <div className="relative max-w-md">
-          <h1 className="font-display text-4xl font-bold leading-tight tracking-tight">
-            The HR operating system your people will actually enjoy.
+          <h1 className="font-display text-4xl font-bold leading-[1.1] tracking-tight">
+            HR and payroll in one system.
           </h1>
-          <ul className="mt-8 space-y-4">
+          <ul className="mt-9 space-y-4">
             {FEATURES.map(({ icon: Icon, text }) => (
               <li key={text} className="flex items-center gap-3 text-sm text-white/80">
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10">
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-4 w-4" aria-hidden="true" />
                 </span>
                 {text}
               </li>
@@ -107,16 +106,14 @@ export default function LoginPage() {
           </ul>
         </div>
 
-        <p className="relative text-xs text-white/50">Multi-tenant · Role-based portals · Open REST API</p>
+        <p className="relative text-xs text-white/55">Role-based portals for admins, managers and employees.</p>
       </div>
 
       {/* Form panel */}
       <div className="flex items-center justify-center p-6">
         <div className="w-full max-w-sm animate-rise">
           <div className="mb-8 lg:hidden">
-            <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 font-display text-lg font-bold text-white">
-              M
-            </div>
+            <Logo />
           </div>
           <h2 className="font-display text-2xl font-bold tracking-tight">
             {mfaToken ? 'Verify your sign-in' : 'Welcome back'}
@@ -141,7 +138,7 @@ export default function LoginPage() {
                 />
               </div>
               {error && (
-                <p data-testid="login-error" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-950 dark:text-rose-300">{error}</p>
+                <p data-testid="login-error" role="alert" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:bg-rose-950 dark:text-rose-300">{error}</p>
               )}
               <Button data-testid="mfa-verify" type="submit" className="w-full" size="lg" disabled={loading}>
                 {loading ? 'Verifying…' : 'Verify'}
@@ -167,7 +164,7 @@ export default function LoginPage() {
               <Input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
             {error && (
-              <p data-testid="login-error" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-950 dark:text-rose-300">{error}</p>
+              <p data-testid="login-error" role="alert" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:bg-rose-950 dark:text-rose-300">{error}</p>
             )}
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
               {loading ? 'Signing in…' : 'Sign in'}
@@ -175,7 +172,7 @@ export default function LoginPage() {
           </form>}
 
           {DEMO_MODE && !mfaToken && <div className="mt-6">
-            <p className="mb-2 text-center text-xs font-medium uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
+            <p className="mb-2 text-center text-xs font-medium text-[hsl(var(--muted-foreground))]">
               Demo accounts
             </p>
             <div className="grid grid-cols-3 gap-2">
@@ -184,7 +181,7 @@ export default function LoginPage() {
                   key={u.email}
                   type="button"
                   onClick={() => { setEmail(u.email); setPassword('Password123!'); }}
-                  className="rounded-lg border border-[hsl(var(--border))] px-2 py-1.5 text-xs font-medium transition-colors hover:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950"
+                  className="cursor-pointer rounded-lg border border-[hsl(var(--border))] px-2 py-2 text-xs font-medium transition-colors hover:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950"
                 >
                   {u.label}
                 </button>
@@ -194,7 +191,7 @@ export default function LoginPage() {
 
           <p className="mt-6 text-center text-sm text-[hsl(var(--muted-foreground))]">
             No account?{' '}
-            <Link href="/signup" className="font-medium text-brand-600 hover:underline dark:text-brand-400">
+            <Link href="/signup" className="font-medium text-brand-700 hover:underline dark:text-brand-400">
               Create company
             </Link>
           </p>
