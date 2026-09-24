@@ -6,7 +6,7 @@ import {
   LayoutDashboard, User, Calendar, Clock, DollarSign, Target, GraduationCap, Sparkles,
   Users, Inbox, Briefcase, UserPlus, MessageCircle, BarChart3, Settings, Store, Sliders,
   GitBranch, Shield, Kanban, FileSignature, Heart, Puzzle, Timer, MessagesSquare, Building2,
-  UserMinus, Receipt, Banknote, LogOut, type LucideIcon,
+  UserMinus, Receipt, Banknote, LogOut, ScrollText, type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/brand/logo';
@@ -17,17 +17,19 @@ const ICON_MAP: Record<string, LucideIcon> = {
   LayoutDashboard, User, Calendar, Clock, DollarSign, Target, GraduationCap, Sparkles,
   Users, Inbox, Briefcase, UserPlus, MessageCircle, BarChart3, Settings, Store, Sliders,
   GitBranch, Shield, Kanban, FileSignature, Heart, Puzzle, Timer, MessagesSquare, Building2,
-  UserMinus, Receipt, Banknote,
+  UserMinus, Receipt, Banknote, ScrollText,
 };
 
 const PORTAL_LABELS: Record<string, string> = {
   admin: 'Admin Portal',
   manager: 'Manager Portal',
   ess: 'Employee Portal',
+  platform: 'Backoffice',
 };
 
 const GROUPS: { label: string | null; hrefs: string[] }[] = [
   { label: null, hrefs: ['/dashboard'] },
+  { label: 'Manage', hrefs: ['/platform', '/platform/audit'] },
   { label: 'Workspace', hrefs: ['/my-profile', '/team', '/approvals', '/one-on-ones'] },
   { label: 'People', hrefs: ['/employees', '/recruitment', '/recruitment/kanban', '/recruitment/preboarding', '/onboarding', '/offboarding'] },
   { label: 'Time', hrefs: ['/leave', '/attendance', '/timesheets'] },
@@ -63,12 +65,14 @@ export function RoleSidebar({ className, onNavigate }: { className?: string; onN
     .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
   const groups = groupNav(navItems);
+  const isBackoffice = user?.permissions.portal === 'platform';
   const displayName = user?.employee ? `${user.employee.firstName} ${user.employee.lastName}` : user?.email ?? '';
+  const homeHref = navItems[0]?.href ?? '/dashboard';
 
   return (
     <aside className={cn('flex h-dvh w-64 flex-col border-r border-[hsl(var(--border))] bg-[hsl(var(--card))]', className)}>
       <div className="flex h-16 shrink-0 items-center justify-between gap-2 px-5">
-        <Link href="/dashboard" onClick={onNavigate} className="rounded-md" aria-label="MatrixHR home">
+        <Link href={homeHref} onClick={onNavigate} className="rounded-md" aria-label="MatrixHR home">
           <Logo markClassName="h-7 w-7" />
         </Link>
         {user && (
@@ -130,7 +134,9 @@ export function RoleSidebar({ className, onNavigate }: { className?: string; onN
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-[13px] font-semibold leading-tight">{displayName}</p>
-              <p className="truncate text-[11px] text-[hsl(var(--muted-foreground))]">{user.tenant?.name}</p>
+              <p className="truncate text-[11px] text-[hsl(var(--muted-foreground))]">
+                {isBackoffice ? 'Platform operator' : user.tenant?.name}
+              </p>
             </div>
             <button
               type="button"

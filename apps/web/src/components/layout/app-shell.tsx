@@ -53,10 +53,12 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
   const allowed = !user || isRouteAllowed(pathname, navHrefs);
 
   useEffect(() => {
+    // Fall back to the first thing this role can actually see, not a hardcoded '/dashboard' — a
+    // portal (e.g. backoffice) that has no '/dashboard' in its nav would otherwise redirect-loop.
     if (user && !allowed) {
-      router.replace('/dashboard');
+      router.replace(navHrefs[0] ?? '/dashboard');
     }
-  }, [user, allowed, router]);
+  }, [user, allowed, navHrefs, router]);
 
   if (loading || !user) {
     return (
@@ -104,7 +106,9 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
             >
               {menuOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
             </button>
-            <p className="truncate text-sm font-semibold">{user.tenant?.name}</p>
+            <p className="truncate text-sm font-semibold">
+              {user.permissions.portal === 'platform' ? 'MatrixHR Backoffice' : user.tenant?.name}
+            </p>
             <span className="hidden rounded-md bg-[hsl(var(--muted))] px-2 py-0.5 text-[11px] font-medium text-[hsl(var(--muted-foreground))] sm:inline">
               {ROLE_LABELS[user.role] ?? user.role}
             </span>

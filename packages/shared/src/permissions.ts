@@ -27,7 +27,7 @@ export type PermissionActions = {
 };
 
 export type UserPermissions = {
-  portal: 'admin' | 'manager' | 'ess';
+  portal: 'admin' | 'manager' | 'ess' | 'platform';
   nav: NavItem[];
   actions: PermissionActions;
 };
@@ -64,7 +64,9 @@ const ALL_NAV: Record<string, NavItem> = {
   extensions: { href: '/extensions', label: 'Extensions', icon: 'Puzzle' },
   timesheets: { href: '/timesheets', label: 'Timesheets', icon: 'Timer' },
   oneOnOnes: { href: '/one-on-ones', label: '1-on-1s', icon: 'MessagesSquare' },
-  platform: { href: '/platform', label: 'Platform', icon: 'Building2' },
+  // Backoffice — the platform operator's own tools, never shown to a tenant's users.
+  platform: { href: '/platform', label: 'Tenants', icon: 'Building2' },
+  platformAudit: { href: '/platform/audit', label: 'Audit Log', icon: 'ScrollText' },
 };
 
 function nav(...keys: string[]): NavItem[] {
@@ -125,14 +127,11 @@ const ESS_ACTIONS: PermissionActions = {
 export function getPermissionsForRole(role: string): UserPermissions {
   switch (role) {
     case ROLES.SUPER_ADMIN:
+      // The platform operator, not a tenant's own admin — sees only backoffice tools (tenants, plans,
+      // platform audit log, their own account security), never a tenant's HR/payroll data.
       return {
-        portal: 'admin',
-        nav: nav(
-          'dashboard', 'employees', 'leave', 'attendance', 'timesheets', 'payroll', 'recruitment',
-          'atsKanban', 'preboarding', 'onboarding', 'offboarding', 'performance', 'enps', 'oneOnOnes', 'lms',
-          'reports', 'whatsapp', 'settings', 'customFields', 'workflows', 'audit',
-          'marketplace', 'extensions', 'ai', 'security', 'expenses', 'loans', 'platform',
-        ),
+        portal: 'platform',
+        nav: nav('platform', 'platformAudit', 'security'),
         actions: ADMIN_ACTIONS,
       };
     case ROLES.COMPANY_ADMIN:
