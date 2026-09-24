@@ -94,6 +94,7 @@ Each business domain under `apps/api/src/<domain>/` is flat and self-contained: 
 - `RoleSidebar` (`components/layout/role-sidebar.tsx`) groups nav items into fixed UI sections (Workspace/People/Time/Pay/Talent/Insights/Company) by matching hrefs from `user.permissions.nav` — it doesn't decide permissions, it only lays out whatever the backend granted.
 - `apps/web/src/lib/api.ts` is a single flat `api` client object mirroring backend module boundaries (`api.employees.list()`, `api.leave.approve()`, etc.), using a bearer token read from `localStorage('accessToken')`. There's no generated client — new endpoints need a matching method added here by hand.
 - Auth state lives in `context/auth-context.tsx` / `hooks/use-auth.ts`.
+- The marketing page (`app/page.tsx`, `components/landing/*`) follows the brief in `docs/brand/landing.md`: tokens live under the `.mx` scope in `globals.css`, and the hero payslip (`lib/payslip.ts`) mirrors `PkPayrollEngine` and must be kept in step with it.
 
 ### Docker dev environment gotchas
 - `docker/entrypoint-api.sh` and `entrypoint-web.sh` **must have LF line endings** — CRLF breaks `/bin/sh` inside the Linux containers (`set -e\r` → "Illegal option"). If Windows/git reintroduces CRLF, reconvert before debugging container crash loops.

@@ -1,25 +1,29 @@
 import type { Metadata, Viewport } from 'next';
 import { Bricolage_Grotesque, Figtree } from 'next/font/google';
 import './globals.css';
+import { siteUrl } from '@/lib/site';
 
-const display = Bricolage_Grotesque({ subsets: ['latin'], variable: '--font-display', display: 'swap' });
+const display = Bricolage_Grotesque({ subsets: ['latin'], variable: '--font-display', display: 'swap', axes: ['opsz', 'wdth'] });
 const body = Figtree({ subsets: ['latin'], variable: '--font-body', display: 'swap' });
 
+const title = 'MatrixHR | HR and payroll for companies in Pakistan';
 const description =
-  'Run payroll, attendance, leave, hiring and performance from one multi-tenant platform built for South Asia and the Middle East.';
+  'Attendance, leave, expense claims and loans flow into a payroll run that a second person approves, then out as payslips and a bank file. HR and payroll for growing companies in Pakistan.';
 
 export const metadata: Metadata = {
-  title: { default: 'MatrixHR | HR and payroll in one system', template: '%s | MatrixHR' },
+  metadataBase: new URL(siteUrl),
+  title: { default: title, template: '%s | MatrixHR' },
   description,
   applicationName: 'MatrixHR',
-  openGraph: { title: 'MatrixHR | HR and payroll in one system', description, type: 'website', siteName: 'MatrixHR' },
-  twitter: { card: 'summary_large_image', title: 'MatrixHR | HR and payroll in one system', description },
+  alternates: { canonical: '/' },
+  openGraph: { title, description, type: 'website', siteName: 'MatrixHR', url: '/', locale: 'en_PK' },
+  twitter: { card: 'summary_large_image', title, description },
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f6faf8' },
-    { media: '(prefers-color-scheme: dark)', color: '#0c1211' },
+    { media: '(prefers-color-scheme: light)', color: '#f2f5f1' },
+    { media: '(prefers-color-scheme: dark)', color: '#0b1411' },
   ],
 };
 

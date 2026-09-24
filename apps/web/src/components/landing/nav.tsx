@@ -8,22 +8,17 @@ import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { cn } from '@/lib/utils';
 
 const LINKS = [
-  { href: '#product', label: 'Product' },
-  { href: '#modules', label: 'Modules' },
-  { href: '#payroll', label: 'Payroll' },
-  { href: '#roles', label: 'Portals' },
-  { href: '#security', label: 'Security' },
-  { href: '#faq', label: 'FAQ' },
+  { href: '#run', label: 'Payroll' },
+  { href: '#whatsapp', label: 'Approvals' },
+  { href: '#access', label: 'Who sees what' },
+  { href: '#pricing', label: 'Pricing' },
+  { href: '#faq', label: 'Questions' },
 ];
-
-const cta =
-  'inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg bg-brand-700 px-4 text-sm font-medium text-white shadow-soft transition-[background-color,box-shadow,transform] duration-200 hover:bg-brand-800 hover:shadow-lifted active:scale-[0.98] dark:bg-brand-600 dark:hover:bg-brand-500';
-const quiet =
-  'inline-flex h-10 items-center rounded-lg px-3 text-sm font-medium text-[hsl(var(--foreground))] transition-colors hover:bg-[hsl(var(--muted))]';
 
 export function LandingNav() {
   const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     try {
@@ -31,6 +26,10 @@ export function LandingNav() {
     } catch {
       /* storage blocked: treat as signed out */
     }
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
@@ -43,26 +42,33 @@ export function LandingNav() {
   const account = signedIn ? { href: '/dashboard', label: 'Open workspace' } : { href: '/login', label: 'Sign in' };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[hsl(var(--border))]/70 bg-[hsl(var(--background))]/80 backdrop-blur-md">
+    <header
+      className={cn(
+        'sticky top-0 z-40 transition-[background-color,box-shadow] duration-300',
+        scrolled || open
+          ? 'bg-[color-mix(in_srgb,var(--mx-paper)_86%,transparent)] shadow-[0_1px_0_var(--mx-rule)] backdrop-blur-md'
+          : 'bg-transparent',
+      )}
+    >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
         <Link href="/" aria-label="MatrixHR home" className="rounded-md">
           <Logo />
         </Link>
 
-        <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
+        <nav aria-label="Main" className="hidden items-center gap-7 lg:flex">
           {LINKS.map((l) => (
-            <a key={l.href} href={l.href} className={quiet}>
+            <a key={l.href} href={l.href} className="mx-link text-[0.9375rem] font-medium">
               {l.label}
             </a>
           ))}
         </nav>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Link href={account.href} className={cn(quiet, 'hidden sm:inline-flex')}>
+          <Link href={account.href} className="mx-link hidden px-2 text-[0.9375rem] font-medium sm:inline">
             {account.label}
           </Link>
-          <Link href="/signup" className={cn(cta, 'hidden sm:inline-flex')}>
+          <Link href="/signup" className="mx-btn mx-btn-primary hidden h-10 px-4 text-[0.9375rem] sm:inline-flex">
             Start free trial
           </Link>
           <button
@@ -71,7 +77,7 @@ export function LandingNav() {
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
             aria-controls="landing-menu"
-            className="cursor-pointer rounded-lg p-2 text-[hsl(var(--foreground))] transition-colors hover:bg-[hsl(var(--muted))] md:hidden"
+            className="grid h-11 w-11 cursor-pointer place-items-center rounded-[10px] transition-colors hover:bg-[var(--mx-sheet)] lg:hidden"
           >
             {open ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
           </button>
@@ -79,18 +85,23 @@ export function LandingNav() {
       </div>
 
       {open && (
-        <div id="landing-menu" className="border-t border-[hsl(var(--border))] bg-[hsl(var(--background))] px-4 pb-5 pt-3 md:hidden animate-fade-in">
+        <div id="landing-menu" className="animate-fade-in border-t border-[var(--mx-rule)] px-4 pb-6 pt-2 lg:hidden">
           <nav aria-label="Mobile" className="flex flex-col">
             {LINKS.map((l) => (
-              <a key={l.href} href={l.href} onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-base font-medium hover:bg-[hsl(var(--muted))]">
+              <a
+                key={l.href}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                className="border-b border-[var(--mx-rule)] py-4 font-display text-2xl font-bold tracking-tight"
+              >
                 {l.label}
               </a>
             ))}
-            <Link href={account.href} className="rounded-lg px-3 py-3 text-base font-medium hover:bg-[hsl(var(--muted))]">
+            <Link href={account.href} className="py-4 text-base font-medium">
               {account.label}
             </Link>
           </nav>
-          <Link href="/signup" className={cn(cta, 'mt-3 h-12 w-full text-base')}>
+          <Link href="/signup" className="mx-btn mx-btn-primary mt-2 w-full">
             Start free trial
           </Link>
         </div>
