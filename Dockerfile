@@ -5,7 +5,13 @@
 # distroless runtime once image size/cold-start actually matters.
 
 FROM node:20-bookworm-slim AS build
-RUN corepack enable
+# openssl must be present *before* `prisma generate` — it's how Prisma detects which engine binary
+# (debian-openssl-1.1.x vs 3.0.x) to bundle. Without it here the build silently picks the wrong one and
+# the runtime stage (which does have openssl 3.0) fails with PrismaClientInitializationError at boot.
+RUN corepack enable \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends openssl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY . .
 RUN pnpm install --frozen-lockfile
