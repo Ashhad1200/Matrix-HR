@@ -1,12 +1,17 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
+import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { EntitlementsService } from '../entitlements/entitlements.service';
+import { AuthService } from '../auth/auth.service';
+import { CreateTenantDto, CreatePlanDto } from './dto';
 
 @Injectable()
 export class PlatformService {
   constructor(
     private prisma: PrismaService,
     private entitlements: EntitlementsService,
+    private auth: AuthService,
   ) {}
 
   private async audit(operatorUserId: string, action: string, targetType: string, targetId: string, detail?: unknown) {
@@ -60,6 +65,64 @@ export class PlatformService {
       include: { versions: { where: { isCurrent: true }, include: { entitlements: true } } },
       orderBy: { createdAt: 'asc' },
     });
+  }
+
+  // Creates a new org (tenant) with its first COMPANY_ADMIN, the same defaults a public signup gets
+  // (leave policies, a shift), optionally starting it on a plan. When adminPassword is omitted a strong
+  // one is generated and returned once — it is never stored or logged in plain text.
+  async createTenant(operatorUserId: string, dto: CreateTenantDto) {
+    const generatedPassword = dto.adminPassword ?? `Op3${randomBytes(9).toString('hex')}`;
+    const passwordHash = await bcrypt.hash(generatedPassword, 12);
+
+    const tenant = await this.auth.provisionTenant({
+      companyName: dto.companyName,
+      subdomain: dto.subdomain,
+      email: dto.adminEmail,
+      passwordHash,
+    });
+
+    if (dto.planCode) {
+      await this.assignPlan(operatorUserId, tenant.id, dto.planCode);
+    }
+
+    await this.audit(operatorUserId, 'CREATE_TENANT', 'Tenant', tenant.id, {
+      name: tenant.name,
+      subdomain: tenant.subdomain,
+      planCode: dto.planCode ?? null,
+    });
+
+    return {
+      tenant: { id: tenant.id, name: tenant.name, subdomain: tenant.subdomain },
+      admin: { email: dto.adminEmail, ...(dto.adminPassword ? {} : { generatedPassword }) },
+    };
+  }
+
+  async createPlan(operatorUserId: string, dto: CreatePlanDto) {
+    const existing = await this.prisma.plan.findUnique({ where: { code: dto.code } });
+    if (existing) throw new ConflictException(`Plan code "${dto.code}" already exists`);
+
+    const plan = await this.prisma.plan.create({
+      data: {
+        code: dto.code,
+        name: dto.name,
+        versions: {
+          create: {
+            version: 1,
+            isCurrent: true,
+            pricePkrMonthly: dto.pricePkrMonthly,
+            includedEmployees: dto.includedEmployees ?? 0,
+            perEmployeePricePkr: dto.perEmployeePricePkr,
+            entitlements: dto.entitlements?.length
+              ? { create: dto.entitlements.map((e) => ({ featureKey: e.featureKey, enabled: e.enabled ?? true, limit: e.limit })) }
+              : undefined,
+          },
+        },
+      },
+      include: { versions: { include: { entitlements: true } } },
+    });
+
+    await this.audit(operatorUserId, 'CREATE_PLAN', 'Plan', plan.id, { code: plan.code, name: plan.name });
+    return plan;
   }
 
   async assignPlan(operatorUserId: string, tenantId: string, planCode: string) {

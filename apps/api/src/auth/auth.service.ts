@@ -29,7 +29,9 @@ export class AuthService {
     private mail: MailService,
   ) {}
 
-  async signUp(dto: SignUpDto) {
+  // Shared by public signup and platform-operator-initiated org creation, so a tenant gets the same
+  // starting defaults (leave policies, a shift) regardless of who created it.
+  async provisionTenant(dto: { companyName: string; subdomain: string; email: string; passwordHash: string }) {
     const existing = await this.prisma.tenant.findUnique({
       where: { subdomain: dto.subdomain },
     });
@@ -40,8 +42,6 @@ export class AuthService {
     });
     if (existingUser) throw new ConflictException('Email already registered');
 
-    const passwordHash = await bcrypt.hash(dto.password, 12);
-
     const tenant = await this.prisma.tenant.create({
       data: {
         name: dto.companyName,
@@ -49,7 +49,7 @@ export class AuthService {
         users: {
           create: {
             email: dto.email,
-            passwordHash,
+            passwordHash: dto.passwordHash,
             role: 'COMPANY_ADMIN',
             emailVerified: true,
           },
@@ -73,6 +73,12 @@ export class AuthService {
       },
     });
 
+    return tenant;
+  }
+
+  async signUp(dto: SignUpDto) {
+    const passwordHash = await bcrypt.hash(dto.password, 12);
+    const tenant = await this.provisionTenant({ ...dto, passwordHash });
     const user = tenant.users[0];
     const tokens = await this.generateTokens(user.id, tenant.id, user.role, user.tokenVersion);
     // Without a session row the refresh token issued here could never be redeemed.

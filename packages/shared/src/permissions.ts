@@ -66,6 +66,7 @@ const ALL_NAV: Record<string, NavItem> = {
   oneOnOnes: { href: '/one-on-ones', label: '1-on-1s', icon: 'MessagesSquare' },
   // Backoffice — the platform operator's own tools, never shown to a tenant's users.
   platform: { href: '/platform', label: 'Tenants', icon: 'Building2' },
+  platformPlans: { href: '/platform/plans', label: 'Plans', icon: 'Layers' },
   platformAudit: { href: '/platform/audit', label: 'Audit Log', icon: 'ScrollText' },
 };
 
@@ -131,7 +132,7 @@ export function getPermissionsForRole(role: string): UserPermissions {
       // platform audit log, their own account security), never a tenant's HR/payroll data.
       return {
         portal: 'platform',
-        nav: nav('platform', 'platformAudit', 'security'),
+        nav: nav('platform', 'platformPlans', 'platformAudit', 'security'),
         actions: ADMIN_ACTIONS,
       };
     case ROLES.COMPANY_ADMIN:

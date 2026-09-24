@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles, CurrentUser } from '../common/decorators';
 import { UserRole } from '@matrixhr/database';
-import { AssignPlanDto, SetSubscriptionStatusDto, CreateOverrideDto } from './dto';
+import { AssignPlanDto, SetSubscriptionStatusDto, CreateOverrideDto, CreateTenantDto, CreatePlanDto } from './dto';
 
 // Platform operations are cross-tenant by nature (a SUPER_ADMIN manages every
 // tenant's commercial state), so this controller deliberately does NOT use
@@ -25,9 +25,19 @@ export class PlatformController {
     return this.platform.getTenant(id);
   }
 
+  @Post('tenants')
+  createTenant(@CurrentUser('id') operatorId: string, @Body() dto: CreateTenantDto) {
+    return this.platform.createTenant(operatorId, dto);
+  }
+
   @Get('plans')
   listPlans() {
     return this.platform.listPlans();
+  }
+
+  @Post('plans')
+  createPlan(@CurrentUser('id') operatorId: string, @Body() dto: CreatePlanDto) {
+    return this.platform.createPlan(operatorId, dto);
   }
 
   @Post('tenants/:id/subscription')

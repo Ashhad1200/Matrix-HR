@@ -411,7 +411,11 @@ export const api = {
   platform: {
     tenants: () => request<any>('/platform/tenants'),
     tenant: (id: string) => request<any>(`/platform/tenants/${id}`),
+    createTenant: (data: { companyName: string; subdomain: string; adminEmail: string; adminPassword?: string; planCode?: string }) =>
+      request<any>('/platform/tenants', { method: 'POST', body: JSON.stringify(data) }),
     plans: () => request<any>('/platform/plans'),
+    createPlan: (data: { code: string; name: string; pricePkrMonthly?: number; includedEmployees?: number; perEmployeePricePkr?: number }) =>
+      request<any>('/platform/plans', { method: 'POST', body: JSON.stringify(data) }),
     assignPlan: (tenantId: string, planCode: string) =>
       request<any>(`/platform/tenants/${tenantId}/subscription`, { method: 'POST', body: JSON.stringify({ planCode }) }),
     setStatus: (tenantId: string, status: string) =>
