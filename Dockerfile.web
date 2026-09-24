@@ -1,0 +1,24 @@
+# Production image for @matrixhr/web.
+#
+# ponytail: `next start` over the full workspace instead of `output: 'standalone'`. Standalone would need
+# `outputFileTracingRoot` set correctly for the pnpm workspace symlinks — worth doing once someone is
+# actually optimizing image size/cold start, not for a first deploy.
+
+FROM node:20-bookworm-slim AS build
+RUN corepack enable
+WORKDIR /app
+COPY . .
+RUN pnpm install --frozen-lockfile
+# NEXT_PUBLIC_* vars are inlined into the client bundle at build time, so the public URL must be known here.
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+RUN pnpm --filter @matrixhr/shared build
+RUN pnpm --filter @matrixhr/web build
+
+FROM node:20-bookworm-slim AS runtime
+RUN corepack enable
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=build /app /app
+EXPOSE 3000
+CMD ["/bin/sh", "-c", "cd apps/web && pnpm exec next start -p ${PORT:-3000} -H 0.0.0.0"]
