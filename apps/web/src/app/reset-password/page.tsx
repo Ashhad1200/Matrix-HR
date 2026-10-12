@@ -1,5 +1,6 @@
 'use client';
 
+import { useBrand } from '@/lib/brand-context';
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -82,10 +83,11 @@ function ResetPasswordForm() {
 }
 
 export default function ResetPasswordPage() {
+  const brand = useBrand();
   return (
     <main className="flex min-h-screen items-center justify-center bg-[hsl(var(--muted))] p-4 sm:p-6">
       <div className="w-full max-w-md rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-sm sm:p-8">
-        <Link href="/login" className="font-display text-lg font-bold text-brand-700 dark:text-brand-400">MatrixHR</Link>
+        <Link href="/login" className="font-display text-lg font-bold text-brand-700 dark:text-brand-400">{brand.name}</Link>
         <h1 className="mt-8 font-display text-2xl font-bold tracking-tight">Choose a new password</h1>
         <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">Use a strong password you have not used for this account before.</p>
         <Suspense fallback={<p className="mt-6 text-sm text-[hsl(var(--muted-foreground))]">Loading…</p>}>

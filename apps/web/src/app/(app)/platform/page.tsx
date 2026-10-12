@@ -1,5 +1,6 @@
 'use client';
 
+import { useBrand, useDomainSuffix } from '@/lib/brand-context';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Building2, Users, UserCheck, CircleCheck, Plus, Copy, Check } from 'lucide-react';
@@ -27,6 +28,7 @@ const STATUS_VARIANT: Record<string, 'success' | 'warning' | 'danger' | 'neutral
 const emptyForm = { companyName: '', subdomain: '', adminEmail: '', adminPassword: '', planCode: '' };
 
 function NewTenantModal({ plans, onClose, onCreated }: { plans: any[]; onClose: () => void; onCreated: () => void }) {
+  const suffix = useDomainSuffix();
   const [form, setForm] = useState(emptyForm);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -111,7 +113,7 @@ function NewTenantModal({ plans, onClose, onCreated }: { plans: any[]; onClose: 
           <label htmlFor="nt-subdomain" className="mb-1.5 block text-sm font-medium">Subdomain</label>
           <div className="flex items-center gap-2">
             <Input id="nt-subdomain" required value={form.subdomain} onChange={(e) => setForm((f) => ({ ...f, subdomain: e.target.value }))} />
-            <span className="shrink-0 text-sm text-[hsl(var(--muted-foreground))]">.matrixhr.com</span>
+            <span className="shrink-0 text-sm text-[hsl(var(--muted-foreground))]">{suffix}</span>
           </div>
         </div>
         <div>
@@ -151,6 +153,7 @@ function NewTenantModal({ plans, onClose, onCreated }: { plans: any[]; onClose: 
 }
 
 export default function PlatformTenantsPage() {
+  const brand = useBrand();
   const [tenants, setTenants] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -182,7 +185,7 @@ export default function PlatformTenantsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Tenants"
-        description="Every company on MatrixHR, their plan, and account health"
+        description={`Every company on ${brand.name}, their plan, and account health`}
         actions={<Button onClick={() => setShowNew(true)}><Plus className="h-4 w-4" /> New tenant</Button>}
       />
 

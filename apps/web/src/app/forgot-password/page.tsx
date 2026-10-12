@@ -1,5 +1,6 @@
 'use client';
 
+import { useBrand } from '@/lib/brand-context';
 import { useState } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
@@ -9,6 +10,7 @@ import { Input } from '@/components/ui/input';
 const CONFIRMATION = "If an account exists for that email, we've sent a reset link";
 
 export default function ForgotPasswordPage() {
+  const brand = useBrand();
   const [email, setEmail] = useState('');
   const [busy, setBusy] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -29,7 +31,7 @@ export default function ForgotPasswordPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[hsl(var(--muted))] p-4 sm:p-6">
       <div className="w-full max-w-md rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-sm sm:p-8">
-        <Link href="/login" className="font-display text-lg font-bold text-brand-700 dark:text-brand-400">MatrixHR</Link>
+        <Link href="/login" className="font-display text-lg font-bold text-brand-700 dark:text-brand-400">{brand.name}</Link>
         <h1 className="mt-8 font-display text-2xl font-bold tracking-tight">Reset your password</h1>
         <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">Enter your work email and we’ll send instructions if an account matches it.</p>
 

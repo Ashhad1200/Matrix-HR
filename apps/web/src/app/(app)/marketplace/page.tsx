@@ -1,5 +1,6 @@
 'use client';
 
+import { useBrand } from '@/lib/brand-context';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowDownToLine, ArrowLeftRight, ArrowUpFromLine, Check, Plug } from 'lucide-react';
@@ -55,6 +56,7 @@ function when(value: string) {
 }
 
 export default function MarketplacePage() {
+  const brand = useBrand();
   const [apps, setApps] = useState<MarketplaceApp[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('');
@@ -147,7 +149,7 @@ export default function MarketplacePage() {
                 </div>
                 <p className="flex-1 text-sm text-[hsl(var(--muted-foreground))]">{app.description}</p>
                 <div className="flex items-center gap-1.5 text-xs text-[hsl(var(--muted-foreground))]"><SyncIcon className="h-3.5 w-3.5" /><span className="capitalize">{app.syncDirection}</span></div>
-                {app.connected && app.mode === 'push' && <p className="text-xs">Devices push data to MatrixHR automatically · <Link className="text-brand-600 hover:underline" href="/settings/devices">Manage devices</Link></p>}
+                {app.connected && app.mode === 'push' && <p className="text-xs">Devices push data to {brand.name} automatically · <Link className="text-brand-600 hover:underline" href="/settings/devices">Manage devices</Link></p>}
                 {app.connected && app.mode === 'export' && <p className="text-xs">Export from a payroll run on the <Link className="text-brand-600 hover:underline" href="/payroll">Payroll page</Link></p>}
                 {app.lastRun && (
                   <div className="space-y-1 rounded-lg bg-[hsl(var(--muted))] p-3 text-xs">

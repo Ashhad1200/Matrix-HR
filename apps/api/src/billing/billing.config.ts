@@ -1,3 +1,4 @@
+import { brand, docPrefix } from '../common/brand';
 /** Who issues receipts. One place, shown on every receipt and served to the web app. Edit here only. */
 export const RECEIPT_ISSUER = {
   name: 'TREEVOXA',
@@ -10,6 +11,14 @@ export const RECEIPT_ISSUER = {
     'TREEVOXA, an Association of Persons (partnership firm) registered with FBR Pakistan, NTN J883480, ' +
     'Plot No. R-326, Hansa Society, Scheme-33, Karachi East, Karachi, Sindh, Pakistan. support@treevoxa.com',
 } as const;
+
+/** Issuer printed on receipts. White-label deployments show the reseller instead of the platform owner. */
+export function receiptIssuer() {
+  const b = brand();
+  if (!b.whiteLabel) return RECEIPT_ISSUER;
+  const legal = process.env.WL_LEGAL_TEXT?.trim();
+  return { name: b.name, legalForm: legal ?? '', ntn: '', address: '', email: b.supportEmail, text: [b.name, legal, b.supportEmail].filter(Boolean).join(', ') };
+}
 
 export const PROOF_MAX_BYTES = 5 * 1024 * 1024;
 export const PROVISIONAL_DEFAULT_HOURS = 72;
@@ -32,4 +41,4 @@ export function sniffProof(buf: Buffer): ProofKind | null {
   return null;
 }
 
-export const receiptNumber = (year: number, n: number) => `TVX-R-${year}-${String(n).padStart(6, '0')}`;
+export const receiptNumber = (year: number, n: number) => `${docPrefix()}-R-${year}-${String(n).padStart(6, '0')}`;

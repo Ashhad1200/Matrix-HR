@@ -1,3 +1,4 @@
+import { brandName } from '../common/brand';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -122,7 +123,7 @@ export class BillingAdminService {
     });
 
     if (!result.already) await this.emailTenantAdmins(result.tenantId, `approved:${id}`, `Payment received: ${result.req.reference}`,
-      `Thank you. We have approved your payment ${result.req.reference}.\n${result.purpose === 'plan' ? `Your plan now runs until ${result.periodEndAt!.toISOString().slice(0, 10)}.` : `${result.creditsGranted!.toLocaleString('en-US')} AI credits were added.`}\nReceipt: ${result.receiptNumber}\nYou can print it from Billing in MatrixHR.\n`);
+      `Thank you. We have approved your payment ${result.req.reference}.\n${result.purpose === 'plan' ? `Your plan now runs until ${result.periodEndAt!.toISOString().slice(0, 10)}.` : `${result.creditsGranted!.toLocaleString('en-US')} AI credits were added.`}\nReceipt: ${result.receiptNumber}\nYou can print it from Billing in ${brandName()}.\n`);
     return this.rows({ id }, 1).then((r) => r[0]);
   }
 
@@ -142,7 +143,7 @@ export class BillingAdminService {
       await tx.auditLog.create({ data: { tenantId: locked[0].tenantId, action: 'PAYMENT_REJECTED', entity: 'PaymentRequest', entityId: id, after: { reason: dto.reason } as any } });
       return locked[0].tenantId;
     });
-    await this.emailTenantAdmins(tenantId, `rejected:${id}`, 'We could not verify your payment', `We could not approve your payment request.\nReason: ${dto.reason.trim()}\nPlease start a new request from Billing in MatrixHR, or reply to this email.\n`);
+    await this.emailTenantAdmins(tenantId, `rejected:${id}`, 'We could not verify your payment', `We could not approve your payment request.\nReason: ${dto.reason.trim()}\nPlease start a new request from Billing in ${brandName()}, or reply to this email.\n`);
     return this.rows({ id }, 1).then((r) => r[0]);
   }
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { useBrand } from '@/lib/brand-context';
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Menu, Search, ShieldAlert, X } from 'lucide-react';
@@ -26,6 +27,7 @@ function isRouteAllowed(pathname: string, navHrefs: string[]) {
 }
 
 function LapsedScreen({ canPay, onChanged }: { canPay: boolean; onChanged: () => void }) {
+  const brand = useBrand();
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div>
@@ -33,7 +35,7 @@ function LapsedScreen({ canPay, onChanged }: { canPay: boolean; onChanged: () =>
         <p className="mt-1 max-w-2xl text-sm text-[hsl(var(--muted-foreground))]">
           {canPay
             ? 'Your data is safe and nothing has been deleted. Pay by bank transfer and upload the proof: you get temporary access while we check it, and full access the moment it is approved.'
-            : 'Your company\'s subscription has ended, so MatrixHR is paused for everyone. Your data is safe. Please ask a company admin or HR manager to renew it from the Billing page.'}
+            : `Your company's subscription has ended, so ${brand.name} is paused for everyone. Your data is safe. Please ask a company admin or HR manager to renew it from the Billing page.`}
         </p>
       </div>
       {canPay && <BillingPanel onChanged={onChanged} />}
@@ -42,6 +44,7 @@ function LapsedScreen({ canPay, onChanged }: { canPay: boolean; onChanged: () =>
 }
 
 function AppShellInner({ children }: { children: React.ReactNode }) {
+  const brand = useBrand();
   const { user, loading, refresh } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -126,8 +129,12 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
             >
               {menuOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
             </button>
+            {user.permissions.portal !== 'platform' && user.tenant?.logoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={user.tenant.logoUrl} alt="" className="hidden h-7 w-auto max-w-[8rem] object-contain sm:block" />
+            )}
             <p className="truncate text-sm font-semibold">
-              {user.permissions.portal === 'platform' ? 'MatrixHR Backoffice' : user.tenant?.name}
+              {user.permissions.portal === 'platform' ? `${brand.name} Backoffice` : user.tenant?.name}
             </p>
             <span className="hidden rounded-md bg-[hsl(var(--muted))] px-2 py-0.5 text-[11px] font-medium text-[hsl(var(--muted-foreground))] sm:inline">
               {ROLE_LABELS[user.role] ?? user.role}

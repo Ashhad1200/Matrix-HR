@@ -31,7 +31,7 @@ export type AuthUser = {
   role: string;
   tenantId: string;
   employeeId?: string | null;
-  tenant: { id: string; name: string; subdomain: string };
+  tenant: { id: string; name: string; subdomain: string; logoUrl?: string | null };
   employee?: {
     id: string;
     firstName: string;

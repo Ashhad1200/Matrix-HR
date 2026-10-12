@@ -52,6 +52,7 @@ Required for the new features (names only here; values come from the owner's sec
 `SMTP_HOST` `SMTP_PORT` `SMTP_USER` `SMTP_PASS` `SMTP_FROM` (+ optional `SMTP_REPLY_TO`) for invites, receipts and reminders; `TRUST_PROXY=1`;
 `CREDENTIAL_KEY` (already required; AI provider keys are encrypted with it); `FILE_SIGNING_KEY` (signs private file links; falls back to the JWT secret) and `API_URL` (the public API origin, used inside file links).
 **Single-company installs** (a customer who buys the source) set `SINGLE_COMPANY_MODE=true`: every module on, no plans/trial/billing/credits screens, no lapse gate, sign-up closed once the company exists. Never set it on the multi-tenant production.
+**White-label installs** (a reseller selling under their own brand, many client companies on one server) additionally set `WL_PRODUCT_NAME` and the other `WL_*` variables on both the API and web services (see `docs/DEPLOYMENT.md`); leave them unset on the TREEVOXA production.
 Do **not** set AI provider keys here: the owner pastes them in the backoffice (step 9). `AI_*_BASE_URL` must be unset in production.
 
 ## 6. Merge and deploy

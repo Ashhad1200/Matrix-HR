@@ -126,6 +126,19 @@ async function uploadWithFields<T>(path: string, file: File, fields: Record<stri
   return res.json();
 }
 
+/** Multipart PUT (replace-in-place uploads such as a client's logo). */
+async function putFile<T>(path: string, file: File): Promise<T> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  const form = new FormData();
+  form.append('file', file);
+  const res = await fetch(`${API_URL}${path}`, { method: 'PUT', headers: token ? { Authorization: `Bearer ${token}` } : {}, body: form });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: res.statusText }));
+    throw new ApiError(res.status, (Array.isArray(err.message) ? err.message.join(', ') : err.message) || 'Upload failed', err.code);
+  }
+  return res.json();
+}
+
 async function uploadFile<T>(path: string, file: File): Promise<T> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
   const send = (accessToken: string | null) => {
@@ -485,6 +498,8 @@ export const api = {
   },
   platform: {
     tenants: () => request<any>('/platform/tenants'),
+    setLogo: (tenantId: string, file: File) => putFile<{ logoUrl: string }>(`/platform/tenants/${tenantId}/logo`, file),
+    clearLogo: (tenantId: string) => request<any>(`/platform/tenants/${tenantId}/logo`, { method: 'DELETE' }),
     tenant: (id: string) => request<any>(`/platform/tenants/${id}`),
     createTenant: (data: { companyName: string; subdomain: string; adminEmail: string; adminPassword?: string; planCode?: string }) =>
       request<any>('/platform/tenants', { method: 'POST', body: JSON.stringify(data) }),

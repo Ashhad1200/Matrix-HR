@@ -5,9 +5,10 @@ import { EntitlementsService } from '../entitlements/entitlements.service';
 import { CreditsService } from '../credits/credits.service';
 import { AiSettingsService } from './ai-settings.service';
 import { PROVIDERS } from './providers';
+import { brandName } from '../common/brand';
 import { MAX_OUTPUT_TOKENS, estimateTokens, mcFor } from './pricing';
 
-const SYSTEM_PROMPT = `You are Ask MatrixHR, an HR assistant for a Pakistani/GCC HR & payroll SaaS platform.
+const systemPrompt = () => `You are Ask ${brandName()}, an HR assistant for a Pakistani/GCC HR & payroll platform. Never mention any other product or vendor name.
 Answer concisely in plain English. Cover leave, attendance, onboarding, payroll (FBR tax, EOBI, PF), and labour law when relevant.
 If employee context is provided, use it for personalized answers. If you lack data, say so and suggest what to check in the app.
 Never invent employee-specific numbers not present in the context.`;
@@ -24,14 +25,14 @@ export class AiService {
     private settings: AiSettingsService,
   ) {}
 
-  async askMatrixHR(tenantId: string, employeeId: string | undefined, question: string) {
+  async askAssistant(tenantId: string, employeeId: string | undefined, question: string) {
     await this.entitlements.recordUsage(tenantId, 'ai.calls');
 
     const context = await this.buildContext(tenantId, employeeId);
     const geminiAnswer = await this.callModel(
       tenantId,
       `${context}\n\nUser question: ${question}`,
-      SYSTEM_PROMPT,
+      systemPrompt(),
     );
 
     if (geminiAnswer) {

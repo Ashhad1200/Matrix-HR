@@ -1,5 +1,6 @@
 'use client';
 
+import { useBrand } from '@/lib/brand-context';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Paperclip, Plus, Send, Sparkles, Trash2, X } from 'lucide-react';
@@ -14,6 +15,7 @@ interface Msg { id?: string; role: 'user' | 'assistant'; content: string; meta?:
 const SUGGESTED = ['What is my leave balance?', 'Which public holidays are coming up?', 'How do I invite an employee to log in?'];
 
 export default function AiPage() {
+  const brand = useBrand();
   const { user } = useAuth();
   const canManage = user?.role === 'COMPANY_ADMIN' || user?.role === 'HR_MANAGER';
   const [status, setStatus] = useState<any>(null);
@@ -76,7 +78,7 @@ export default function AiPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Ask MatrixHR</h1>
+          <h1 className="text-2xl font-bold">Ask {brand.name}</h1>
           <p className="text-sm text-[hsl(var(--muted-foreground))]">Ask about your leave, policies and company data, or have me prepare a request for you to confirm.</p>
         </div>
         <div className="flex items-center gap-3 text-sm">

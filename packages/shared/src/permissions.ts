@@ -40,7 +40,7 @@ const ALL_NAV: Record<string, NavItem> = {
   myPay: { href: '/my-pay', label: 'Pay Stubs', icon: 'DollarSign' },
   performance: { href: '/performance', label: 'Performance', icon: 'Target' },
   lms: { href: '/lms', label: 'Learning', icon: 'GraduationCap' },
-  ai: { href: '/ai', label: 'Ask MatrixHR', icon: 'Sparkles' },
+  ai: { href: '/ai', label: 'AI assistant', icon: 'Sparkles' },
   team: { href: '/team', label: 'My Team', icon: 'Users' },
   approvals: { href: '/approvals', label: 'Approvals', icon: 'Inbox', badge: 'pendingApprovals' },
   employees: { href: '/employees', label: 'Employees', icon: 'Users' },

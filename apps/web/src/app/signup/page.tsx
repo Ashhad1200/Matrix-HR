@@ -1,5 +1,6 @@
 'use client';
 
+import { useBrand, useDomainSuffix } from '@/lib/brand-context';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -10,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Logo } from '@/components/brand/logo';
 
 export default function SignUpPage() {
+  const brand = useBrand();
+  const suffix = useDomainSuffix();
   const router = useRouter();
   const [form, setForm] = useState({ email: '', password: '', companyName: '', subdomain: '' });
   const [error, setError] = useState('');
@@ -41,7 +44,7 @@ export default function SignUpPage() {
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-[hsl(var(--muted))]/60 p-4">
-      <Link href="/" aria-label="MatrixHR home" className="rounded-md"><Logo /></Link>
+      <Link href="/" aria-label={`${brand.name} home`} className="rounded-md"><Logo /></Link>
       <Card className="w-full max-w-md animate-rise">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Create your company</CardTitle>
@@ -57,7 +60,7 @@ export default function SignUpPage() {
               <label htmlFor="su-subdomain" className="mb-1.5 block text-sm font-medium">Subdomain</label>
               <div className="flex items-center gap-2">
                 <Input id="su-subdomain" value={form.subdomain} onChange={(e) => update('subdomain', e.target.value)} required />
-                <span className="text-sm text-[hsl(var(--muted-foreground))]">.matrixhr.com</span>
+                <span className="text-sm text-[hsl(var(--muted-foreground))]">{suffix}</span>
               </div>
             </div>
             <div>

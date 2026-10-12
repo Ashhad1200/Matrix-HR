@@ -134,7 +134,7 @@ export default function SecurityPage() {
     const url = URL.createObjectURL(new Blob([`${recoveryCodes.join('\n')}\n`], { type: 'text/plain;charset=utf-8' }));
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = 'matrixhr-recovery-codes.txt';
+    anchor.download = 'recovery-codes.txt';
     document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();

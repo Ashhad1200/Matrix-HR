@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { getBrand } from '@/lib/brand-server';
 import { Logo } from '@/components/brand/logo';
 import { LandingNav } from '@/components/landing/nav';
 import { PayslipDemo } from '@/components/landing/payslip-demo';
@@ -138,6 +140,8 @@ function JsonLd() {
 }
 
 export default function LandingPage() {
+  // The vendor's marketing page is never shown on a white-label install: visitors go straight to the sign-in.
+  if (getBrand().whiteLabel) redirect('/login');
   return (
     <div className="mx relative min-h-dvh overflow-x-clip">
       <JsonLd />

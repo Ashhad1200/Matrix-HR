@@ -46,7 +46,7 @@ const CATALOG: CatalogApp[] = [
   { id: 'rozee', name: 'Rozee.pk', category: 'recruitment', pillar: 'Job Syndication', description: 'Pakistan job board posting sync', scopes: ['jobs:read'], syncDirection: 'outbound', maturity: 'planned' },
   // Local & hardware
   { id: 'nadra-verisys', name: 'NADRA Verisys', category: 'local', pillar: 'Local Compliance', description: 'CNIC verification for Pakistani employees', scopes: ['employees:read'], syncDirection: 'outbound', maturity: 'planned' },
-  { id: 'zkteco', name: 'ZKTeco Biometric', category: 'hardware', pillar: 'Time Hardware', description: 'Terminals push punches to MatrixHR over the ZKTeco ADMS protocol; punches become attendance records with a visible sync log.', scopes: ['attendance:write'], syncDirection: 'inbound', maturity: 'beta', mode: 'push', requiredFeature: 'attendance.biometric' },
+  { id: 'zkteco', name: 'ZKTeco Biometric', category: 'hardware', pillar: 'Time Hardware', description: 'Terminals push punches to the platform over the ZKTeco ADMS protocol; punches become attendance records with a visible sync log.', scopes: ['attendance:write'], syncDirection: 'inbound', maturity: 'beta', mode: 'push', requiredFeature: 'attendance.biometric' },
   { id: 'careem', name: 'Careem Business', category: 'lifestyle', pillar: 'Lifestyle', description: 'Corporate rides for employees', scopes: [], syncDirection: 'outbound', maturity: 'planned' },
 ];
 

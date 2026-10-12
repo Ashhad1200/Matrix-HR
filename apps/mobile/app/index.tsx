@@ -1,3 +1,4 @@
+import { brand } from '../lib/brand';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Link } from 'expo-router';
 
@@ -6,7 +7,7 @@ export default function HomeScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.logo}>M</Text>
-        <Text style={styles.title}>MatrixHR</Text>
+        <Text style={styles.title}>{brand.name}</Text>
         <Text style={styles.subtitle}>Employee Self-Service</Text>
       </View>
 

@@ -11,6 +11,49 @@ import { Badge, statusVariant } from '@/components/ui/badge';
 import { formatDate } from '@/lib/utils';
 import { TenantBillingCard } from '@/components/billing/tenant-billing-card';
 
+function BrandingCard({ tenant, onChanged }: { tenant: any; onChanged: () => void }) {
+  const [msg, setMsg] = useState('');
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+  async function pick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setErr(''); setMsg(''); setBusy(true);
+    try { await api.platform.setLogo(tenant.id, file); setMsg('Logo saved. It now shows in this company\'s app and on its payslips.'); onChanged(); }
+    catch (x: any) { setErr(x.message); } finally { setBusy(false); }
+  }
+  async function clear() {
+    setErr(''); setMsg(''); setBusy(true);
+    try { await api.platform.clearLogo(tenant.id); setMsg('Logo removed.'); onChanged(); } catch (x: any) { setErr(x.message); } finally { setBusy(false); }
+  }
+  return (
+    <Card>
+      <CardHeader><CardTitle>Branding</CardTitle></CardHeader>
+      <CardContent className="space-y-3 text-sm">
+        <p className="text-[hsl(var(--muted-foreground))]">This company&rsquo;s own logo, shown in its app and on its payslips. PNG, JPEG or WebP, up to 256 KB.</p>
+        <div className="flex items-center gap-4">
+          <div className="flex h-16 w-40 items-center justify-center rounded-lg border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--muted))]">
+            {tenant.logoUrl
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={tenant.logoUrl} alt={`${tenant.name} logo`} className="max-h-14 max-w-[9rem] object-contain" />
+              : <span className="text-xs text-[hsl(var(--muted-foreground))]">No logo</span>}
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="inline-flex h-9 cursor-pointer items-center justify-center rounded-lg border border-[hsl(var(--border))] px-3 text-sm font-medium hover:bg-[hsl(var(--muted))]">
+              {busy ? 'Uploading…' : tenant.logoUrl ? 'Replace logo' : 'Upload logo'}
+              <input data-testid="logo-input" type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" disabled={busy} onChange={pick} />
+            </label>
+            {tenant.logoUrl && <Button variant="ghost" size="sm" disabled={busy} onClick={clear}>Remove logo</Button>}
+          </div>
+        </div>
+        {err && <p role="alert" className="text-rose-700">{err}</p>}
+        {msg && <p role="status" className="text-emerald-700">{msg}</p>}
+      </CardContent>
+    </Card>
+  );
+}
+
 const STATUSES = ['trialing', 'active', 'past_due', 'suspended', 'cancelled', 'expired'];
 
 export default function PlatformTenantDetailPage() {
@@ -164,6 +207,7 @@ export default function PlatformTenantDetailPage() {
           </CardContent>
         </Card>
 
+        <BrandingCard tenant={tenant} onChanged={load} />
         <TenantBillingCard tenantId={id} />
 
         <Card className="lg:col-span-2">

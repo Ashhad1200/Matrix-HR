@@ -1,3 +1,4 @@
+import { brand, brandName } from '../common/brand';
 import { Global, Injectable, Logger, Module, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { PrismaService } from '../prisma/prisma.service';
@@ -17,7 +18,7 @@ export function buildTransport(env: NodeJS.ProcessEnv = process.env) {
   });
 }
 
-export const mailFrom = (env: NodeJS.ProcessEnv = process.env) => env.SMTP_FROM || env.MAIL_FROM || 'MatrixHR <no-reply@matrixhr.local>';
+export const mailFrom = (env: NodeJS.ProcessEnv = process.env) => env.SMTP_FROM || env.MAIL_FROM || `${brandName()} <no-reply@${brand().whiteLabel ? 'localhost' : 'matrixhr.local'}>`;
 
 /**
  * Transactional email. Without SMTP configured, dev keeps messages in an in-memory outbox (GET /dev/outbox);

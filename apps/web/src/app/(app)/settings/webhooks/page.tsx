@@ -1,5 +1,6 @@
 'use client';
 
+import { useBrand } from '@/lib/brand-context';
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +34,7 @@ function dateTime(value: string | null) {
 }
 
 export default function WebhooksPage() {
+  const brand = useBrand();
   const [webhooks, setWebhooks] = useState<Webhook[]>([]);
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -168,7 +170,7 @@ export default function WebhooksPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Webhooks" description="Send signed MatrixHR events to your systems" />
+      <PageHeader title="Webhooks" description={`Send signed ${brand.name} events to your systems`} />
       {error && <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-700 dark:bg-rose-950 dark:text-rose-300">{error}</p>}
 
       <Card>
@@ -176,7 +178,7 @@ export default function WebhooksPage() {
         <CardContent>
           <form data-testid="webhook-form" onSubmit={createWebhook} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
-              <label className="space-y-1 text-sm font-medium">Endpoint URL<input className={INPUT_CLASS} type="url" placeholder="https://example.com/webhooks/matrixhr" required value={form.url} onChange={(event) => setForm({ ...form, url: event.target.value })} /></label>
+              <label className="space-y-1 text-sm font-medium">Endpoint URL<input className={INPUT_CLASS} type="url" placeholder="https://example.com/webhooks" required value={form.url} onChange={(event) => setForm({ ...form, url: event.target.value })} /></label>
               <label className="space-y-1 text-sm font-medium">Custom signing secret (optional)<input className={INPUT_CLASS} type="password" autoComplete="new-password" value={form.secret} onChange={(event) => setForm({ ...form, secret: event.target.value })} /></label>
             </div>
             <fieldset>

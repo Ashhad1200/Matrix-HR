@@ -6,7 +6,7 @@ import { EmailOutboxService } from '../mail/mail.service';
 import { CreditsService, creditsToMc } from '../credits/credits.service';
 import { computeLifecycle, Lifecycle } from './lifecycle';
 import {
-  GRACE_DEFAULT_DAYS, OPEN_REQUEST_STATUSES, PROOF_MAX_BYTES, PROVISIONAL_DEFAULT_HOURS, RECEIPT_ISSUER, REFERENCE_ALPHABET,
+  GRACE_DEFAULT_DAYS, OPEN_REQUEST_STATUSES, PROOF_MAX_BYTES, PROVISIONAL_DEFAULT_HOURS, receiptIssuer, REFERENCE_ALPHABET,
   TRIAL_CREDITS, TRIAL_DAYS, sniffProof,
 } from './billing.config';
 import { CreateRequestDto, UploadProofDto } from './dto';
@@ -272,7 +272,7 @@ export class BillingService {
 
   receiptBody(r: any, receipt: { number: string; amount: any; currency: string; issuedAt: Date }, tenant: { name: string; subdomain: string }) {
     return {
-      issuer: RECEIPT_ISSUER,
+      issuer: receiptIssuer(),
       number: receipt.number,
       issuedAt: receipt.issuedAt,
       customer: { name: tenant.name, subdomain: tenant.subdomain },

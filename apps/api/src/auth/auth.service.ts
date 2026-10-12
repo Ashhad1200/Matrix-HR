@@ -1,3 +1,4 @@
+import { brand, brandName } from '../common/brand';
 import {
   Injectable,
   UnauthorizedException,
@@ -267,7 +268,7 @@ export class AuthService {
     const base = (process.env.WEB_URL || 'http://localhost:3000').replace(/\/$/, '');
     await this.mail.send({
       to: user.email,
-      subject: 'Reset your MatrixHR password',
+      subject: `Reset your ${brandName()} password`,
       text: `Use this link to choose a new password. It works once and expires in 30 minutes.\n\n${base}/reset-password?token=${token}\n\nIf you didn't ask for this, you can ignore this email.`,
     });
     await this.audit.log({ tenantId: user.tenantId, userId: user.id, action: 'PASSWORD_RESET_REQUESTED', entity: 'User', entityId: user.id });
@@ -324,7 +325,7 @@ export class AuthService {
     const secret = generateSecret();
     // Stored encrypted, and inactive until the user proves their app works via mfaEnable.
     await this.prisma.user.update({ where: { id: userId }, data: { twoFaSecret: this.cipher.encrypt(secret) } });
-    return { secret, otpauthUrl: otpauthUrl(secret, user.email) };
+    return { secret, otpauthUrl: otpauthUrl(secret, user.email, brandName()) };
   }
 
   async mfaEnable(userId: string, code: string) {
@@ -457,6 +458,7 @@ export class AuthService {
       entitlements,
       billing: billingForRole,
       deployment: { singleCompany: single },
+      brand: (({ whiteLabel, name, logoUrl, faviconUrl, primaryColor, supportEmail, websiteUrl }) => ({ whiteLabel, name, logoUrl, faviconUrl, primaryColor, supportEmail, websiteUrl }))(brand()),
     };
   }
 

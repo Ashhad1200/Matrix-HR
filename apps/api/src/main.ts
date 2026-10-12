@@ -1,3 +1,4 @@
+import { brandName } from './common/brand';
 import 'reflect-metadata';
 import { config as loadEnv } from 'dotenv';
 import { resolve } from 'path';
@@ -62,21 +63,21 @@ async function bootstrap() {
   // The interactive API docs enumerate every route, so they are off in production unless explicitly enabled.
   if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_API_DOCS === 'true') {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle('MatrixHR API')
-      .setDescription('Public REST API for the MatrixHR platform. Authenticate with a Bearer JWT from /auth/login.')
+      .setTitle(`${brandName()} API`)
+      .setDescription(`Public REST API for the ${brandName()} platform. Authenticate with a Bearer JWT from /auth/login.`)
       .setVersion('1.0')
       .addBearerAuth()
       .build();
     const document = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('api/docs', app, document, {
-      customSiteTitle: 'MatrixHR API Docs',
+      customSiteTitle: `${brandName()} API Docs`,
       jsonDocumentUrl: 'api/docs-json',
     });
   }
 
   const port = process.env.PORT || 3001;
   await app.listen(port);
-  console.log(`MatrixHR API running on http://localhost:${port}`);
+  console.log(`${brandName()} API running on http://localhost:${port}`);
   if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_API_DOCS === 'true') console.log(`API docs at http://localhost:${port}/api/docs`);
 }
 

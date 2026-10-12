@@ -1,3 +1,5 @@
+import { brandName } from '../common/brand';
+import { logoBufferForPdf } from '../platform/logo';
 import { Injectable, Optional, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PayrollEngineFactory } from './engines/payroll-engine.factory';
@@ -461,7 +463,8 @@ export class PayrollService {
     for (const item of run.items) {
       if (item.payslipUrl) continue; // idempotent — safe to call repeatedly
       const buffer = await this.payslipPdf.generate({
-        tenantName: tenant?.name ?? 'MatrixHR',
+        tenantName: tenant?.name ?? brandName(),
+        logo: logoBufferForPdf(tenant?.logoUrl),
         period: run.period,
         employeeName: `${item.employee.firstName} ${item.employee.lastName}`,
         employeeCode: item.employee.employeeCode,
@@ -490,7 +493,8 @@ export class PayrollService {
 
     const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
     const buffer = await this.payslipPdf.generate({
-      tenantName: tenant?.name ?? 'MatrixHR',
+      tenantName: tenant?.name ?? brandName(),
+      logo: logoBufferForPdf(tenant?.logoUrl),
       period: item.payrollRun.period,
       employeeName: `${item.employee.firstName} ${item.employee.lastName}`,
       employeeCode: item.employee.employeeCode,

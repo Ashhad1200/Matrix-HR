@@ -1,3 +1,4 @@
+import { brandName } from '../common/brand';
 import { Injectable } from '@nestjs/common';
 // pdfkit's CJS export is the class itself, not `{ default: Class }` — a
 // TS default import compiles to `require('pdfkit').default`, which is
@@ -7,6 +8,7 @@ const PDFDocument = require('pdfkit');
 
 export type PayslipData = {
   tenantName: string;
+  logo?: Buffer;
   period: string;
   employeeName: string;
   employeeCode: string;
@@ -47,7 +49,10 @@ export class PayslipPdfService {
         doc.text(value, { align: 'right' });
       };
 
-      doc.font('Helvetica-Bold').fontSize(18).fillColor('#0f172a').text(data.tenantName);
+      if (data.logo) {
+        try { doc.image(data.logo, 50, 40, { fit: [140, 50] }); doc.y = 100; } catch { /* unreadable logo: fall back to the name only */ }
+      }
+      doc.font('Helvetica-Bold').fontSize(18).fillColor('#0f172a').text(data.tenantName, 50);
       doc.font('Helvetica').fontSize(12).fillColor('#64748b').text(`Payslip — ${data.period}`);
       doc.moveDown();
       line();
@@ -84,7 +89,7 @@ export class PayslipPdfService {
 
       doc.moveDown(2);
       doc.font('Helvetica').fontSize(9).fillColor('#94a3b8')
-        .text('This is a system-generated payslip. Figures are calculated by MatrixHR and have not been independently audited.', { width: 495 });
+        .text(`This is a system-generated payslip. Figures are calculated by ${brandName()} and have not been independently audited.`, { width: 495 });
 
       doc.end();
     });

@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import { AuthService } from '../auth/auth.service';
 import { CreateTenantDto, CreatePlanDto } from './dto';
+import { parseLogoDataUri } from './logo';
 
 @Injectable()
 export class PlatformService {
@@ -18,6 +19,15 @@ export class PlatformService {
     await this.prisma.platformAuditLog.create({
       data: { operatorUserId, action, targetType, targetId, detail: detail as any },
     });
+  }
+
+  async setTenantLogo(operatorUserId: string, tenantId: string, dataUri: string | null) {
+    const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId }, select: { id: true } });
+    if (!tenant) throw new NotFoundException('Tenant not found');
+    const logoUrl = dataUri === null ? null : parseLogoDataUri(dataUri);
+    await this.prisma.tenant.update({ where: { id: tenantId }, data: { logoUrl } });
+    await this.audit(operatorUserId, logoUrl ? 'TENANT_LOGO_SET' : 'TENANT_LOGO_CLEARED', 'Tenant', tenantId);
+    return { logoUrl };
   }
 
   async listTenants() {

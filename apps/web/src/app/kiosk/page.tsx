@@ -1,5 +1,6 @@
 'use client';
 
+import { useBrand } from '@/lib/brand-context';
 import { useEffect, useState } from 'react';
 import { Clock, LogIn, LogOut, CheckCircle2, XCircle } from 'lucide-react';
 
@@ -7,6 +8,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1
 
 /** Shared-device attendance kiosk: each punch authenticates, clocks, and forgets. */
 export default function KioskPage() {
+  const brand = useBrand();
   const [now, setNow] = useState(new Date());
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -112,7 +114,7 @@ export default function KioskPage() {
         )}
       </div>
 
-      <p className="mt-8 text-xs text-white/40">MatrixHR Kiosk Mode · credentials are never stored on this device</p>
+      <p className="mt-8 text-xs text-white/40">{brand.name} Kiosk Mode · credentials are never stored on this device</p>
     </div>
   );
 }

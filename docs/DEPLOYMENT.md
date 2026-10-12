@@ -92,3 +92,29 @@ stateless — sessions live in the database — so none is needed).
 ## Single-company installation (source-code customers)
 
 Set `SINGLE_COMPANY_MODE=true` on the API. Effects: every module is enabled with no plan; the Billing and platform screens, free trial, lapse/grace gate, payment routes (404) and AI credits (unlimited; the company supplies its own provider key) are off; public sign-up works only until the first company exists. The first sign-up creates the company and its owner (with an employee profile); everyone else joins through Settings > Staff logins. Do not set this flag on a multi-tenant deployment.
+
+
+## White-label and multi-client hosting (resellers)
+
+This is the opposite of single-company mode. One server hosts **many client companies**, all shown under the **reseller's brand**. Keep `SINGLE_COMPANY_MODE` **off**.
+
+Set these on **both the API and the web container** (they are read at runtime; restart to apply, no rebuild):
+
+| Variable | Meaning |
+|---|---|
+| `WL_PRODUCT_NAME` | Turns white-label on. The product name shown everywhere. |
+| `WL_LOGO_URL` | Logo for the sign-in screen and sidebar (https URL or a data URI). Without it the name is shown as text. |
+| `WL_FAVICON_URL` | Browser-tab icon. |
+| `WL_PRIMARY_COLOR` | `#RRGGBB`. The whole app palette (buttons, links, focus rings) is generated from it. |
+| `WL_SUPPORT_EMAIL` | Shown on receipts and used as the support address. |
+| `WL_EMAIL_FROM_NAME` | Sender name on emails (defaults to the product name). The address still comes from `SMTP_FROM`. |
+| `WL_WEBSITE_URL` | The reseller's site; its host is used as the company-address suffix when creating companies and for canonical links. |
+| `WL_LEGAL_TEXT` | Optional line printed with the issuer on receipts. |
+
+What changes when `WL_PRODUCT_NAME` is set: the vendor marketing page at `/` redirects to sign-in; page titles, share cards, the sign-in/reset/invite pages, the kiosk, the sidebar and the AI assistant (prompts and replies) use the reseller's name; invitation, reset, billing and reminder emails, the WhatsApp replies, the TOTP authenticator label and the payslip footer use it too; receipts are issued by the reseller (not the vendor) and numbered with a prefix derived from the product name; the mobile app is built with the same name and colour (`apps/mobile/app.config.js` reads the same variables at `eas build` time, plus an optional `WL_APP_ID` for the bundle id).
+
+**Per-client logo.** In the backoffice open *Companies > (company)* and use the **Branding** card to upload that client's logo (PNG, JPEG or WebP, up to 256 KB; SVG is refused). It shows in that company's app header and on its payslips. Clients cannot change it themselves.
+
+**Running the client book.** The reseller signs in to the backoffice (SUPER_ADMIN) and, under their own brand, creates client companies, assigns each a plan, records bank-transfer payments, and suspends or reinstates a company. Each client stays a separate tenant: data, users, logins and files are isolated exactly as on the standard multi-tenant install.
+
+**Verifying.** `GET /api/v1/brand` returns what the server is serving. Search the rendered pages, a sent email and a payslip PDF for the vendor name before go-live; `pnpm test:qa` (spec `16-white-label`) does this automatically against a white-label API instance.

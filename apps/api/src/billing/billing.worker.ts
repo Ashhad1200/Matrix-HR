@@ -1,3 +1,4 @@
+import { brandName } from '../common/brand';
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -52,10 +53,10 @@ export class BillingWorker implements OnModuleInit, OnModuleDestroy {
       if (inserted !== 1) continue;
       const admins = await this.prisma.user.findMany({ where: { tenantId: s.tenantId, role: 'COMPANY_ADMIN', status: 'ACTIVE' }, select: { email: true } });
       const end = s.currentPeriodEnd!.toISOString().slice(0, 10);
-      const subject = kind === 'expired' ? `Your MatrixHR plan has ended (${s.tenant.name})` : `Your MatrixHR plan ends on ${end}`;
+      const subject = kind === 'expired' ? `Your ${brandName()} plan has ended (${s.tenant.name})` : `Your ${brandName()} plan ends on ${end}`;
       const body = kind === 'expired'
-        ? `Your plan for ${s.tenant.name} ended on ${end}. You have a short grace period; after that the workspace shows only the billing page.\nPay by bank transfer from Billing in MatrixHR and upload your proof to keep everything running.\n`
-        : `Your plan for ${s.tenant.name} ends on ${end}.\nRenew from Billing in MatrixHR: pick a plan, transfer the amount with your payment reference, and upload the proof.\n`;
+        ? `Your plan for ${s.tenant.name} ended on ${end}. You have a short grace period; after that the workspace shows only the billing page.\nPay by bank transfer from Billing in ${brandName()} and upload your proof to keep everything running.\n`
+        : `Your plan for ${s.tenant.name} ends on ${end}.\nRenew from Billing in ${brandName()}: pick a plan, transfer the amount with your payment reference, and upload the proof.\n`;
       for (const a of admins) await this.outbox.enqueue({ to: a.email, subject, body, tenantId: s.tenantId, dedupeKey: `remind:${s.id}:${end}:${kind}:${a.email}` });
       queued++;
     }
