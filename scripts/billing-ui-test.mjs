@@ -26,7 +26,15 @@ async function api(path, { token, method = 'GET', body } = {}) {
   let json; try { json = JSON.parse(text); } catch { json = text; }
   return { status: res.status, body: json };
 }
-const login = async (email, password = PASS) => (await api('/auth/login', { method: 'POST', body: { email, password } })).body.accessToken;
+const login = async (email, password = PASS) => {
+  // Login has its own per-IP throttle; back off and retry rather than fail on it.
+  for (let i = 0; i < 8; i++) {
+    const r = await api('/auth/login', { method: 'POST', body: { email, password } });
+    if (r.status !== 429 && (r.body.accessToken || i >= 2)) return r.body.accessToken; // a throttled or momentarily failed login is retried
+    if (r.status === 401 && i >= 2) console.log(`  note  login ${email} -> ${r.status} ${JSON.stringify(r.body).slice(0, 120)}`);
+    await new Promise((res) => setTimeout(res, 8000));
+  }
+};
 
 async function uiLogin(page, email, password = PASS) {
   await page.goto(`${WEB}/login`, { waitUntil: 'networkidle' });
@@ -248,7 +256,7 @@ const tampered = signed.body.url.slice(0, -3) + 'AAA';
 ok('a tampered link is refused', (await fetch(tampered)).status === 404);
 ok('a manager cannot mint a link to someone else\'s document', (await api(`/employees/${emp}/documents/${doc.body.id}/link`, { token: await login(empEmail, 'Newpass123') })).status === 403);
 const pc = await api('/reports/payroll-cost', { token: await login('ali.khan@acme.com') });
-ok('payroll-cost is refused to a manager', pc.status === 403, String(pc.status));
+ok('payroll-cost is refused to a manager', pc.status === 403, String(pc.status) + ' ' + JSON.stringify(pc.body).slice(0, 200));
 ok('payroll-cost works for HR', (await api('/reports/payroll-cost', { token: adm })).status === 200);
 const hrTok = await login('hr@acme.com');
 ok('headcount report still works for a manager', (await api('/reports/headcount', { token: await login('ali.khan@acme.com') })).status === 200);

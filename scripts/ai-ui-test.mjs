@@ -19,7 +19,13 @@ async function api(path, { token, method = 'GET', body } = {}) {
   const text = await res.text(); let json; try { json = JSON.parse(text); } catch { json = text; }
   return { status: res.status, body: json };
 }
-const login = async (email) => (await api('/auth/login', { method: 'POST', body: { email, password: PASS } })).body.accessToken;
+const login = async (email) => {
+  for (let i = 0; i < 8; i++) {
+    const r = await api('/auth/login', { method: 'POST', body: { email, password: PASS } });
+    if (r.status !== 429) return r.body.accessToken;
+    await new Promise((res) => setTimeout(res, 8000));
+  }
+};
 async function uiLogin(page, email) {
   await page.goto(`${WEB}/login`, { waitUntil: 'networkidle' });
   await page.fill('input[type="email"]', email); await page.fill('input[type="password"]', PASS);
