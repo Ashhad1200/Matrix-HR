@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import { useBrand } from '@/lib/brand-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDate } from '@/lib/utils';
 
 export default function WhatsAppPage() {
+  const brand = useBrand();
   const [messages, setMessages] = useState<any[]>([]);
 
   useEffect(() => {
@@ -21,7 +23,7 @@ export default function WhatsAppPage() {
           <CardHeader><CardTitle>Commands</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <p className="text-[hsl(var(--muted-foreground))]">
-              Employees and managers can interact with MatrixHR via WhatsApp.
+              Employees and managers can interact with {brand.name} via WhatsApp.
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
               {[

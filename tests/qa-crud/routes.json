@@ -615,6 +615,13 @@
  },
  {
   "method": "GET",
+  "path": "/brand",
+  "auth": false,
+  "roles": [],
+  "file": "brand/brand.controller.ts"
+ },
+ {
+  "method": "GET",
   "path": "/custom-fields",
   "auth": true,
   "roles": [
@@ -720,6 +727,36 @@
   "file": "employees/employees.controller.ts"
  },
  {
+  "method": "POST",
+  "path": "/employees/departments/import",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/employees/departments/:id",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/employees/departments/:id",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "employees/employees.controller.ts"
+ },
+ {
   "method": "GET",
   "path": "/employees/team",
   "auth": true,
@@ -757,6 +794,36 @@
  {
   "method": "POST",
   "path": "/employees/designations",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/employees/designations/import",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/employees/designations/:id",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/employees/designations/:id",
   "auth": true,
   "roles": [
    "COMPANY_ADMIN",
@@ -1396,6 +1463,23 @@
   "file": "lms/lms.controller.ts"
  },
  {
+  "method": "GET",
+  "path": "/lms/my-enrollments",
+  "auth": true,
+  "roles": [],
+  "file": "lms/lms.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/lms/courses/:id",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "lms/lms.controller.ts"
+ },
+ {
   "method": "POST",
   "path": "/lms/courses",
   "auth": true,
@@ -1624,6 +1708,26 @@
   "file": "onboarding/onboarding.controller.ts"
  },
  {
+  "method": "POST",
+  "path": "/onboarding/templates",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "onboarding/onboarding.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/onboarding/templates/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "onboarding/onboarding.controller.ts"
+ },
+ {
   "method": "GET",
   "path": "/onboarding/progress",
   "auth": true,
@@ -1841,6 +1945,16 @@
   "file": "payroll/payroll.controller.ts"
  },
  {
+  "method": "PATCH",
+  "path": "/payroll/compensation-items/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "payroll/payroll.controller.ts"
+ },
+ {
   "method": "DELETE",
   "path": "/payroll/compensation-items/:id",
   "auth": true,
@@ -1923,6 +2037,16 @@
   "file": "performance/performance.controller.ts"
  },
  {
+  "method": "PATCH",
+  "path": "/performance/cycles/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "performance/performance.controller.ts"
+ },
+ {
   "method": "GET",
   "path": "/performance/goals",
   "auth": true,
@@ -1932,6 +2056,13 @@
  {
   "method": "POST",
   "path": "/performance/goals",
+  "auth": true,
+  "roles": [],
+  "file": "performance/performance.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/performance/goals/:id",
   "auth": true,
   "roles": [],
   "file": "performance/performance.controller.ts"
@@ -2049,6 +2180,24 @@
   "file": "platform/platform.controller.ts"
  },
  {
+  "method": "PUT",
+  "path": "/platform/tenants/:id/logo",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "platform/platform.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/platform/tenants/:id/logo",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "platform/platform.controller.ts"
+ },
+ {
   "method": "GET",
   "path": "/platform/audit",
   "auth": true,
@@ -2111,6 +2260,16 @@
  {
   "method": "POST",
   "path": "/recruitment/jobs",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "recruitment/recruitment.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/recruitment/jobs/:id",
   "auth": true,
   "roles": [
    "HR_MANAGER",

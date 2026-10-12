@@ -246,7 +246,7 @@
   "title": "Audit Log",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 49
+  "tableRows": 50
  },
  "admin:/billing": {
   "title": "Billing",
@@ -326,6 +326,31 @@
   ],
   "inputs": 10,
   "tableRows": 4
+ },
+ "admin:/settings/structure": {
+  "title": "Departments & designations",
+  "buttons": [
+   "Import",
+   "New department",
+   "Edit",
+   "Delete",
+   "Edit",
+   "Delete",
+   "Import",
+   "New designation",
+   "Edit",
+   "Delete"
+  ],
+  "inputs": 0,
+  "tableRows": 3
+ },
+ "admin:/settings/compensation": {
+  "title": "Pay components",
+  "buttons": [
+   "Add component"
+  ],
+  "inputs": 1,
+  "tableRows": 0
  },
  "admin:/settings/logins": {
   "title": "Staff logins",
@@ -707,6 +732,31 @@
   "inputs": 3,
   "tableRows": 0
  },
+ "hr:/settings/structure": {
+  "title": "Departments & designations",
+  "buttons": [
+   "Import",
+   "New department",
+   "Edit",
+   "Delete",
+   "Edit",
+   "Delete",
+   "Import",
+   "New designation",
+   "Edit",
+   "Delete"
+  ],
+  "inputs": 0,
+  "tableRows": 3
+ },
+ "hr:/settings/compensation": {
+  "title": "Pay components",
+  "buttons": [
+   "Add component"
+  ],
+  "inputs": 1,
+  "tableRows": 0
+ },
  "manager:/dashboard": {
   "title": "Good evening, Mansoor",
   "buttons": [],
@@ -1026,7 +1076,7 @@
    "New tenant"
   ],
   "inputs": 0,
-  "tableRows": 218
+  "tableRows": 268
  },
  "superadmin:/platform/billing": {
   "title": "Billing",
@@ -1064,7 +1114,7 @@
    "Grant"
   ],
   "inputs": 12,
-  "tableRows": 209
+  "tableRows": 255
  },
  "superadmin:/security": {
   "title": "Security",

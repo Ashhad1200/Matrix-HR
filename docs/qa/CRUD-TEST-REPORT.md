@@ -9,10 +9,10 @@ Suite: `tests/qa-crud/` (run with `pnpm test:qa`). Inventory: `docs/qa/crud-matr
 ## 2. Totals
 | | Round 1 | Round 2 (after the owner's decisions) |
 |---|---|---|
-| Automated specs (`pnpm test:qa`) | 103 / 103 | **130 / 130 pass** (API 93 incl. the 6 matrix specs; browser 37) |
+| Automated specs (`pnpm test:qa`) | 103 / 103 | 130 / 130 pass in round 2; **149 / 149 pass after round 3** (19 new: structure, pay components, client logo, white-label API and web) |
 | Route matrix | 292 routes | 298 routes: 401 without a token everywhere; 403 for every non-listed role on every role-gated route; tenant B sees no tenant A row; the 24 public routes are exactly the intended ones |
 | Browser journeys | billing, AI | billing (staff logins, leave setup, private files, payments) passes; AI assistant passes (22 checks) |
-| API unit + DB integration | 153 | 153 pass |
+| API unit + DB integration | 153 | 160 pass after round 3 (7 new brand/receipt/payslip-PDF tests) |
 | Migration rehearsal | 5 prod-like databases | still 5 databases, now with 3 migrations (`0_init`, `1_ai_billing`, `2_hr_modules`): ALL PASSED, applied twice each, row fingerprints unchanged |
 | Bugs found | 20 (1 blocker, 9 major, 10 minor), all fixed | no new product bugs found by the extended suite; one test race fixed (below) |
 
@@ -105,18 +105,42 @@ Screenshots of the verified flows: `docs/qa/screenshots/` (`employees-*`, `leave
 | 30-day trial at signup | ✅ done, upgraded | journey A: trial 30 days + 100 AI credits; `specs/08`: now every module during the trial |
 | Private files + payroll-cost restricted | ✅ done | journey G (signed links, tamper/cross-company refused); matrix: manager gets 403 on payroll-cost |
 
+## 7d. Round 3: structure, pay components, white-label (specs `16`, `17`, `18`; `common/brand.spec.ts`)
+| Item | Result | Evidence |
+|---|---|---|
+| **Departments and designations**: create, rename, nest (cycle refused), CSV-style import, edit, delete | ✅ | `16` API: duplicate names refused (any case), a department cannot sit under its own child, foreign-company parent refused, other company gets 404 on edit/delete, employee gets 403; import reports created/skipped/errors; every action is in the audit log. `18` UI: the same flow on `/settings/structure` |
+| **Delete refused while in use** | ✅ | 409 with the reason ("still in use by 1 sub-department", "employee(s) still hold it") for a department with sub-departments or people, and for a designation someone holds; deletes once emptied. Screenshot `structure-delete-refused.png` |
+| **Pay components** (allowance, bonus, arrears, deduction; recurring or one-off; start and end month) | ✅ | New screen `/settings/compensation`. Create, **edit (new PATCH)**, remove. Months validated (`YYYY-MM`, end not before start). Loans and advances stay read-only ("managed by loans"). Payroll reads the same table with the same rules as before (`resolveCompensation` untouched; the payroll integration specs pass). |
+| **Audit of every change** | ✅ | CREATE / UPDATE (with before and after values) / DELETE recorded for pay components; CREATE / UPDATE / DELETE / IMPORT for departments and designations |
+| **White-label**: product name, logo, favicon, colour, support email, email sender name, website | ✅ | Set by `WL_*` env on the API and web containers (documented in `docs/DEPLOYMENT.md` and `.env.example`). `17`: a second API and web server started with `WL_*`; `/brand` and `/auth/me` carry it; the standard server still says MatrixHR |
+| **No vendor text anywhere a client sees it** | ✅ | `17` scans the rendered HTML of every public page (sign-in, forgot/reset password, accept invite, sign-up, kiosk, 404), the page text of 40 signed-in screens as company admin, 6 backoffice screens as operator, page titles, `/robots.txt`, `/sitemap.xml`, the API docs JSON, `/brand`, the password-reset email, the authenticator label and the AI assistant's own system prompt (echoed by the mock model). Jest checks the payslip PDF text (hex-decoded from the deflated stream) and the receipt issuer. Zero matches for MatrixHR or TREEVOXA |
+| Vendor marketing page | ✅ | `/` redirects to the sign-in in white-label mode |
+| Colour and logo | ✅ | The palette is generated from `WL_PRIMARY_COLOR` (CSS variables, light and dark); checked: `--brand-500` equals the chosen colour and the sign-in button is no longer green. Logo shown on sign-in and the sidebar; favicon and title from config |
+| Mobile app config | ✅ (config only) | `apps/mobile/app.config.js` reads the same `WL_*` variables (name, slug, scheme, bundle id, colours); screens read the name from it. Not built into a binary here: that needs an EAS build |
+| **Per-client logo in the backoffice** | ✅ | `/platform/:id` has a Branding card. API: `PUT/DELETE /platform/tenants/:id/logo` (operator only; PNG/JPEG/WebP decided from the file bytes, SVG refused, 256 KB limit; audited). The logo shows in that company's header (every user of it) and on its payslips (PNG/JPEG); other companies are unaffected (`16`, `18`) |
+| **Multi-client hosting stays on** | ✅ | White-label does not touch tenancy. The operator creates companies, assigns plans, records payments and suspends, as before (the existing `07` and `14` isolation specs pass unchanged) |
+| **Receipts** | ✅ | Issued by the reseller (name, support email, optional `WL_LEGAL_TEXT`) with a number prefix taken from the product name; the vendor's NTN and address are not printed |
+| **AI assistant: white-label and single-company** | ✅ | The assistant was built in the earlier PR; this round makes its system prompt, app guide and nav label brand-aware (nav label is now "AI assistant"). White-label: replies and prompt carry the reseller's name, never the vendor's (`17`). Single-company: unlimited credits, no purchase screens (`09`) |
+
+Notes
+- **Receipt numbers issued before a server turns white-label keep their old `TVX-` prefix.** A new reseller install starts clean, so this only matters if you switch an existing server over.
+- The default plan on the Billing screen can be one a company has outgrown; the screen shows the server's message ("Starter allows up to 25"). Not changed.
+- No schema change in this round, so the migration rehearsal was not re-run (3 migrations, unchanged).
+- Not tested: a real SMTP send, a real AI provider (the mock model is used), a mobile binary.
+
 ## 8. Demo-safe path (fully verified, in this order)
 1. **Owner/HR:** sign up a fresh company (trial, every module) → Employees (add, search) → Recruitment (new job, add candidate, Applicant board) → Onboarding (new checklist, start for an employee) → Performance (new cycle) → Learning (new course) → eNPS (new survey, publish).
-2. **Employee:** Leave (apply: the form shows working days; edit; cancel) → Timesheets → Expenses → Loans → Performance (new goal, progress) → Learning (enrol) → Surveys (answer once) → Ask MatrixHR.
+2. **Employee:** Leave (apply: the form shows working days; edit; cancel) → Timesheets → Expenses → Loans → Performance (new goal, progress) → Learning (enrol) → Surveys (answer once) → the AI assistant.
 3. **Manager:** Approvals → Expenses → 1-on-1s → Reports.
 4. **HR/Admin:** Settings > Leave (weekend, holidays, leave types) → Staff logins → Payroll (run, submit; admin approves, locks).
 5. **Operator:** Billing (approve, receipt), AI assistant settings, Suspend a test company and show the suspended screen (then un-suspend).
-Skip: Pre-boarding invite, Departments/Designations, Compensation items (no create screen).
+Skip: Pre-boarding invite (not promised).
+6. **Set-up of a new client company (new in round 3):** Settings > Departments & designations (import a list, edit, try to delete one in use) → Settings > Pay components (add an allowance and a one-off bonus for an employee; edit; remove) → Payroll run shows them.
 
 ## How to re-run
 ```
 /var/tmp/up.sh            # (sandbox helper) or: pnpm dev stack with web built (next build + next start); API with AUTH_THROTTLE_LIMIT and THROTTLE_LIMIT raised
-pnpm test:qa              # tests/qa-crud, 130 specs, ~6 min (web as a production build)
+pnpm test:qa              # tests/qa-crud, 149 specs, ~7 min (web as a production build)
 node scripts/billing-ui-test.mjs && node scripts/ai-ui-test.mjs   # journeys (mock LLM: node scripts/mock-llm.mjs 9100)
 python3 tests/qa-crud/gen-routes.py   # refresh the route table after adding endpoints
 ```

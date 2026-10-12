@@ -14,6 +14,7 @@ createServer((req, res) => {
     if (last.role === 'tool') return reply(res, { content: last.content.includes('remaining') ? `You have ${JSON.parse(last.content)[0]?.remaining ?? '?'} days of ${JSON.parse(last.content)[0]?.leaveType ?? 'leave'} left.` : 'Done.' });
     if (/leave balance|days.*left/i.test(text)) return reply(res, { content: '', tool_calls: [{ id: 'c1', type: 'function', function: { name: 'my_leave_balances', arguments: '{}' } }] });
     if (/book leave|apply for leave/i.test(text)) return reply(res, { content: 'I can submit that for you.', tool_calls: [{ id: 'c2', type: 'function', function: { name: 'request_leave', arguments: JSON.stringify({ policyId: (text.match(/policy:(\S+)/) || [])[1] || 'x', startDate: '2026-12-21', endDate: '2026-12-22', reason: 'Mock trip' }) } }] });
+    if (/echo system prompt/i.test(text)) return reply(res, { content: msgs.filter((m) => m.role === 'system').map((m) => m.content).join('\n') });
     if (/attached file/i.test(text)) return reply(res, { content: `I read the attachment (${text.length} chars).` });
     reply(res, { content: 'Hello! I am the mock assistant.' });
   });

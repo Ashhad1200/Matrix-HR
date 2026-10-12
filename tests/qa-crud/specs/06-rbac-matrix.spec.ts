@@ -77,7 +77,7 @@ test('tenant isolation: tenant B never receives tenant A rows from any list rout
 test('public routes: only the intended ones exist', async () => {
   const pub = routes.filter((x) => !x.auth).map((x) => `${x.method} ${x.path}`).sort();
   const expected = [
-    'GET /auth/invite/:token', 'GET /careers/:subdomain/feed.xml', 'GET /careers/:subdomain/jobs', 'GET /files/:token', 'GET /health', 'GET /health/ready',
+    'GET /auth/invite/:token', 'GET /brand', 'GET /careers/:subdomain/feed.xml', 'GET /careers/:subdomain/jobs', 'GET /files/:token', 'GET /health', 'GET /health/ready',
     'GET /iclock/cdata', 'GET /iclock/getrequest', 'GET /preboarding/portal/:token', 'GET /sso/:subdomain/login-hint', 'GET /sso/:subdomain/metadata',
     'GET /tenants/subdomain/:subdomain', 'GET /whatsapp/webhook', 'POST /auth/forgot-password', 'POST /auth/invite/accept', 'POST /auth/login', 'POST /auth/logout',
     'POST /auth/mfa/verify', 'POST /auth/refresh', 'POST /auth/reset-password', 'POST /auth/signup', 'POST /iclock/cdata', 'POST /iclock/devicecmd', 'POST /whatsapp/webhook',

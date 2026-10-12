@@ -99,7 +99,7 @@ export default function StructurePage() {
       {notice && <p role="status" className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">{notice}</p>}
 
       <Card>
-        <CardHeader className="flex-row items-center justify-between">
+        <CardHeader className="!flex-row items-center justify-between space-y-0">
           <CardTitle>Departments</CardTitle>
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => { setError(''); setImporting('department'); }}><Upload className="h-4 w-4" aria-hidden="true" /> Import</Button>
@@ -124,7 +124,7 @@ export default function StructurePage() {
       </Card>
 
       <Card>
-        <CardHeader className="flex-row items-center justify-between">
+        <CardHeader className="!flex-row items-center justify-between space-y-0">
           <CardTitle>Designations</CardTitle>
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => { setError(''); setImporting('designation'); }}><Upload className="h-4 w-4" aria-hidden="true" /> Import</Button>
