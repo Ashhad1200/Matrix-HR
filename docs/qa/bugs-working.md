@@ -15,3 +15,8 @@ B12 | Major (regression from payroll-cost RBAC) | /reports page: one 403 from pa
 B13 | Major | Leave, Approvals, Attendance, Onboarding, Employees: write actions had no error handling - a refused request (over balance, duplicate code, forbidden) did nothing visible | FIXED (ErrorAlert + useAction)
 B14 | Minor | Employees list had no pagination UI (silently capped at 50) | FIXED
 B15 | Minor | Employee Attendance page called the manager-only dashboard (403 in console) | FIXED
+B16 | Major | Billing page: a company on a plan that is no longer offered (Enterprise, the old PKR plans: i.e. every existing customer) opened with "That plan is not available", no plan selected and a disabled Continue button | FIXED (falls back to the first offered plan)
+OPEN-2 | Decision | A company created through public signup has an admin login but NO employee profile, so Time Clock / Timesheets / My profile / 1-on-1s return 403 for that admin (console errors; pages mostly empty). Suggest: create an employee record for the signup admin
+OPEN-3 | Decision | A new trial company lands on the Starter plan; Custom fields, SSO etc. are plan-gated, so a trial customer cannot try them
+B17 | Minor (a11y) | Timesheet and 1-on-1 form labels were not associated with their inputs (screen readers / getByLabel) | FIXED
+B18 | Major (mobile/keyboard) | Timesheet 'Delete entry' button was display:none until mouse hover: impossible on touch devices and by keyboard | FIXED

@@ -260,8 +260,8 @@ export default function OneOnOnesPage() {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Schedule a 1-on-1" description="Set up a recurring conversation with a report">
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium">Team member</label>
-            <select className="input-base" value={form.employeeId} onChange={(e) => setForm({ ...form, employeeId: e.target.value })}>
+            <label htmlFor="oo-5717" className="mb-1 block text-sm font-medium">Team member</label>
+            <select id="oo-5717" className="input-base" value={form.employeeId} onChange={(e) => setForm({ ...form, employeeId: e.target.value })}>
               <option value="">Select…</option>
               {team.map((t: any) => (
                 <option key={t.id} value={t.id}>{t.firstName} {t.lastName}</option>
@@ -269,12 +269,12 @@ export default function OneOnOnesPage() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">When</label>
-            <Input type="datetime-local" value={form.scheduledAt} onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })} />
+            <label htmlFor="oo-8922" className="mb-1 block text-sm font-medium">When</label>
+            <Input id="oo-8922" type="datetime-local" value={form.scheduledAt} onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })} />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Talking points (one per line)</label>
-            <textarea
+            <label htmlFor="oo-7772" className="mb-1 block text-sm font-medium">Talking points (one per line)</label>
+            <textarea id="oo-7772"
               className="input-base min-h-[90px] resize-y py-2"
               placeholder={'Career goals check-in\nProject blockers\nFeedback both ways'}
               value={form.points}

@@ -37,13 +37,13 @@ for (const who of ROLES) {
       const resp = await page.goto(p, { waitUntil: 'domcontentloaded' }).catch((e) => { issues.push(`${p}: navigation failed ${e.message.slice(0, 80)}`); return null; });
       if (!resp) continue;
       await page.locator('#main').waitFor({ timeout: 15_000 }).catch(() => issues.push(`${p}: shell did not render`));
-      await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => undefined);
+      await page.waitForTimeout(1200); // the app polls (notifications), so networkidle never settles; give requests time to land
       const url = new URL(page.url());
       if (url.pathname !== p && !p.startsWith(url.pathname)) issues.push(`${p}: redirected to ${url.pathname}`);
       const words = await badText(page);
       if (words.length) issues.push(`${p}: shows ${words.join(', ')}`);
       const spinner = await page.locator('[role="progressbar"], .animate-spin').count();
-      if (spinner) { await page.waitForTimeout(2500); if (await page.locator('[role="progressbar"], .animate-spin').count()) issues.push(`${p}: spinner still showing after load`); }
+      if (spinner) { await page.waitForTimeout(3000); if (await page.locator('[role="progressbar"], .animate-spin').count()) issues.push(`${p}: spinner still showing after load`); }
       if (errs.length) issues.push(`${p}: console: ${errs.slice(0, 2).join(' | ')}`);
       if (bad.length) issues.push(`${p}: ${bad.slice(0, 3).join(' | ')}`);
       const over = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2);

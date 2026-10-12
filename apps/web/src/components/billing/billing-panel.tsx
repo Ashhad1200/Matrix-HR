@@ -92,7 +92,8 @@ export function BillingPanel({ onChanged }: { onChanged?: () => void }) {
     try {
       const [s, c, r] = await Promise.all([api.billing.state(), api.billing.catalog(), api.billing.requests()]);
       setState(s); setCatalog(c); setRequests(r);
-      setPlanCode((p) => p || s.subscription?.planCode || c.plans[0]?.code || '');
+      // Preselect the current plan only when it is still offered; customers on a retired plan (old PKR plans, Enterprise) start from the first offered one.
+      setPlanCode((p) => p || (c.plans.some((x: any) => x.code === s.subscription?.planCode) ? s.subscription.planCode : c.plans[0]?.code) || '');
       setPackCode((p) => p || c.creditPacks[0]?.code || '');
       setAccountId((a) => a || c.accounts[0]?.id || '');
     } catch (e: any) {

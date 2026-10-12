@@ -1,11 +1,256 @@
 {
+ "manager:/dashboard": {
+  "title": "Good afternoon, Mansoor",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "manager:/my-profile": {
+  "title": "My Info",
+  "buttons": [
+   "Save Changes"
+  ],
+  "inputs": 3,
+  "tableRows": 0
+ },
+ "manager:/team": {
+  "title": "My Team",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 1
+ },
+ "manager:/approvals": {
+  "title": "Approvals",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "manager:/one-on-ones": {
+  "title": "1-on-1s",
+  "buttons": [
+   "Schedule 1-on-1",
+   "Schedule 1-on-1"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "manager:/offboarding": {
+  "title": "Offboarding",
+  "buttons": [
+   "Submit resignation"
+  ],
+  "inputs": 2,
+  "tableRows": 0
+ },
+ "manager:/leave": {
+  "title": "Leave Management",
+  "buttons": [
+   "Apply for Leave"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "manager:/attendance": {
+  "title": "Attendance",
+  "buttons": [
+   "Clock In",
+   "Clock Out"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "manager:/timesheets": {
+  "title": "Timesheets",
+  "buttons": [
+   "Log Hours",
+   "My Week",
+   "Approvals",
+   "Previous week",
+   "Next week",
+   "Submit Week"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "manager:/my-pay": {
+  "title": "Pay Stubs",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "manager:/expenses": {
+  "title": "Expenses & reimbursements",
+  "buttons": [
+   "Add item",
+   "Save draft"
+  ],
+  "inputs": 7,
+  "tableRows": 0
+ },
+ "manager:/loans": {
+  "title": "Loans & advances",
+  "buttons": [
+   "Submit request"
+  ],
+  "inputs": 5,
+  "tableRows": 0
+ },
+ "manager:/performance": {
+  "title": "Performance",
+  "buttons": [
+   "Reviews & 360s",
+   "eNPS"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "manager:/reports": {
+  "title": "Reports & Analytics",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 12
+ },
+ "manager:/ai": {
+  "title": "Ask MatrixHR",
+  "buttons": [
+   "New chat",
+   "What is my leave balance?",
+   "Which public holidays are coming up?",
+   "How do I invite an employee to log in?",
+   "Attach a file",
+   "Send"
+  ],
+  "inputs": 2,
+  "tableRows": 0
+ },
+ "manager:/security": {
+  "title": "Security",
+  "buttons": [
+   "Change password",
+   "Set up",
+   "Opt in to WhatsApp messages"
+  ],
+  "inputs": 3,
+  "tableRows": 0
+ },
+ "employee:/dashboard": {
+  "title": "Good afternoon, Esha",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "employee:/my-profile": {
+  "title": "My Info",
+  "buttons": [
+   "Save Changes"
+  ],
+  "inputs": 3,
+  "tableRows": 0
+ },
+ "employee:/offboarding": {
+  "title": "Offboarding",
+  "buttons": [
+   "Submit resignation"
+  ],
+  "inputs": 2,
+  "tableRows": 0
+ },
+ "employee:/leave": {
+  "title": "Leave Management",
+  "buttons": [
+   "Apply for Leave"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "employee:/attendance": {
+  "title": "Attendance",
+  "buttons": [
+   "Clock In",
+   "Clock Out"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "employee:/timesheets": {
+  "title": "Timesheets",
+  "buttons": [
+   "Log Hours",
+   "Previous week",
+   "Next week",
+   "Submit Week"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "employee:/my-pay": {
+  "title": "Pay Stubs",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "employee:/expenses": {
+  "title": "Expenses & reimbursements",
+  "buttons": [
+   "Add item",
+   "Save draft"
+  ],
+  "inputs": 7,
+  "tableRows": 0
+ },
+ "employee:/loans": {
+  "title": "Loans & advances",
+  "buttons": [
+   "Submit request"
+  ],
+  "inputs": 5,
+  "tableRows": 0
+ },
+ "employee:/performance": {
+  "title": "Performance",
+  "buttons": [
+   "Reviews & 360s",
+   "eNPS"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "employee:/lms": {
+  "title": "Learning Management",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "employee:/ai": {
+  "title": "Ask MatrixHR",
+  "buttons": [
+   "New chat",
+   "What is my leave balance?",
+   "Which public holidays are coming up?",
+   "How do I invite an employee to log in?",
+   "Attach a file",
+   "Send"
+  ],
+  "inputs": 2,
+  "tableRows": 0
+ },
+ "employee:/security": {
+  "title": "Security",
+  "buttons": [
+   "Change password",
+   "Set up",
+   "Opt in to WhatsApp messages"
+  ],
+  "inputs": 3,
+  "tableRows": 0
+ },
  "superadmin:/platform": {
   "title": "Tenants",
   "buttons": [
    "New tenant"
   ],
   "inputs": 0,
-  "tableRows": 84
+  "tableRows": 90
  },
  "superadmin:/platform/billing": {
   "title": "Billing",
@@ -31,7 +276,7 @@
   "title": "Audit log",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 55
+  "tableRows": 58
  },
  "superadmin:/platform/ai": {
   "title": "AI assistant",
@@ -43,7 +288,7 @@
    "Grant"
   ],
   "inputs": 12,
-  "tableRows": 82
+  "tableRows": 88
  },
  "superadmin:/security": {
   "title": "Security",
