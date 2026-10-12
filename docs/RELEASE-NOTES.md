@@ -1,4 +1,4 @@
-# Release notes: rounds 2 and 3 (everything after the merged QA-fixes PR)
+# Release notes: rounds 2 to 4 (everything after the merged QA-fixes PR)
 
 **Base:** `master` already contains the QA fixes (PR #4 as merged on 2026-10-12, 20 bug fixes plus `tests/qa-crud`). This release adds everything below on top of it. It was developed on `claude/serene-rubin-xa92dj`.
 
