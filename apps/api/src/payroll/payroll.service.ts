@@ -4,6 +4,7 @@ import { PayrollEngineFactory } from './engines/payroll-engine.factory';
 import { PayrollRules } from './engines/payroll-engine.interface';
 import { PayslipPdfService } from './payslip-pdf.service';
 import { UploadsService } from '../uploads/uploads.service';
+import { FilesService } from '../uploads/files.service';
 import { CreateCompensationItemDto } from './dto';
 import { IntegrationSyncService } from '../integrations/integration-sync.service';
 import { buildBankFile } from './bank-file';
@@ -16,6 +17,7 @@ export class PayrollService {
     private engineFactory: PayrollEngineFactory,
     private payslipPdf: PayslipPdfService,
     private uploads: UploadsService,
+    private files: FilesService,
     private syncLogs: IntegrationSyncService,
   ) {}
 
@@ -431,13 +433,13 @@ export class PayrollService {
         department: item.employee.department?.name,
         breakdown: (item.breakdown ?? {}) as any,
       });
-      const { url } = await this.uploads.uploadBuffer(
+      const { ref } = await this.uploads.uploadBuffer(
         tenantId,
         buffer,
         `payslip-${run.period}-${item.employee.employeeCode}.pdf`,
         'application/pdf',
       );
-      await this.prisma.payrollItem.update({ where: { id: item.id }, data: { payslipUrl: url } });
+      await this.prisma.payrollItem.update({ where: { id: item.id }, data: { payslipUrl: ref } });
     }
   }
 
@@ -448,7 +450,7 @@ export class PayrollService {
       include: { payrollRun: true, employee: { include: { designation: true, department: true } } },
     });
     if (!item) throw new NotFoundException('Payslip not found');
-    if (item.payslipUrl) return { url: item.payslipUrl };
+    if (item.payslipUrl) return this.files.linkFor(tenantId, item.payslipUrl, { name: `payslip-${item.payrollRun.period}-${item.employee.employeeCode}.pdf` });
 
     const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
     const buffer = await this.payslipPdf.generate({
@@ -460,14 +462,14 @@ export class PayrollService {
       department: item.employee.department?.name,
       breakdown: (item.breakdown ?? {}) as any,
     });
-    const { url } = await this.uploads.uploadBuffer(
+    const { ref } = await this.uploads.uploadBuffer(
       tenantId,
       buffer,
       `payslip-${item.payrollRun.period}-${item.employee.employeeCode}.pdf`,
       'application/pdf',
     );
-    await this.prisma.payrollItem.update({ where: { id: item.id }, data: { payslipUrl: url } });
-    return { url };
+    await this.prisma.payrollItem.update({ where: { id: item.id }, data: { payslipUrl: ref } });
+    return this.files.linkFor(tenantId, ref, { name: `payslip-${item.payrollRun.period}-${item.employee.employeeCode}.pdf` });
   }
 
   private assertDisbursable(run: { status: string }, what: string) {

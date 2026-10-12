@@ -311,6 +311,9 @@ async function main() {
   const { seedCommercial } = await import('./seed-commercial');
   await seedCommercial(prisma, tenant.id);
 
+  const { seedUsdCatalog } = await import('./seed-usd-catalog');
+  await seedUsdCatalog(prisma);
+
   const { seedPayrollRules } = await import('./seed-payroll-rules');
   await seedPayrollRules(prisma);
 

@@ -70,8 +70,8 @@ export default function EmployeeDetailPage() {
     setUploading(true);
     setUploadError('');
     try {
-      const { url } = await api.uploads.upload(docFile);
-      await api.employees.addDocument(id, { type: docType, name: docFile.name, fileUrl: url });
+      const { key } = await api.uploads.upload(docFile);
+      await api.employees.addDocument(id, { type: docType, name: docFile.name, fileKey: key });
       setDocFile(null);
       load();
     } catch (err: any) {
@@ -197,7 +197,21 @@ export default function EmployeeDetailPage() {
                     <td className="p-2">{d.type}</td>
                     <td className="p-2">
                       {d.fileUrl ? (
-                        <a href={d.fileUrl} target="_blank" rel="noreferrer" className="text-brand-600 hover:underline">{d.name}</a>
+                        // Files are private: ask for a short-lived signed link when someone actually opens one.
+                        <button
+                          type="button"
+                          className="text-brand-600 hover:underline"
+                          onClick={async () => {
+                            try {
+                              const { url } = await api.files.documentLink(id, d.id);
+                              window.open(url, '_blank', 'noopener');
+                            } catch (err: any) {
+                              setUploadError(err.message || 'Could not open this document');
+                            }
+                          }}
+                        >
+                          {d.name}
+                        </button>
                       ) : d.name}
                     </td>
                     <td className="p-2">{d.verified ? '✓' : '—'}</td>

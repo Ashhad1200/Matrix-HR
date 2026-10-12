@@ -4,10 +4,13 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import {
-  Sliders, GitBranch, Shield, ChevronRight, KeyRound, Fingerprint, Globe2, MonitorSmartphone, BookOpen, Webhook, ScanFace,
+  Sliders, GitBranch, Shield, ChevronRight, KeyRound, Fingerprint, Globe2, MonitorSmartphone, BookOpen, Webhook, ScanFace, UserPlus, CalendarDays, CreditCard,
 } from 'lucide-react';
 
 const settingsLinks = [
+  { href: '/settings/logins', label: 'Staff logins', description: 'Invite employees to sign in and choose their role', icon: UserPlus },
+  { href: '/settings/leave', label: 'Leave setup', description: 'Leave types, yearly days, carry-forward and holidays', icon: CalendarDays },
+  { href: '/billing', label: 'Billing', description: 'Your plan, bank-transfer payments and receipts', icon: CreditCard },
   { href: '/settings/custom-fields', label: 'Custom Fields', description: 'Extend employee records with custom data formats', icon: Sliders },
   { href: '/settings/workflows', label: 'Workflows', description: 'Multi-level approval automation for profile changes', icon: GitBranch },
   { href: '/settings/audit', label: 'Audit Log', description: 'Review system activity and changes', icon: Shield },

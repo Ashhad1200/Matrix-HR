@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge, statusVariant } from '@/components/ui/badge';
 import { formatDate } from '@/lib/utils';
+import { TenantBillingCard } from '@/components/billing/tenant-billing-card';
 
 const STATUSES = ['trialing', 'active', 'past_due', 'suspended', 'cancelled', 'expired'];
 
@@ -162,6 +163,8 @@ export default function PlatformTenantDetailPage() {
             </div>
           </CardContent>
         </Card>
+
+        <TenantBillingCard tenantId={id} />
 
         <Card className="lg:col-span-2">
           <CardHeader><CardTitle>Entitlement Overrides ({sub?.overrides?.length ?? 0})</CardTitle></CardHeader>

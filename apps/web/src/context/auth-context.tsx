@@ -10,6 +10,19 @@ export type AuthBadges = {
   unreadNotifications: number;
 };
 
+export type BillingSummary = {
+  state: 'none' | 'ok' | 'due_soon' | 'grace' | 'lapsed' | 'provisional';
+  blocked: boolean;
+  banner: 'lapsed' | 'provisional' | 'pending' | 'rejected' | 'grace' | 'due_soon' | null;
+  periodEnd?: string | null;
+  graceEndsAt?: string | null;
+  daysToEnd?: number | null;
+  provisionalUntil?: string | null;
+  subscription?: { planName: string; planCode: string; status: string; billingPeriod: string; trialEndsAt?: string | null } | null;
+  openRequest?: { id: string; status: string; purpose: string; reference: string } | null;
+  rejectedReason?: string | null;
+};
+
 export type NavItemWithBadge = NavItem & { badgeCount?: number };
 
 export type AuthUser = {
@@ -32,6 +45,8 @@ export type AuthUser = {
   permissions: UserPermissions & { nav: NavItemWithBadge[] };
   badges: AuthBadges;
   twoFaEnabled: boolean;
+  /** null for the platform operator. Everyone else learns whether the company is blocked; only admins get banner details. */
+  billing?: BillingSummary | null;
 };
 
 type AuthContextValue = {

@@ -8,7 +8,7 @@ import { WhatsAppThread } from '@/components/landing/whatsapp-thread';
 import { RecordLens } from '@/components/landing/record-lens';
 import { Pricing } from '@/components/landing/pricing';
 import { In } from '@/components/landing/motion';
-import { PRICING_TIERS } from '@matrixhr/shared';
+import { USD_PLAN_CATALOG, TRIAL_DAYS } from '@matrixhr/shared';
 import { siteUrl } from '@/lib/site';
 import { cn } from '@/lib/utils';
 
@@ -104,7 +104,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: 'How does the trial work?',
-    a: 'Create your company and choose a subdomain. You become the company admin with every module switched on, and the trial runs for 30 days.',
+    a: 'Create your company and choose a subdomain. You become the company admin on the Growth plan for 30 days, with 100 AI credits. To keep going afterwards, pay by bank transfer from the Billing page; if you do not, the workspace pauses after a short grace period and your data stays safe.',
   },
 ];
 
@@ -120,17 +120,12 @@ function JsonLd() {
         url: siteUrl,
         description:
           'HR and payroll for growing companies in Pakistan: attendance, leave, expenses, loans and payroll with a second approver, payslips and bank files.',
-        offers: (['starter', 'growth', 'pro'] as const).map((k) => ({
+        offers: USD_PLAN_CATALOG.map((p) => ({
           '@type': 'Offer',
-          name: PRICING_TIERS[k].name,
-          price: PRICING_TIERS[k].pricePkr,
-          priceCurrency: 'PKR',
-          priceSpecification: {
-            '@type': 'UnitPriceSpecification',
-            price: PRICING_TIERS[k].pricePkr,
-            priceCurrency: 'PKR',
-            unitText: 'per employee per month',
-          },
+          name: p.name,
+          price: p.monthly,
+          priceCurrency: 'USD',
+          priceSpecification: { '@type': 'UnitPriceSpecification', price: p.monthly, priceCurrency: 'USD', unitText: 'per month' },
         })),
       },
       {
@@ -171,7 +166,7 @@ export default function LandingPage() {
                   <a href="#pricing" className="mx-btn mx-btn-quiet">
                     See pricing
                   </a>
-                  <span className="text-sm text-[var(--mx-ink-2)] sm:ml-2">30 days, every module on.</span>
+                  <span className="text-sm text-[var(--mx-ink-2)] sm:ml-2">{TRIAL_DAYS} days free, 100 AI credits.</span>
                 </div>
               </>
             }
@@ -315,7 +310,7 @@ export default function LandingPage() {
         <section id="pricing" aria-labelledby="pricing-title" className="scroll-mt-16 py-24 sm:py-32">
           <div className={WRAP}>
             <h2 id="pricing-title" className="mx-display max-w-[24ch] text-[clamp(2.6rem,5.4vw,4.75rem)]">
-              Priced per person, in rupees.
+              Simple monthly pricing, in dollars.
             </h2>
             <div className="mt-12">
               <Pricing />

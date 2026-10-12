@@ -2,9 +2,9 @@ import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards } from '@ne
 import { RecruitmentService } from './recruitment.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles, TenantId } from '../common/decorators';
+import { Roles, TenantId, CurrentUser } from '../common/decorators';
 import { UserRole } from '@matrixhr/database';
-import { CreateJobDto, CreateApplicationDto } from './dto';
+import { CreateJobDto, CreateApplicationDto, HireDto } from './dto';
 
 @Controller('recruitment')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -38,7 +38,7 @@ export class RecruitmentController {
   }
 
   @Post('applications/:id/hire')
-  hire(@TenantId() tenantId: string, @Param('id') id: string) {
-    return this.recruitment.hireCandidate(tenantId, id);
+  hire(@TenantId() tenantId: string, @CurrentUser() user: { id: string; role: string }, @Param('id') id: string, @Body() body: HireDto) {
+    return this.recruitment.hireCandidate(tenantId, id, user, body?.inviteRole);
   }
 }

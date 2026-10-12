@@ -68,6 +68,8 @@ const ALL_NAV: Record<string, NavItem> = {
   platform: { href: '/platform', label: 'Tenants', icon: 'Building2' },
   platformPlans: { href: '/platform/plans', label: 'Plans', icon: 'Layers' },
   platformAudit: { href: '/platform/audit', label: 'Audit Log', icon: 'ScrollText' },
+  platformBilling: { href: '/platform/billing', label: 'Billing', icon: 'CreditCard' },
+  billing: { href: '/billing', label: 'Billing', icon: 'CreditCard' },
 };
 
 function nav(...keys: string[]): NavItem[] {
@@ -132,7 +134,7 @@ export function getPermissionsForRole(role: string): UserPermissions {
       // platform audit log, their own account security), never a tenant's HR/payroll data.
       return {
         portal: 'platform',
-        nav: nav('platform', 'platformPlans', 'platformAudit', 'security'),
+        nav: nav('platform', 'platformBilling', 'platformPlans', 'platformAudit', 'security'),
         actions: ADMIN_ACTIONS,
       };
     case ROLES.COMPANY_ADMIN:
@@ -143,7 +145,7 @@ export function getPermissionsForRole(role: string): UserPermissions {
           'dashboard', 'employees', 'leave', 'attendance', 'timesheets', 'payroll', 'recruitment',
           'atsKanban', 'preboarding', 'onboarding', 'offboarding', 'performance', 'enps', 'oneOnOnes', 'lms',
           'reports', 'whatsapp', 'settings', 'customFields', 'workflows', 'audit',
-          'marketplace', 'extensions', 'ai', 'security', 'expenses', 'loans',
+          'marketplace', 'extensions', 'ai', 'security', 'expenses', 'loans', 'billing',
         ),
         actions: ADMIN_ACTIONS,
       };

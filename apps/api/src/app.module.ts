@@ -48,6 +48,9 @@ import { HealthModule } from './health/health.module';
 import { ExpensesModule } from './expenses/expenses.module';
 import { LoansModule } from './loans/loans.module';
 import { BiometricModule } from './biometric/biometric.module';
+import { BillingModule } from './billing/billing.module';
+import { InvitesModule } from './invites/invites.module';
+import { CreditsModule } from './credits/credits.service';
 
 @Module({
   imports: [
@@ -59,6 +62,9 @@ import { BiometricModule } from './biometric/biometric.module';
     MailModule,
     HealthModule,
     ExpensesModule,
+    CreditsModule,
+    BillingModule,
+    InvitesModule,
     LoansModule,
     AuditModule,
     NotificationsModule,

@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, IsUrl, MaxLength, IsIn } from 'class-validator';
 
 export class CreateJobDto {
   @IsString() @MaxLength(200) title: string;
@@ -15,4 +15,9 @@ export class CreateApplicationDto {
   @IsOptional() @IsString() @MaxLength(40) phone?: string;
   @IsOptional() @IsUrl({ require_protocol: true, require_tld: false }) resumeUrl?: string;
   @IsOptional() @IsString() @MaxLength(60) source?: string;
+}
+
+export class HireDto {
+  /** Also invite the new hire to sign in, with this role. */
+  @IsOptional() @IsIn(['EMPLOYEE', 'MANAGER', 'HR_MANAGER', 'COMPANY_ADMIN']) inviteRole?: 'EMPLOYEE' | 'MANAGER' | 'HR_MANAGER' | 'COMPANY_ADMIN';
 }

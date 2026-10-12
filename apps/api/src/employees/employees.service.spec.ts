@@ -26,6 +26,7 @@ describe('EmployeesService tenant isolation', () => {
     webhooks as never,
     onboarding as never,
     entitlements as never,
+    { linkFor: jest.fn() } as never,
   );
 
   beforeEach(() => {

@@ -10,6 +10,8 @@ import { ThemeToggle } from './theme-toggle';
 import { CommandPalette } from './command-palette';
 import { AuthProvider } from '@/context/auth-context';
 import { useAuth } from '@/hooks/use-auth';
+import { BillingBanner } from '@/components/billing/billing-banner';
+import { BillingPanel } from '@/components/billing/billing-panel';
 
 const ROLE_LABELS: Record<string, string> = {
   SUPER_ADMIN: 'Super Admin',
@@ -23,8 +25,24 @@ function isRouteAllowed(pathname: string, navHrefs: string[]) {
   return navHrefs.some((href) => pathname === href || pathname.startsWith(`${href}/`));
 }
 
+function LapsedScreen({ canPay, onChanged }: { canPay: boolean; onChanged: () => void }) {
+  return (
+    <div className="mx-auto max-w-4xl space-y-6">
+      <div>
+        <h1 className="font-display text-2xl font-bold tracking-tight">Your subscription has ended</h1>
+        <p className="mt-1 max-w-2xl text-sm text-[hsl(var(--muted-foreground))]">
+          {canPay
+            ? 'Your data is safe and nothing has been deleted. Pay by bank transfer and upload the proof: you get temporary access while we check it, and full access the moment it is approved.'
+            : 'Your company\'s subscription has ended, so MatrixHR is paused for everyone. Your data is safe. Please ask a company admin or HR manager to renew it from the Billing page.'}
+        </p>
+      </div>
+      {canPay && <BillingPanel onChanged={onChanged} />}
+    </div>
+  );
+}
+
 function AppShellInner({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, refresh } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -49,6 +67,8 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [menuOpen]);
 
+  // A lapsed company only gets the billing screen. The API enforces this too; this is the friendly version of that 403.
+  const blocked = !!user?.billing?.blocked;
   const navHrefs = user?.permissions.nav.map((n) => n.href) ?? [];
   const allowed = !user || isRouteAllowed(pathname, navHrefs);
 
@@ -137,8 +157,9 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
             <ThemeToggle />
           </div>
         </header>
+        <BillingBanner />
         <main id="main" tabIndex={-1} className="flex-1 overflow-y-auto p-4 focus:outline-none sm:p-6 lg:p-8">
-          <div className="mx-auto max-w-7xl">{children}</div>
+          <div className="mx-auto max-w-7xl">{blocked ? <LapsedScreen canPay={['COMPANY_ADMIN', 'HR_MANAGER'].includes(user.role)} onChanged={refresh} /> : children}</div>
         </main>
       </div>
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />

@@ -61,6 +61,11 @@ export class EmployeesController {
     return this.employees.getMyPayslips(tenantId, employeeId);
   }
 
+  @Get('me/payslips/:itemId/link')
+  myPayslipLink(@TenantId() tenantId: string, @CurrentUser('employeeId') employeeId: string, @Param('itemId') itemId: string) {
+    return this.employees.getMyPayslipLink(tenantId, employeeId, itemId);
+  }
+
   @Patch('me/self')
   selfUpdate(
     @TenantId() tenantId: string,
@@ -126,6 +131,16 @@ export class EmployeesController {
     @Body() dto: UpdateEmployeeDto,
   ) {
     return this.employees.update(tenantId, userId, id, dto);
+  }
+
+  @Get(':id/documents/:docId/link')
+  documentLink(
+    @TenantId() tenantId: string,
+    @Param('id') employeeId: string,
+    @Param('docId') docId: string,
+    @CurrentUser() user: { id: string; role: string; employeeId?: string },
+  ) {
+    return this.employees.getDocumentLink(tenantId, employeeId, docId, viewerOf(user));
   }
 
   @Post(':id/documents')

@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import {
-  ArrayMaxSize, ArrayMinSize, IsBoolean, IsDateString, IsIn, IsNumber, IsOptional, IsString, IsUrl, Max, MaxLength, Min, ValidateNested,
+  ArrayMaxSize, ArrayMinSize, IsBoolean, IsDateString, IsIn, IsNumber, IsOptional, IsString, Max, MaxLength, Min, ValidateNested,
 } from 'class-validator';
 
 export class CreateCategoryDto {
@@ -21,7 +21,8 @@ export class ExpenseItemDto {
   @IsDateString() date: string;
   @IsNumber({ maxDecimalPlaces: 2 }) @Min(0.01) @Max(10_000_000) amount: number;
   @IsString() @MaxLength(300) description: string;
-  @IsOptional() @IsUrl({ require_protocol: true, require_tld: false, protocols: ['http', 'https'] }) receiptUrl?: string;
+  /** "s3:<key>" from POST /uploads (or a legacy URL into our own bucket). The service refuses anything that is not this tenant's own file. */
+  @IsOptional() @IsString() @MaxLength(400) receiptUrl?: string;
 }
 
 export class CreateClaimDto {

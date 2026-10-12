@@ -58,6 +58,11 @@ export class ExpensesController {
     return this.expenses.getClaim(tenantId, viewerOf(user), id);
   }
 
+  @Get('claims/:id/items/:itemId/receipt-link')
+  receiptLink(@TenantId() tenantId: string, @CurrentUser() user: Me, @Param('id') id: string, @Param('itemId') itemId: string) {
+    return this.expenses.getReceiptLink(tenantId, viewerOf(user), id, itemId);
+  }
+
   @Patch('claims/:id')
   update(@TenantId() tenantId: string, @CurrentUser() user: Me, @Param('id') id: string, @Body() dto: UpdateClaimDto) {
     return this.expenses.updateClaim(tenantId, viewerOf(user), id, dto);
