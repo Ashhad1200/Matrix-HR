@@ -4,8 +4,12 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function ReportsPage() {
+  const { user } = useAuth();
+  // Payroll cost is HR/admin only on the server; managers must not call it (one 403 used to blank the whole page).
+  const canSeePayroll = user?.role === 'HR_MANAGER' || user?.role === 'COMPANY_ADMIN';
   const [headcount, setHeadcount] = useState<any[]>([]);
   const [leaveData, setLeaveData] = useState<any[]>([]);
   const [payrollCost, setPayrollCost] = useState<any[]>([]);
@@ -13,18 +17,19 @@ export default function ReportsPage() {
   const month = new Date().toISOString().slice(0, 7);
 
   useEffect(() => {
+    const safe = <T,>(p: Promise<T>, fallback: T) => p.catch((e) => { console.error(e); return fallback; });
     Promise.all([
-      api.reports.headcount(),
-      api.reports.leaveConsumption(),
-      api.reports.payrollCost(),
-      api.reports.attendance(month),
+      safe(api.reports.headcount(), [] as any[]),
+      safe(api.reports.leaveConsumption(), [] as any[]),
+      canSeePayroll ? safe(api.reports.payrollCost(), [] as any[]) : Promise.resolve([] as any[]),
+      safe(api.reports.attendance(month), [] as any[]),
     ]).then(([h, l, p, a]) => {
       setHeadcount(h);
       setLeaveData(l);
       setPayrollCost(p);
       setAttendance(a);
-    }).catch(console.error);
-  }, [month]);
+    });
+  }, [month, canSeePayroll]);
 
   return (
     <div className="space-y-6">
@@ -43,7 +48,7 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        {canSeePayroll && <Card>
           <CardHeader><CardTitle>Payroll Cost by Department</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             {payrollCost.map((d) => (
@@ -53,7 +58,7 @@ export default function ReportsPage() {
               </div>
             ))}
           </CardContent>
-        </Card>
+        </Card>}
       </div>
 
       <Card>

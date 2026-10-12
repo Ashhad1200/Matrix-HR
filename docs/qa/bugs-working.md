@@ -11,3 +11,7 @@ B9 | BLOCKER (security) | POST /enps/surveys/:id/respond had no auth guard: anyo
 OPEN-1 | Decision | eNPS responses carry no respondent id, so one user can vote repeatedly (needs an additive table to dedupe while staying anonymous)
 B10 | Minor | Custom field key accepted any text (spaces, symbols), no length limits | FIXED
 B11 | Major (ops) | Operator 'Suspend' only switched off plan-gated features: the company kept full access (Tenant.status was never set; no UI/API could set it). Suspending now blocks the tenant and un-suspending restores it | FIXED (behaviour change, see Decisions)
+B12 | Major (regression from payroll-cost RBAC) | /reports page: one 403 from payroll-cost (managers) rejected the whole Promise.all, so a manager saw an EMPTY reports page | FIXED (per-call fallback, payroll card HR/admin only)
+B13 | Major | Leave, Approvals, Attendance, Onboarding, Employees: write actions had no error handling - a refused request (over balance, duplicate code, forbidden) did nothing visible | FIXED (ErrorAlert + useAction)
+B14 | Minor | Employees list had no pagination UI (silently capped at 50) | FIXED
+B15 | Minor | Employee Attendance page called the manager-only dashboard (403 in console) | FIXED

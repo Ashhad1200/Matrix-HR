@@ -6,12 +6,15 @@ import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
+import { useAction } from '@/hooks/use-action';
+import { ErrorAlert } from '@/components/ui/alert';
 
 export default function ApprovalsPage() {
   const { refresh } = useAuth();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const action = useAction();
 
   function load() {
     setLoading(true);
@@ -24,15 +27,11 @@ export default function ApprovalsPage() {
   useEffect(() => { load(); }, []);
 
   async function handleApprove(id: string) {
-    await api.approvals.approve(id);
-    load();
-    await refresh();
+    if (await action.run(() => api.approvals.approve(id))) { load(); await refresh(); }
   }
 
   async function handleReject(id: string) {
-    await api.approvals.reject(id, 'Not approved at this time');
-    load();
-    await refresh();
+    if (await action.run(() => api.approvals.reject(id, 'Not approved at this time'))) { load(); await refresh(); }
   }
 
   return (
@@ -41,6 +40,7 @@ export default function ApprovalsPage() {
         <h1 className="text-2xl font-bold">Approvals</h1>
         <p className="text-[hsl(var(--muted-foreground))]">Review and action pending requests</p>
       </div>
+      <ErrorAlert message={action.error} />
 
       {loading ? (
         <p className="text-[hsl(var(--muted-foreground))]">Loading inbox...</p>

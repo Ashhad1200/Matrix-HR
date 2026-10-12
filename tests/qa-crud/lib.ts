@@ -35,5 +35,6 @@ export function watch(page: Page, allow: RegExp[] = []) {
 
 export async function badText(page: Page) {
   const t = await page.locator('body').innerText();
-  return ['undefined', 'NaN', 'Invalid Date', '[object Object]'].filter((w) => new RegExp(`(^|[^A-Za-z])${w}([^A-Za-z]|$)`).test(t));
+  const esc = (w: string) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return ['undefined', 'NaN', 'Invalid Date', '[object Object]'].filter((w) => new RegExp(`(^|[^A-Za-z])${esc(w)}([^A-Za-z]|$)`).test(t));
 }

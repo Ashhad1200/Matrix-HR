@@ -1,0 +1,58 @@
+{
+ "superadmin:/platform": {
+  "title": "Tenants",
+  "buttons": [
+   "New tenant"
+  ],
+  "inputs": 0,
+  "tableRows": 84
+ },
+ "superadmin:/platform/billing": {
+  "title": "Billing",
+  "buttons": [
+   "To check (0)",
+   "History",
+   "Payment accounts",
+   "Plans and packs",
+   "Settings"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "superadmin:/platform/plans": {
+  "title": "Plans",
+  "buttons": [
+   "New plan"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "superadmin:/platform/audit": {
+  "title": "Audit log",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 55
+ },
+ "superadmin:/platform/ai": {
+  "title": "AI assistant",
+  "buttons": [
+   "Turn on",
+   "Save",
+   "Save",
+   "Save",
+   "Grant"
+  ],
+  "inputs": 12,
+  "tableRows": 82
+ },
+ "superadmin:/security": {
+  "title": "Security",
+  "buttons": [
+   "Change password",
+   "Set up",
+   "Opt in to WhatsApp messages"
+  ],
+  "inputs": 3,
+  "tableRows": 0
+ }
+}

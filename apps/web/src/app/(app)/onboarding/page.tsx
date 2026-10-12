@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useAction } from '@/hooks/use-action';
+import { ErrorAlert } from '@/components/ui/alert';
 
 export default function OnboardingPage() {
+  const action = useAction();
   const [templates, setTemplates] = useState<any[]>([]);
   const [progress, setProgress] = useState<any[]>([]);
   const [dashboard, setDashboard] = useState<any>(null);
@@ -27,13 +30,13 @@ export default function OnboardingPage() {
   async function completeNextTask(p: any) {
     const pending = p.tasks?.find((t: any) => t.status !== 'COMPLETED');
     if (!pending) return;
-    await api.onboarding.completeTask(p.id, pending.taskId);
-    load();
+    if (await action.run(() => api.onboarding.completeTask(p.id, pending.taskId))) load();
   }
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Onboarding</h1>
+      <ErrorAlert message={action.error} />
 
       {dashboard && (
         <div className="grid gap-4 sm:grid-cols-2">

@@ -5,8 +5,14 @@ import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
+import { useAction } from '@/hooks/use-action';
+import { useAuth } from '@/hooks/use-auth';
+import { ErrorAlert } from '@/components/ui/alert';
 
 export default function AttendancePage() {
+  const action = useAction();
+  const { user } = useAuth();
+  const canSeeDashboard = user?.role !== 'EMPLOYEE'; // the team dashboard is for managers and above
   const [logs, setLogs] = useState<any[]>([]);
   const [dashboard, setDashboard] = useState<any>(null);
   const [todayLog, setTodayLog] = useState<any>(null);
@@ -15,19 +21,17 @@ export default function AttendancePage() {
 
   function load() {
     api.attendance.myLogs(month).then(setLogs).catch(console.error);
-    api.attendance.dashboard().then(setDashboard).catch(() => {});
+    if (canSeeDashboard) api.attendance.dashboard().then(setDashboard).catch(() => {});
   }
 
   useEffect(() => { load(); }, []);
 
   async function clockIn() {
-    await api.attendance.clockIn();
-    load();
+    if (await action.run(() => api.attendance.clockIn())) load();
   }
 
   async function clockOut() {
-    await api.attendance.clockOut();
-    load();
+    if (await action.run(() => api.attendance.clockOut())) load();
   }
 
   const today = new Date().toISOString().slice(0, 10);
@@ -36,6 +40,7 @@ export default function AttendancePage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Attendance</h1>
+      <ErrorAlert message={action.error} />
 
       <Card>
         <CardContent className="flex items-center justify-between p-6">
