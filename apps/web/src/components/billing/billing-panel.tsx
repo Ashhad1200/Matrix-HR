@@ -1,5 +1,6 @@
 'use client';
 
+import { useBrand } from '@/lib/brand-context';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, Copy, FileText, Printer, Upload } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -66,6 +67,7 @@ function ProofViewer({ id, onClose }: { id: string; onClose: () => void }) {
  * history of requests with receipts. Shown on /billing, and on its own as the lapsed (billing-only) screen.
  */
 export function BillingPanel({ onChanged }: { onChanged?: () => void }) {
+  const brand = useBrand();
   const [state, setState] = useState<any>(null);
   const [catalog, setCatalog] = useState<any>(null);
   const [requests, setRequests] = useState<any[]>([]);
@@ -249,7 +251,7 @@ export function BillingPanel({ onChanged }: { onChanged?: () => void }) {
           <CardHeader><CardTitle>{state?.blocked ? 'Renew to continue' : 'Renew or buy AI credits'}</CardTitle></CardHeader>
           <CardContent className="space-y-5">
             {noAccounts ? (
-              <EmptyState title="Payment details are not set up yet" description="Bank details for transfers have not been added. Please contact support@treevoxa.com and we will help you pay." />
+              <EmptyState title="Payment details are not set up yet" description={`Bank details for transfers have not been added. Please contact ${brand.supportEmail || 'support'} and we will help you pay.`} />
             ) : (
               <>
                 <div role="tablist" aria-label="What to pay for" className="inline-flex rounded-lg border border-[hsl(var(--border))] p-1">

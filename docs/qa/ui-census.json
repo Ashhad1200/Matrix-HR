@@ -250,18 +250,9 @@
  },
  "admin:/billing": {
   "title": "Billing",
-  "buttons": [
-   "Plan",
-   "AI credits",
-   "Monthly",
-   "Yearly (2 months free)",
-   "Starter$25.00 a monthUp to 25 employees2 admin users150 AI credits a month",
-   "Growth$69.00 a monthUp to 100 employees5 admin users500 AI credits a month",
-   "Business$149.00 a monthUp to 300 employees, then $0.50 each15 admin users1,500 AI credits a month",
-   "Continue to payment details"
-  ],
+  "buttons": [],
   "inputs": 0,
-  "tableRows": 1
+  "tableRows": 0
  },
  "admin:/marketplace": {
   "title": "Marketplace",
@@ -680,18 +671,9 @@
  },
  "hr:/billing": {
   "title": "Billing",
-  "buttons": [
-   "Plan",
-   "AI credits",
-   "Monthly",
-   "Yearly (2 months free)",
-   "Starter$25.00 a monthUp to 25 employees2 admin users150 AI credits a month",
-   "Growth$69.00 a monthUp to 100 employees5 admin users500 AI credits a month",
-   "Business$149.00 a monthUp to 300 employees, then $0.50 each15 admin users1,500 AI credits a month",
-   "Continue to payment details"
-  ],
+  "buttons": [],
   "inputs": 0,
-  "tableRows": 1
+  "tableRows": 0
  },
  "hr:/marketplace": {
   "title": "Marketplace",
@@ -1076,7 +1058,7 @@
    "New tenant"
   ],
   "inputs": 0,
-  "tableRows": 268
+  "tableRows": 13
  },
  "superadmin:/platform/billing": {
   "title": "Billing",
@@ -1102,7 +1084,7 @@
   "title": "Audit log",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 200
+  "tableRows": 18
  },
  "superadmin:/platform/ai": {
   "title": "AI assistant",
@@ -1114,7 +1096,7 @@
    "Grant"
   ],
   "inputs": 12,
-  "tableRows": 255
+  "tableRows": 9
  },
  "superadmin:/security": {
   "title": "Security",

@@ -89,7 +89,7 @@ test.describe('Performance (UI)', () => {
     await expect(goal2).toBeVisible();
     await goal2.getByLabel(/Progress for/).fill('140');
     await goal2.getByRole('button', { name: 'Update progress' }).click();
-    await expect(emp.page.getByRole('alert')).toBeVisible(); // 140% refused
+    await expect(emp.page.getByRole('alert').filter({ hasText: /progress/i })).toBeVisible(); // 140% refused (the route announcer is also an alert)
     await goal2.getByLabel(/Progress for/).fill('60');
     await goal2.getByRole('button', { name: 'Update progress' }).click();
     await expect.poll(async () => Number((await api('employee', '/performance/goals')).body.find((g: any) => g.title === `${tag} learn Rust well`).progress)).toBe(60);

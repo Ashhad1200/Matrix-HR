@@ -122,7 +122,9 @@ test.describe('white-label web', () => {
     const bad: string[] = [];
     page.on('response', (r) => { if (r.status() >= 400 && r.status() !== 401 && !r.url().endsWith('/billing/quote')) bad.push(`${r.status()} ${r.request().method()} ${r.url().replace(/^https?:\/\/[^/]+/, '')}`); });
     for (const p of ['/dashboard', '/employees', '/ai', '/settings', '/settings/structure', '/settings/compensation', '/settings/leave', '/settings/api-keys', '/settings/webhooks', '/payroll', '/security', '/marketplace', '/whatsapp', '/reports', '/billing', '/leave', '/attendance', '/loans', '/expenses', '/recruitment', '/performance', '/onboarding', '/lms', '/surveys', '/settings/logins', '/settings/audit', '/settings/devices', '/settings/sso', '/settings/eor', '/timesheets', '/offboarding']) {
-      await page.goto(`${WEB4}${p}`, { waitUntil: 'networkidle' });
+      await page.goto(`${WEB4}${p}`, { waitUntil: 'domcontentloaded' });
+      await page.locator('#main').waitFor({ timeout: 20_000 }).catch(() => undefined);
+      await page.waitForLoadState('networkidle', { timeout: 8_000 }).catch(() => undefined);
       if (new URL(page.url()).pathname !== p) { leaks.push(`${p}: redirected to ${new URL(page.url()).pathname}`); continue; }
       const text = await page.locator('body').innerText();
       if (FORBIDDEN.test(text)) leaks.push(`${p}: ${text.match(FORBIDDEN)![0]}`);

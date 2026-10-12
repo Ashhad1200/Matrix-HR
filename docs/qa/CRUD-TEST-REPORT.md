@@ -125,6 +125,8 @@ Screenshots of the verified flows: `docs/qa/screenshots/` (`employees-*`, `leave
 Notes
 - **Receipt numbers issued before a server turns white-label keep their old `TVX-` prefix.** A new reseller install starts clean, so this only matters if you switch an existing server over.
 - The default plan on the Billing screen can be one a company has outgrown; the screen shows the server's message ("Starter allows up to 25"). Not changed.
+- **Clean-database run:** the suite was re-run from a freshly created, migrated and seeded empty database: **149 / 149 pass**, jest 160 / 160 (with DB integration specs), API type-check clean. That run found one real white-label leak (the Billing screen's "no bank details yet" message named the vendor's support address; now uses the configured support address) and two test flakes (a strict-mode alert selector, a slow `networkidle`), all fixed.
+- A new server shows no payment wizard until the operator adds an active bank account in the backoffice (Billing > Payment accounts); the billing journey also expects its own fixture IBAN.
 - No schema change in this round, so the migration rehearsal was not re-run (3 migrations, unchanged).
 - Not tested: a real SMTP send, a real AI provider (the mock model is used), a mobile binary.
 
