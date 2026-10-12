@@ -1,11 +1,9 @@
-/** Formats a decimal string/number in the given currency, always two decimals for money that must reconcile with a bank statement. */
+import { formatMoney } from '@matrixhr/shared';
+
+/** One formatter for every price on every screen: "PKR 18,999", "$69", "$0.50". */
 export function money(amount: string | number | null | undefined, currency = 'USD') {
-  if (amount == null || amount === '') return '—';
-  try {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(amount));
-  } catch {
-    return `${currency} ${Number(amount).toFixed(2)}`;
-  }
+  const out = formatMoney(amount, currency);
+  return out === '' ? '—' : out;
 }
 
 export const REQUEST_STATUS: Record<string, { label: string; variant: 'success' | 'warning' | 'danger' | 'info' | 'neutral' }> = {

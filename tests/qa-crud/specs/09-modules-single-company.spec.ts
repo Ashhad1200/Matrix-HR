@@ -120,6 +120,7 @@ test.describe('Single-company mode (a second API instance)', () => {
     expect(closed.body.message).toMatch(/closed/i);
     const ai = await call(t, '/ai/status');
     expect(ai.body.unlimited).toBe(true);
+    expect((await call(null, '/pricing')).status, 'a single-company install shows no prices').toBe(404);
   });
   test('a lapsed period never blocks a single-company install', async () => {
     const s = Math.random().toString(36).slice(2, 8);

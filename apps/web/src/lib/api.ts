@@ -172,7 +172,7 @@ export const api = {
     upload: (file: File) => uploadFile<{ ref: string; key: string }>('/uploads', file),
   },
   auth: {
-    signup: (data: { email: string; password: string; companyName: string; subdomain: string }) =>
+    signup: (data: { email: string; password: string; companyName: string; subdomain: string; country?: string }) =>
       request<any>('/auth/signup', { method: 'POST', body: JSON.stringify(data) }),
     login: (data: { email: string; password: string }) =>
       request<LoginResponse>('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
@@ -499,6 +499,7 @@ export const api = {
   platform: {
     tenants: () => request<any>('/platform/tenants'),
     setLogo: (tenantId: string, file: File) => putFile<{ logoUrl: string }>(`/platform/tenants/${tenantId}/logo`, file),
+    setCurrency: (tenantId: string, currency: 'PKR' | 'USD', reason: string) => request<any>(`/platform/tenants/${tenantId}/currency`, { method: 'PATCH', body: JSON.stringify({ currency, reason }) }),
     clearLogo: (tenantId: string) => request<any>(`/platform/tenants/${tenantId}/logo`, { method: 'DELETE' }),
     tenant: (id: string) => request<any>(`/platform/tenants/${id}`),
     createTenant: (data: { companyName: string; subdomain: string; adminEmail: string; adminPassword?: string; planCode?: string }) =>

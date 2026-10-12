@@ -10,6 +10,8 @@ import {
   TRIAL_CREDITS, TRIAL_DAYS, sniffProof,
 } from './billing.config';
 import { CreateRequestDto, UploadProofDto } from './dto';
+import { Currency, formatMoney, isCurrency, pickCurrency } from '@matrixhr/shared';
+import { brand } from '../common/brand';
 
 const cents = (n: unknown) => Math.round(Number(n) * 100);
 const money = (c: number) => (c / 100).toFixed(2);
@@ -91,39 +93,52 @@ export class BillingService {
     };
   }
 
+  /** The company's billing currency (set at sign-up, changeable only by the operator), limited to what this deployment offers. */
+  async currencyFor(tenantId: string): Promise<Currency> {
+    const t = await this.prisma.tenant.findUnique({ where: { id: tenantId }, select: { billingCurrency: true } });
+    return pickCurrency(isCurrency(t?.billingCurrency) ? t!.billingCurrency as Currency : 'USD', brand().currencies);
+  }
+
   // ── Catalog and quotes (amounts are ALWAYS computed here from the database, never taken from the client) ─────────
   async catalog(tenantId: string) {
+    const currency = await this.currencyFor(tenantId);
+    const pkr = currency === 'PKR';
     const [versions, packs, accounts, activeEmployees] = await Promise.all([
       this.prisma.planVersion.findMany({
-        where: { isCurrent: true, offeredToNew: true, currency: 'USD', priceMonthly: { not: null }, plan: { isActive: true } },
+        where: { isCurrent: true, offeredToNew: true, currency: 'USD', ...(pkr ? { priceMonthlyPkr: { not: null } } : { priceMonthly: { not: null } }), plan: { isActive: true } },
         include: { plan: true },
-        orderBy: { priceMonthly: 'asc' },
+        orderBy: pkr ? { priceMonthlyPkr: 'asc' } : { priceMonthly: 'asc' },
       }),
-      this.prisma.creditPack.findMany({ where: { isActive: true }, orderBy: { price: 'asc' } }),
-      this.prisma.paymentAccount.findMany({ where: { isActive: true }, orderBy: { createdAt: 'asc' }, select: { id: true, label: true, bankName: true, accountTitle: true, accountNumber: true, iban: true, swift: true, currency: true, instructions: true } }),
+      this.prisma.creditPack.findMany({ where: { isActive: true, ...(pkr ? { pricePkr: { not: null } } : {}) }, orderBy: pkr ? { pricePkr: 'asc' } : { price: 'asc' } }),
+      // A company only ever sees accounts in its own currency (PKR: local bank / Raast; USD: international accounts).
+      this.prisma.paymentAccount.findMany({ where: { isActive: true, currency }, orderBy: { createdAt: 'asc' }, select: { id: true, label: true, bankName: true, accountTitle: true, accountNumber: true, iban: true, swift: true, currency: true, instructions: true } }),
       this.prisma.employee.count({ where: { tenantId, status: 'ACTIVE' } }),
     ]);
     return {
+      currency,
       activeEmployees,
       plans: versions.map((v) => ({
-        code: v.plan.code, name: v.plan.name, currency: v.currency,
-        monthly: v.priceMonthly!.toString(), yearly: v.priceYearly?.toString() ?? null,
+        code: v.plan.code, name: v.plan.name, currency,
+        monthly: (pkr ? v.priceMonthlyPkr : v.priceMonthly)!.toString(), yearly: (pkr ? v.priceYearlyPkr : v.priceYearly)?.toString() ?? null,
         aiCreditsMonthly: v.aiCreditsMonthly, maxEmployees: v.maxEmployees, maxAdminUsers: v.maxAdminUsers,
-        overagePerEmployee: v.overagePerEmployee?.toString() ?? null,
+        overagePerEmployee: (pkr ? v.overagePerEmployeePkr : v.overagePerEmployee)?.toString() ?? null,
       })),
-      creditPacks: packs.map((p) => ({ code: p.code, name: p.name, credits: p.credits, price: p.price.toString(), currency: p.currency })),
+      creditPacks: packs.map((p) => ({ code: p.code, name: p.name, credits: p.credits, price: (pkr ? p.pricePkr! : p.price).toString(), currency })),
       accounts,
     };
   }
 
   async quote(tenantId: string, dto: { purpose: 'plan' | 'credit_pack'; planCode?: string; period?: 'monthly' | 'yearly'; packCode?: string }): Promise<Quote> {
+    const currency = await this.currencyFor(tenantId);
+    const pkr = currency === 'PKR';
     if (dto.purpose === 'credit_pack') {
       if (!dto.packCode) throw new BadRequestException('packCode is required');
       const pack = await this.prisma.creditPack.findFirst({ where: { code: dto.packCode, isActive: true } });
-      if (!pack) throw new NotFoundException('Credit pack not found');
+      const price = currency === 'PKR' ? pack?.pricePkr : pack?.price;
+      if (!pack || price == null) throw new NotFoundException('Credit pack not found');
       return {
-        purpose: 'credit_pack', currency: pack.currency, expectedAmount: money(cents(pack.price)),
-        lineItems: [{ label: `${pack.name}: ${pack.credits.toLocaleString('en-US')} AI credits`, amount: money(cents(pack.price)) }],
+        purpose: 'credit_pack', currency, expectedAmount: money(cents(price)),
+        lineItems: [{ label: `${pack.name}: ${pack.credits.toLocaleString('en-US')} AI credits`, amount: money(cents(price)) }],
         packCode: pack.code, credits: pack.credits,
       };
     }
@@ -132,23 +147,24 @@ export class BillingService {
       where: { isCurrent: true, offeredToNew: true, currency: 'USD', plan: { code: dto.planCode, isActive: true } },
       include: { plan: true },
     });
-    const base = dto.period === 'yearly' ? v?.priceYearly : v?.priceMonthly;
+    const base = pkr ? (dto.period === 'yearly' ? v?.priceYearlyPkr : v?.priceMonthlyPkr) : (dto.period === 'yearly' ? v?.priceYearly : v?.priceMonthly);
+    const overage = pkr ? v?.overagePerEmployeePkr : v?.overagePerEmployee;
     if (!v || !base) throw new NotFoundException('That plan is not available');
 
     const active = await this.prisma.employee.count({ where: { tenantId, status: 'ACTIVE' } });
     const lines: QuoteLine[] = [{ label: `${v.plan.name}, ${dto.period === 'yearly' ? '12 months' : '1 month'}`, amount: money(cents(base)) }];
     let total = cents(base);
     if (v.maxEmployees != null && active > v.maxEmployees) {
-      if (v.overagePerEmployee == null) {
+      if (overage == null) {
         throw new BadRequestException(`You have ${active} active employees and ${v.plan.name} allows up to ${v.maxEmployees}. Choose a larger plan.`);
       }
       const extra = active - v.maxEmployees;
       const months = dto.period === 'yearly' ? 12 : 1;
-      const over = extra * cents(v.overagePerEmployee) * months;
+      const over = extra * cents(overage) * months;
       total += over;
-      lines.push({ label: `${extra} employee${extra === 1 ? '' : 's'} over ${v.maxEmployees} at ${v.currency} ${Number(v.overagePerEmployee).toFixed(2)} for ${months} month${months === 1 ? '' : 's'}`, amount: money(over) });
+      lines.push({ label: `${extra} employee${extra === 1 ? '' : 's'} over ${v.maxEmployees} at ${formatMoney(overage.toString(), currency)} for ${months} month${months === 1 ? '' : 's'}`, amount: money(over) });
     }
-    return { purpose: 'plan', currency: v.currency, expectedAmount: money(total), lineItems: lines, planCode: v.plan.code, planVersionId: v.id, billingPeriod: dto.period };
+    return { purpose: 'plan', currency, expectedAmount: money(total), lineItems: lines, planCode: v.plan.code, planVersionId: v.id, billingPeriod: dto.period };
   }
 
   // ── Requests ─────────────────────────────────────────────────────────────────────────────────────
@@ -162,13 +178,10 @@ export class BillingService {
   }
 
   async createRequest(tenantId: string, userId: string, dto: CreateRequestDto) {
-    const account = await this.prisma.paymentAccount.findFirst({ where: { id: dto.accountId, isActive: true } });
-    if (!account) throw new NotFoundException('Payment account not found');
     const q = await this.quote(tenantId, dto);
-    if (account.currency !== q.currency) {
-      // The brief allows paying a different currency only with a stated reason; the account is shown, so make that explicit up front.
-      this.logger.log(`request for ${q.currency} against a ${account.currency} account (tenant ${tenantId})`);
-    }
+    // Only an account in the company's own currency can be chosen (a PKR company never sees or pays into a USD account, and vice versa).
+    const account = await this.prisma.paymentAccount.findFirst({ where: { id: dto.accountId, isActive: true, currency: q.currency } });
+    if (!account) throw new NotFoundException('Payment account not found');
     const reference = await this.newReference();
     try {
       const req = await this.prisma.paymentRequest.create({
@@ -251,7 +264,7 @@ export class BillingService {
 
     const notify = process.env.BILLING_NOTIFY_EMAIL;
     if (notify) {
-      await this.outbox.enqueue({ to: notify, subject: `Payment to check: ${r.reference}`, body: `A payment proof is waiting for review.\nReference: ${r.reference}\nExpected: ${r.currency} ${r.expectedAmount}\n`, tenantId, dedupeKey: `proof:${id}` }).catch(() => {});
+      await this.outbox.enqueue({ to: notify, subject: `Payment to check: ${r.reference}`, body: `A payment proof is waiting for review.\nReference: ${r.reference}\nExpected: ${formatMoney(r.expectedAmount.toString(), r.currency)}\n`, tenantId, dedupeKey: `proof:${id}` }).catch(() => {});
     }
     return this.getRequest(tenantId, id);
   }

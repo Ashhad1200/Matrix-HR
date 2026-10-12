@@ -1,7 +1,9 @@
 'use client';
 
 import { useBrand, useDomainSuffix } from '@/lib/brand-context';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { currencyForCountry, currencyForTimeZone, formatMoney } from '@matrixhr/shared';
+import { COUNTRIES } from '@/lib/countries';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
@@ -14,9 +16,21 @@ export default function SignUpPage() {
   const brand = useBrand();
   const suffix = useDomainSuffix();
   const router = useRouter();
-  const [form, setForm] = useState({ email: '', password: '', companyName: '', subdomain: '' });
+  const [form, setForm] = useState({ email: '', password: '', companyName: '', subdomain: '', country: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Default the country from the visitor (edge header or geo-IP, then the browser time zone); they can change it.
+  useEffect(() => {
+    let live = true;
+    (async () => {
+      let c: string | null = null;
+      try { c = (await (await fetch('/api/country')).json()).country; } catch { /* ignore */ }
+      if (!c) { try { c = Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Karachi' ? 'PK' : null; } catch { /* ignore */ } }
+      if (live && c && COUNTRIES.some(([code]) => code === c)) setForm((f) => (f.country ? f : { ...f, country: c! }));
+    })();
+    return () => { live = false; };
+  }, []);
 
   function update(field: string, value: string) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -31,7 +45,7 @@ export default function SignUpPage() {
     setLoading(true);
     setError('');
     try {
-      const res = await api.auth.signup(form);
+      const res = await api.auth.signup({ ...form, country: form.country === 'XX' ? undefined : form.country });
       localStorage.setItem('accessToken', res.accessToken);
       localStorage.setItem('refreshToken', res.refreshToken);
       router.push('/dashboard');
@@ -62,6 +76,14 @@ export default function SignUpPage() {
                 <Input id="su-subdomain" value={form.subdomain} onChange={(e) => update('subdomain', e.target.value)} required />
                 <span className="text-sm text-[hsl(var(--muted-foreground))]">{suffix}</span>
               </div>
+            </div>
+            <div>
+              <label htmlFor="su-country" className="mb-1.5 block text-sm font-medium">Country</label>
+              <select id="su-country" required value={form.country} onChange={(e) => update('country', e.target.value)} className="flex h-10 w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 text-sm">
+                <option value="" disabled>Choose your country</option>
+                {COUNTRIES.map(([code, name]) => <option key={code} value={code}>{name}</option>)}
+              </select>
+              {form.country && <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]" data-testid="billing-currency-hint">You will be billed in {currencyForCountry(form.country) === 'PKR' ? 'Pakistani rupees (PKR)' : 'US dollars (USD)'}.</p>}
             </div>
             <div>
               <label htmlFor="su-email" className="mb-1.5 block text-sm font-medium">Work email</label>

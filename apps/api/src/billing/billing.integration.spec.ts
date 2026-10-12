@@ -113,6 +113,16 @@ run('billing (database)', () => {
       expect(q.expectedAmount).toBe('150.00'); // 149 + 2 x 0.50
       expect((await billing.quote(big.id, { purpose: 'plan', planCode: 'business', period: 'yearly' })).expectedAmount).toBe('1502.00'); // 1490 + 2 x 0.50 x 12
     });
+    it('quotes a PKR company in rupees from the PKR price list, overage included', async () => {
+      const big = await mkTenant('bigpkr', 302);
+      await prisma.tenant.update({ where: { id: big.id }, data: { billingCurrency: 'PKR' } });
+      const q = await billing.quote(big.id, { purpose: 'plan', planCode: 'business', period: 'monthly' });
+      expect(q.currency).toBe('PKR');
+      expect(q.expectedAmount).toBe('40279.00'); // 39,999 + 2 x 140
+      expect(q.lineItems[1].label).toMatch(/2 employees over 300 at PKR 140/);
+      expect((await billing.quote(big.id, { purpose: 'plan', planCode: 'business', period: 'yearly' })).expectedAmount).toBe('403350.00'); // 399,990 + 2 x 140 x 12
+      expect((await billing.quote(big.id, { purpose: 'credit_pack', packCode: 'large' })).expectedAmount).toBe('32999.00');
+    });
     it('refuses a plan the tenant has outgrown instead of quoting a wrong price', async () => {
       const mid = await mkTenant('mid', 30);
       await expect(billing.quote(mid.id, { purpose: 'plan', planCode: 'starter', period: 'monthly' })).rejects.toThrow(/allows up to 25/);

@@ -4,7 +4,8 @@ import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import { AuthService } from '../auth/auth.service';
-import { CreateTenantDto, CreatePlanDto } from './dto';
+import { CreateTenantDto, CreatePlanDto, SetTenantCurrencyDto } from './dto';
+import { brand } from '../common/brand';
 import { parseLogoDataUri } from './logo';
 
 @Injectable()
@@ -19,6 +20,19 @@ export class PlatformService {
     await this.prisma.platformAuditLog.create({
       data: { operatorUserId, action, targetType, targetId, detail: detail as any },
     });
+  }
+
+  /** Only the operator can change a company's billing currency. Refused while a payment is open (its amount is already fixed in the old one). */
+  async setTenantCurrency(operatorUserId: string, tenantId: string, dto: SetTenantCurrencyDto) {
+    const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId }, select: { id: true, billingCurrency: true } });
+    if (!tenant) throw new NotFoundException('Tenant not found');
+    if (!brand().currencies.includes(dto.currency)) throw new BadRequestException(`${dto.currency} is not offered on this deployment`);
+    if (tenant.billingCurrency === dto.currency) return { billingCurrency: dto.currency, changed: false };
+    const open = await this.prisma.paymentRequest.count({ where: { tenantId, status: { in: ['AWAITING_PROOF', 'PENDING'] } } });
+    if (open > 0) throw new ConflictException('This company has an open payment request. Let it be approved, rejected or cancelled first.');
+    await this.prisma.tenant.update({ where: { id: tenantId }, data: { billingCurrency: dto.currency } });
+    await this.audit(operatorUserId, 'TENANT_CURRENCY_CHANGED', 'Tenant', tenantId, { from: tenant.billingCurrency, to: dto.currency, reason: dto.reason });
+    return { billingCurrency: dto.currency, changed: true };
   }
 
   async setTenantLogo(operatorUserId: string, tenantId: string, dataUri: string | null) {
@@ -89,6 +103,7 @@ export class PlatformService {
       subdomain: dto.subdomain,
       email: dto.adminEmail,
       passwordHash,
+      country: dto.country,
     });
 
     if (dto.planCode) {

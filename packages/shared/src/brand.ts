@@ -1,3 +1,5 @@
+import { Currency, parseCurrencies } from './currency';
+
 /**
  * White-label branding. One resolver used by the API, the web app and the mobile config.
  *
@@ -14,6 +16,8 @@ export interface Brand {
   supportEmail: string;
   emailFromName: string;
   websiteUrl: string | null;
+  /** Billing currencies this deployment offers (WL_CURRENCIES). */
+  currencies: Currency[];
 }
 
 export const DEFAULT_BRAND_NAME = 'MatrixHR';
@@ -25,7 +29,7 @@ const HEX = /^#[0-9a-fA-F]{6}$/;
 export function resolveBrand(env: Record<string, string | undefined> = ((globalThis as any).process?.env ?? {})): Brand {
   const name = clean(env.WL_PRODUCT_NAME);
   if (!name) {
-    return { whiteLabel: false, name: DEFAULT_BRAND_NAME, logoUrl: null, faviconUrl: null, primaryColor: null, supportEmail: DEFAULT_SUPPORT_EMAIL, emailFromName: DEFAULT_BRAND_NAME, websiteUrl: null };
+    return { whiteLabel: false, name: DEFAULT_BRAND_NAME, logoUrl: null, faviconUrl: null, primaryColor: null, supportEmail: DEFAULT_SUPPORT_EMAIL, emailFromName: DEFAULT_BRAND_NAME, websiteUrl: null, currencies: parseCurrencies(env.WL_CURRENCIES) };
   }
   const color = clean(env.WL_PRIMARY_COLOR);
   return {
@@ -37,6 +41,7 @@ export function resolveBrand(env: Record<string, string | undefined> = ((globalT
     supportEmail: clean(env.WL_SUPPORT_EMAIL) ?? '',
     emailFromName: clean(env.WL_EMAIL_FROM_NAME) ?? name,
     websiteUrl: clean(env.WL_WEBSITE_URL),
+    currencies: parseCurrencies(env.WL_CURRENCIES),
   };
 }
 

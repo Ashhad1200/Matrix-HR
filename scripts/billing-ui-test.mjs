@@ -60,7 +60,8 @@ if (process.env.TRACE) { page.on('response', (r) => r.url().includes('3001') && 
 
 // ── setup through the API: an operator, a payment account, and two fresh signups ───────────────────────────────
 const op = await login('superadmin@acme.com');
-if (!(await api('/platform/billing/accounts', { token: op })).body.length) {
+// The journey brings its own active USD account (a fresh database has none; a PKR-only or inactive one would not do).
+if (!(await api('/platform/billing/accounts', { token: op })).body.some((a) => a.isActive && a.currency === 'USD' && a.iban === 'PK36MEZN0000001234564471')) {
   await api('/platform/billing/accounts', { token: op, method: 'POST', body: { label: 'TREEVOXA USD', bankName: 'Test Bank Ltd', accountTitle: 'TREEVOXA', iban: 'PK36MEZN0000001234564471', swift: 'MEZNPKKA', currency: 'USD', instructions: 'Use the payment reference as the transfer note.' } });
 }
 const signup = async (tag) => (await api('/auth/signup', { method: 'POST', body: { email: `owner-${tag}-${suffix}@qa.test`, password: PASS, companyName: `QA ${tag} ${suffix}`, subdomain: `qa-${tag}-${suffix}` } })).body;
@@ -86,15 +87,15 @@ await shot(page, '01-billing-trial');
 console.log('B. pay wizard');
 await page.getByRole('radio', { name: /^Growth/ }).click();
 await page.waitForFunction(() => document.body.innerText.includes('You pay'));
-ok('server quote $69.00', (await page.locator('[aria-live=polite]').first().innerText()).includes('$69.00'));
+ok('server quote $69.00', (await page.locator('[aria-live=polite]').first().innerText()).includes('$69'));
 await page.getByRole('radio', { name: /Yearly/ }).click();
-await page.waitForFunction(() => document.body.innerText.includes('$690.00'));
-ok('yearly quote $690.00 (2 months free)', true);
+await page.waitForFunction(() => document.body.innerText.includes('$690'));
+ok('yearly quote $690 (2 months free)', true);
 await page.getByRole('radio', { name: /^Monthly/ }).click();
-await page.waitForFunction(() => /You pay\s*\$69\.00/.test(document.body.innerText));
+await page.waitForFunction(() => /You pay\s*\$69(?!\d)/.test(document.body.innerText));
 await shot(page, '02-wizard-choose');
 await page.getByRole('button', { name: 'Continue to payment details' }).click();
-await page.getByText('Pay $69.00 by bank transfer').waitFor();
+await page.getByText('Pay $69 by bank transfer').waitFor();
 const reference = (await page.getByText(/^MHR-[A-HJ-NP-Z2-9]{6}$/).first().innerText()).trim();
 ok('payment reference issued (MHR-XXXXXX)', /^MHR-[A-HJ-NP-Z2-9]{6}$/.test(reference), reference);
 ok('bank details with IBAN shown', await page.getByText('PK36MEZN0000001234564471').isVisible());
@@ -123,7 +124,7 @@ await uiLogin(opPage, 'superadmin@acme.com');
 await opPage.goto(`${WEB}/platform/billing`, { waitUntil: 'networkidle' });
 await opPage.getByText(reference).first().waitFor();
 ok('proof is in the queue', true);
-ok('mismatch is flagged (customer said $60.00)', await opPage.getByText('$60.00').first().isVisible());
+ok('mismatch is flagged (customer said $60)', await opPage.getByText('$60').first().isVisible());
 await shot(opPage, '06-backoffice-queue');
 await opPage.getByRole('button', { name: 'View proof' }).first().click();
 await opPage.locator('img[alt="Payment proof"]').waitFor();
@@ -150,7 +151,7 @@ await page.goto(`${WEB}${href}`, { waitUntil: 'networkidle' });
 await page.getByText(/TVX-R-\d{4}-\d{6}/).first().waitFor();
 const receiptText = await page.locator('main').innerText();
 ok('receipt carries the issuer text and NTN', receiptText.includes('NTN J883480') && receiptText.includes('TREEVOXA') && receiptText.includes('Plot No. R-326'));
-ok('receipt shows the reference and amount', receiptText.includes(reference) && receiptText.includes('$69.00'));
+ok('receipt shows the reference and amount', receiptText.includes(reference) && receiptText.includes('$69'));
 await page.pdf({ path: `${SHOTS}09-receipt.pdf`, format: 'A4' });
 await shot(page, '09-receipt');
 

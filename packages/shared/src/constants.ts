@@ -31,15 +31,15 @@ export const DEFAULT_LEAVE_POLICIES = [
  * Operators can later edit prices in the backoffice; the live database then wins and this list is only the starting point.
  */
 export const USD_PLAN_CATALOG = [
-  { code: 'starter', name: 'Starter', monthly: 25, yearly: 250, maxEmployees: 25, maxAdminUsers: 2, aiCreditsMonthly: 150, overagePerEmployee: null },
-  { code: 'growth', name: 'Growth', monthly: 69, yearly: 690, maxEmployees: 100, maxAdminUsers: 5, aiCreditsMonthly: 500, overagePerEmployee: null },
-  { code: 'business', name: 'Business', monthly: 149, yearly: 1490, maxEmployees: 300, maxAdminUsers: 15, aiCreditsMonthly: 1500, overagePerEmployee: 0.5 },
+  { code: 'starter', name: 'Starter', monthly: 25, yearly: 250, monthlyPkr: 6999, yearlyPkr: 69990, maxEmployees: 25, maxAdminUsers: 2, aiCreditsMonthly: 150, overagePerEmployee: null, overagePerEmployeePkr: null },
+  { code: 'growth', name: 'Growth', monthly: 69, yearly: 690, monthlyPkr: 18999, yearlyPkr: 189990, maxEmployees: 100, maxAdminUsers: 5, aiCreditsMonthly: 500, overagePerEmployee: null, overagePerEmployeePkr: null },
+  { code: 'business', name: 'Business', monthly: 149, yearly: 1490, monthlyPkr: 39999, yearlyPkr: 399990, maxEmployees: 300, maxAdminUsers: 15, aiCreditsMonthly: 1500, overagePerEmployee: 0.5, overagePerEmployeePkr: 140 },
 ] as const;
 
 export const AI_CREDIT_PACKS = [
-  { code: 'small', name: 'Small', credits: 1000, price: 10 },
-  { code: 'medium', name: 'Medium', credits: 5000, price: 45 },
-  { code: 'large', name: 'Large', credits: 15000, price: 120 },
+  { code: 'small', name: 'Small', credits: 1000, price: 10, pricePkr: 2799 },
+  { code: 'medium', name: 'Medium', credits: 5000, price: 45, pricePkr: 12499 },
+  { code: 'large', name: 'Large', credits: 15000, price: 120, pricePkr: 32999 },
 ] as const;
 
 export const TRIAL_DAYS = 30;

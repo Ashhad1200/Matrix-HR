@@ -30,6 +30,10 @@ export class SignUpDto {
 
   @IsOptional() @IsString() @MinLength(1) @MaxLength(60)
   lastName?: string;
+
+  /** ISO 3166 alpha-2 country of the company. Pakistan bills in PKR, everywhere else in USD. */
+  @IsOptional() @IsString() @Matches(/^[A-Za-z]{2}$/, { message: 'country must be a 2-letter country code' })
+  country?: string;
 }
 
 export class LoginDto {

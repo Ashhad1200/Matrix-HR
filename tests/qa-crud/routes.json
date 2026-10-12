@@ -547,6 +547,13 @@
  },
  {
   "method": "GET",
+  "path": "/pricing",
+  "auth": false,
+  "roles": [],
+  "file": "billing/pricing.controller.ts"
+ },
+ {
+  "method": "GET",
   "path": "/biometric/devices",
   "auth": true,
   "roles": [
@@ -2173,6 +2180,15 @@
  {
   "method": "DELETE",
   "path": "/platform/tenants/:id/overrides/:overrideId",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "platform/platform.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/platform/tenants/:id/currency",
   "auth": true,
   "roles": [
    "SUPER_ADMIN"

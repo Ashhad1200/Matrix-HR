@@ -7,6 +7,6 @@ export class BrandController {
   @Get()
   get() {
     const b = brand();
-    return { whiteLabel: b.whiteLabel, name: b.name, logoUrl: b.logoUrl, faviconUrl: b.faviconUrl, primaryColor: b.primaryColor, supportEmail: b.supportEmail, websiteUrl: b.websiteUrl };
+    return { whiteLabel: b.whiteLabel, name: b.name, logoUrl: b.logoUrl, faviconUrl: b.faviconUrl, primaryColor: b.primaryColor, supportEmail: b.supportEmail, websiteUrl: b.websiteUrl, currencies: b.currencies };
   }
 }

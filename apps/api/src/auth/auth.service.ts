@@ -1,4 +1,5 @@
 import { brand, brandName } from '../common/brand';
+import { currencyForCountry, pickCurrency } from '@matrixhr/shared';
 import {
   Injectable,
   UnauthorizedException,
@@ -40,7 +41,7 @@ export class AuthService {
 
   // Shared by public signup and platform-operator-initiated org creation, so a tenant gets the same
   // starting defaults (leave policies, a shift) regardless of who created it.
-  async provisionTenant(dto: { companyName: string; subdomain: string; email: string; passwordHash: string; firstName?: string; lastName?: string }) {
+  async provisionTenant(dto: { companyName: string; subdomain: string; email: string; passwordHash: string; firstName?: string; lastName?: string; country?: string }) {
     const existing = await this.prisma.tenant.findUnique({
       where: { subdomain: dto.subdomain },
     });
@@ -55,6 +56,8 @@ export class AuthService {
       data: {
         name: dto.companyName,
         subdomain: dto.subdomain,
+        country: dto.country ? dto.country.toUpperCase() : null,
+        billingCurrency: pickCurrency(currencyForCountry(dto.country), brand().currencies),
         users: {
           create: {
             email: dto.email,

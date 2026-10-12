@@ -55,6 +55,8 @@ Required for the new features (names only here; values come from the owner's sec
 **White-label installs** (a reseller selling under their own brand, many client companies on one server) additionally set `WL_PRODUCT_NAME` and the other `WL_*` variables on both the API and web services (see `docs/DEPLOYMENT.md`); leave them unset on the TREEVOXA production.
 Do **not** set AI provider keys here: the owner pastes them in the backoffice (step 9). `AI_*_BASE_URL` must be unset in production.
 
+Billing currencies: after deploy, in the backoffice check every plan has both a USD and a PKR price, and set each payment account's currency (PKR for local bank/Raast, USD for Payoneer/Wise). Companies already on a PKR plan become PKR automatically; new sign-ups choose a country (Pakistan = PKR, others USD).
+
 ## 6. Merge and deploy
 Merge the PR **only when the owner says so**, then deploy from Coolify. The API entrypoint runs `migrate deploy` (already applied, so a no-op) and, on boot, removes the public-read policy from the file bucket.
 

@@ -35,7 +35,7 @@ export class AccountDto {
   @IsOptional() @IsString() @MaxLength(60) accountNumber?: string;
   @IsOptional() @IsString() @MaxLength(60) iban?: string;
   @IsOptional() @IsString() @MaxLength(30) swift?: string;
-  @IsOptional() @IsString() @Matches(/^[A-Za-z]{3}$/) currency?: string;
+  @IsOptional() @IsString() @IsIn(['PKR', 'USD']) currency?: string;
   @IsOptional() @IsString() @MaxLength(500) instructions?: string;
   @IsOptional() @IsBoolean() isActive?: boolean;
 }
@@ -54,6 +54,10 @@ export class PlanEditDto {
   @IsOptional() @IsInt() @Min(1) maxEmployees?: number;
   @IsOptional() @IsInt() @Min(1) maxAdminUsers?: number;
   @IsOptional() @Type(() => Number) @IsNumber({ maxDecimalPlaces: 2 }) @Min(0.01) overagePerEmployee?: number;
+  /** The PKR price list (same version): set by hand, never converted from USD. */
+  @IsOptional() @Type(() => Number) @IsNumber({ maxDecimalPlaces: 2 }) @Min(0.01) priceMonthlyPkr?: number;
+  @IsOptional() @Type(() => Number) @IsNumber({ maxDecimalPlaces: 2 }) @Min(0.01) priceYearlyPkr?: number;
+  @IsOptional() @Type(() => Number) @IsNumber({ maxDecimalPlaces: 2 }) @Min(0.01) overagePerEmployeePkr?: number;
   @IsOptional() @IsBoolean() isActive?: boolean;
   @IsOptional() @IsBoolean() offeredToNew?: boolean;
 }
@@ -62,6 +66,7 @@ export class PackEditDto {
   @IsOptional() @IsString() @Length(2, 60) name?: string;
   @IsOptional() @IsInt() @Min(1) credits?: number;
   @IsOptional() @Type(() => Number) @IsNumber({ maxDecimalPlaces: 2 }) @Min(0.01) price?: number;
+  @IsOptional() @Type(() => Number) @IsNumber({ maxDecimalPlaces: 2 }) @Min(0.01) pricePkr?: number;
   @IsOptional() @IsBoolean() isActive?: boolean;
 }
 

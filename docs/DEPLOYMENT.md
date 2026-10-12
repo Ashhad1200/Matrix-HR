@@ -110,6 +110,7 @@ Set these on **both the API and the web container** (they are read at runtime; r
 | `WL_EMAIL_FROM_NAME` | Sender name on emails (defaults to the product name). The address still comes from `SMTP_FROM`. |
 | `WL_WEBSITE_URL` | The reseller's site; its host is used as the company-address suffix when creating companies and for canonical links. |
 | `WL_LEGAL_TEXT` | Optional line printed with the issuer on receipts. |
+| `WL_CURRENCIES` | `PKR,USD` (default) or one currency. A single value bills every client in it and hides the currency switch. |
 
 What changes when `WL_PRODUCT_NAME` is set: the vendor marketing page at `/` redirects to sign-in; page titles, share cards, the sign-in/reset/invite pages, the kiosk, the sidebar and the AI assistant (prompts and replies) use the reseller's name; invitation, reset, billing and reminder emails, the WhatsApp replies, the TOTP authenticator label and the payslip footer use it too; receipts are issued by the reseller (not the vendor) and numbered with a prefix derived from the product name; the mobile app is built with the same name and colour (`apps/mobile/app.config.js` reads the same variables at `eas build` time, plus an optional `WL_APP_ID` for the bundle id).
 
@@ -118,3 +119,13 @@ What changes when `WL_PRODUCT_NAME` is set: the vendor marketing page at `/` red
 **Running the client book.** The reseller signs in to the backoffice (SUPER_ADMIN) and, under their own brand, creates client companies, assigns each a plan, records bank-transfer payments, and suspends or reinstates a company. Each client stays a separate tenant: data, users, logins and files are isolated exactly as on the standard multi-tenant install.
 
 **Verifying.** `GET /api/v1/brand` returns what the server is serving. Search the rendered pages, a sent email and a payslip PDF for the vendor name before go-live; `pnpm test:qa` (spec `16-white-label`) does this automatically against a white-label API instance.
+
+
+## Billing currencies (PKR for Pakistan, USD for everyone else)
+
+- **Prices.** Every plan version and credit pack stores both a USD and a PKR price (monthly, yearly, per extra employee), set **by hand** in the backoffice (Billing > Plans and AI credit packs). There is no live FX conversion. Starting values: Starter $25 / PKR 6,999; Growth $69 / PKR 18,999; Business $149 / PKR 39,999 (+ $0.50 / PKR 140 per extra employee); yearly = 10 x monthly in both; credit packs 1k $10 / PKR 2,799, 5k $45 / PKR 12,499, 15k $120 / PKR 32,999.
+- **Which currency a company pays in** is stored on the company (`Tenant.billingCurrency`), set at sign-up from the country chosen in the form (PK = PKR, everything else = USD). Companies cannot change it; the operator can (backoffice > company > Billing currency, with a reason, audited, refused while a payment is open). Companies that were already on a PKR plan become PKR on upgrade.
+- **Quotes, payment references, receipts, reminder and approval emails** all use the company's currency. A company only sees, and can only pay into, **payment accounts in its own currency**: give each account a currency (PKR for a local bank / Raast, USD for Payoneer, Wise or an international bank).
+- **Marketing page** (not signed in): the visitor's country comes from the `CF-IPCountry` header, else a short geo-IP lookup of the visitor's address (`GEOIP_LOOKUP=off` disables it; `GEOIP_URL` points it at your own service), else the browser time zone (Asia/Karachi = PKR). Pakistan sees PKR, everyone else USD, and a PKR/USD switch is always shown.
+- Amounts are stored as exact decimals with two places (`DECIMAL(12,2)`) in each currency's major unit, and shown by one shared formatter: `PKR 18,999` (no decimals) and `$69` / `$0.50`.
+- **Single-company mode** shows no prices (the price list endpoint returns 404 and the marketing pricing is hidden). Set `SINGLE_COMPANY_MODE` on the web container as well for that.

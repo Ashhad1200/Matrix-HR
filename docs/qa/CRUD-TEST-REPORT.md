@@ -9,7 +9,7 @@ Suite: `tests/qa-crud/` (run with `pnpm test:qa`). Inventory: `docs/qa/crud-matr
 ## 2. Totals
 | | Round 1 | Round 2 (after the owner's decisions) |
 |---|---|---|
-| Automated specs (`pnpm test:qa`) | 103 / 103 | 130 / 130 pass in round 2; **149 / 149 pass after round 3** (19 new: structure, pay components, client logo, white-label API and web) |
+| Automated specs (`pnpm test:qa`) | 103 / 103 | 130 / 130 pass in round 2; **158 / 158 pass after round 4** (19 new in round 3, 9 more for currencies: structure, pay components, client logo, white-label API and web) |
 | Route matrix | 292 routes | 298 routes: 401 without a token everywhere; 403 for every non-listed role on every role-gated route; tenant B sees no tenant A row; the 24 public routes are exactly the intended ones |
 | Browser journeys | billing, AI | billing (staff logins, leave setup, private files, payments) passes; AI assistant passes (22 checks) |
 | API unit + DB integration | 153 | 160 pass after round 3 (7 new brand/receipt/payslip-PDF tests) |
@@ -130,6 +130,18 @@ Notes
 - No schema change in this round, so the migration rehearsal was not re-run (3 migrations, unchanged).
 - Not tested: a real SMTP send, a real AI provider (the mock model is used), a mobile binary.
 
+## 7e. Round 4: two billing currencies (spec `19-currency`; jest `common/currency.spec.ts`, `billing.integration.spec.ts`)
+| Requirement | Result | Evidence |
+|---|---|---|
+| Each plan and credit pack stores a USD **and** a PKR price, set by hand | ✅ | Migration `3_currency` (additive, idempotent; fills the starting prices where empty); backoffice plan and pack editors have the PKR fields; an edit shows on `/pricing` at once and is audited. Seeds: Starter $25 / PKR 6,999, Growth $69 / PKR 18,999, Business $149 / PKR 39,999 (+ $0.50 / PKR 140), yearly 10 x monthly; packs $10 / 2,799, $45 / 12,499, $120 / 32,999 |
+| Marketing page: PK sees PKR; US, UK, UAE see USD; switch works | ✅ | `19`: `CF-IPCountry` PK / US / GB / AE; no header: time zone Asia/Karachi = PKR, Europe/London = USD; the switch flips every price both ways. Screenshots `pricing-pkr.png`, `pricing-usd-*.png`. The live geo-IP lookup is built (off with `GEOIP_LOOKUP=off`) but not tested (no internet in the test environment) |
+| Company currency fixed at sign-up from the country; only the operator can change it | ✅ | `19`: PK / pk = PKR; US, GB, AE, DE and no country = USD; bad country code 400. A company admin gets 403 on the currency endpoint and 400 when it tries to smuggle `billingCurrency` through branding. Operator change needs a reason, is audited (from, to, reason), and is refused (409) while a payment is open |
+| Quote, payment amount and reference, receipt, emails in the company's currency | ✅ | PKR company: quote 18,999 / 189,990, credit pack 12,499 and 2,799, request, proof, approval, receipt `PKR 18,999`, approval email "Amount received: PKR 18,999". USD company: $69, credit pack $10, receipt and email in dollars. Jest: Business overage in PKR = 39,999 + 2 x 140 = 40,279 (yearly 403,350) |
+| Payment accounts have a currency; a company sees and can use only its own | ✅ | PKR company sees only the PKR account and gets 404 paying into a USD one, and the reverse; the Billing screen shows no other-currency text |
+| One formatter: "PKR 18,999", "$69", "$0.50" | ✅ | `formatMoney` in `@matrixhr/shared`, used by the landing page, Billing, receipts, backoffice and emails; jest covers the cases |
+| White-label `WL_CURRENCIES`; single-company shows no prices | ✅ | A second API with `WL_CURRENCIES=USD` bills a Pakistani client in USD, offers one currency on `/pricing` and refuses a PKR change; single-company `/pricing` is 404 (spec `09`) |
+Notes: amounts stay exact two-decimal numbers per currency (not integer minor units); companies that were already on a PKR plan become PKR; the billing journey now creates its own bank account.
+
 ## 8. Demo-safe path (fully verified, in this order)
 1. **Owner/HR:** sign up a fresh company (trial, every module) → Employees (add, search) → Recruitment (new job, add candidate, Applicant board) → Onboarding (new checklist, start for an employee) → Performance (new cycle) → Learning (new course) → eNPS (new survey, publish).
 2. **Employee:** Leave (apply: the form shows working days; edit; cancel) → Timesheets → Expenses → Loans → Performance (new goal, progress) → Learning (enrol) → Surveys (answer once) → the AI assistant.
@@ -142,7 +154,7 @@ Skip: Pre-boarding invite (not promised).
 ## How to re-run
 ```
 /var/tmp/up.sh            # (sandbox helper) or: pnpm dev stack with web built (next build + next start); API with AUTH_THROTTLE_LIMIT and THROTTLE_LIMIT raised
-pnpm test:qa              # tests/qa-crud, 149 specs, ~7 min (web as a production build)
+pnpm test:qa              # tests/qa-crud, 158 specs, ~7 min (web as a production build)
 node scripts/billing-ui-test.mjs && node scripts/ai-ui-test.mjs   # journeys (mock LLM: node scripts/mock-llm.mjs 9100)
 python3 tests/qa-crud/gen-routes.py   # refresh the route table after adding endpoints
 ```

@@ -65,6 +65,7 @@ services:
     ports:
       - "3001:3001"
     environment:
+      WL_CURRENCIES: ${WL_CURRENCIES:-}
       WL_PRODUCT_NAME: ${WL_PRODUCT_NAME:-}
       WL_LOGO_URL: ${WL_LOGO_URL:-}
       WL_FAVICON_URL: ${WL_FAVICON_URL:-}
@@ -109,6 +110,10 @@ services:
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:3001/api/v1
       WEB_URL: http://localhost:3000
+      WL_CURRENCIES: ${WL_CURRENCIES:-}
+      SINGLE_COMPANY_MODE: ${SINGLE_COMPANY_MODE:-}
+      GEOIP_LOOKUP: ${GEOIP_LOOKUP:-}
+      API_INTERNAL_URL: http://api:3001/api/v1
       WL_PRODUCT_NAME: ${WL_PRODUCT_NAME:-}
       WL_LOGO_URL: ${WL_LOGO_URL:-}
       WL_FAVICON_URL: ${WL_FAVICON_URL:-}

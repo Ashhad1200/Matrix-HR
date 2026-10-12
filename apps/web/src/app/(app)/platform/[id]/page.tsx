@@ -54,6 +54,37 @@ function BrandingCard({ tenant, onChanged }: { tenant: any; onChanged: () => voi
   );
 }
 
+function CurrencyCard({ tenant, onChanged }: { tenant: any; onChanged: () => void }) {
+  const [currency, setCurrency] = useState<'PKR' | 'USD'>(tenant.billingCurrency ?? 'USD');
+  const [reason, setReason] = useState('');
+  const [msg, setMsg] = useState('');
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+  async function save(e: React.FormEvent) {
+    e.preventDefault(); setErr(''); setMsg(''); setBusy(true);
+    try { const r = await api.platform.setCurrency(tenant.id, currency, reason); setMsg(r.changed ? `Billing currency is now ${r.billingCurrency}.` : 'No change.'); setReason(''); onChanged(); }
+    catch (x: any) { setErr(x.message); } finally { setBusy(false); }
+  }
+  return (
+    <Card>
+      <CardHeader><CardTitle>Billing currency</CardTitle></CardHeader>
+      <CardContent className="space-y-3 text-sm">
+        <p className="text-[hsl(var(--muted-foreground))]">Set at sign-up from the company&rsquo;s country (Pakistan: PKR, everyone else: USD). Only you can change it. Quotes, payment accounts, receipts and emails follow it.</p>
+        <form onSubmit={save} className="space-y-2">
+          <div className="flex flex-wrap items-end gap-3">
+            <div><label htmlFor="bc-cur" className="mb-1.5 block font-medium">Currency</label>
+              <select id="bc-cur" value={currency} onChange={(e) => setCurrency(e.target.value as 'PKR' | 'USD')} className="flex h-10 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 text-sm"><option value="PKR">PKR</option><option value="USD">USD</option></select></div>
+            <div className="min-w-[14rem] flex-1"><label htmlFor="bc-reason" className="mb-1.5 block font-medium">Reason (kept in the audit log)</label><Input id="bc-reason" required minLength={5} value={reason} onChange={(e) => setReason(e.target.value)} /></div>
+            <Button type="submit" disabled={busy || currency === tenant.billingCurrency}>Change currency</Button>
+          </div>
+        </form>
+        {err && <p role="alert" className="text-rose-700">{err}</p>}
+        {msg && <p role="status" className="text-emerald-700">{msg}</p>}
+      </CardContent>
+    </Card>
+  );
+}
+
 const STATUSES = ['trialing', 'active', 'past_due', 'suspended', 'cancelled', 'expired'];
 
 export default function PlatformTenantDetailPage() {
@@ -207,6 +238,7 @@ export default function PlatformTenantDetailPage() {
           </CardContent>
         </Card>
 
+        <CurrencyCard tenant={tenant} onChanged={load} />
         <BrandingCard tenant={tenant} onChanged={load} />
         <TenantBillingCard tenantId={id} />
 
