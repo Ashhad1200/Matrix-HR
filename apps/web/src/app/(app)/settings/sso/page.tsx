@@ -10,10 +10,15 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Badge } from '@/components/ui/badge';
 import { PageSkeleton } from '@/components/ui/skeleton';
 import { Fingerprint, Save } from 'lucide-react';
+import { AdminOnly } from '@/components/admin-only';
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1').replace(/\/$/, '');
 
 export default function SsoSettingsPage() {
+  return <AdminOnly><SsoSettingsPageInner /></AdminOnly>;
+}
+
+function SsoSettingsPageInner() {
   const { user } = useAuth();
   const [config, setConfig] = useState<any>(null);
   const [saving, setSaving] = useState(false);

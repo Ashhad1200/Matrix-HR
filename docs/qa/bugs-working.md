@@ -20,3 +20,4 @@ OPEN-2 | Decision | A company created through public signup has an admin login b
 OPEN-3 | Decision | A new trial company lands on the Starter plan; Custom fields, SSO etc. are plan-gated, so a trial customer cannot try them
 B17 | Minor (a11y) | Timesheet and 1-on-1 form labels were not associated with their inputs (screen readers / getByLabel) | FIXED
 B18 | Major (mobile/keyboard) | Timesheet 'Delete entry' button was display:none until mouse hover: impossible on touch devices and by keyboard | FIXED
+B19 | Minor | HR could open Settings > API keys and SSO (page loaded, every call 403) | FIXED (company-admins-only notice)

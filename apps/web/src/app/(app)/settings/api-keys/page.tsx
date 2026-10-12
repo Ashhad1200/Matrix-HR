@@ -11,8 +11,13 @@ import { TableSkeleton } from '@/components/ui/skeleton';
 import { Modal } from '@/components/ui/modal';
 import { KeyRound, Plus, Copy, Check, Trash2 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { AdminOnly } from '@/components/admin-only';
 
 export default function ApiKeysPage() {
+  return <AdminOnly><ApiKeysPageInner /></AdminOnly>;
+}
+
+function ApiKeysPageInner() {
   const [keys, setKeys] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
