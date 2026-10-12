@@ -154,6 +154,12 @@ export class PlatformService {
       data: { status, ...(status === 'cancelled' ? { cancelledAt: new Date() } : {}) },
     });
 
+    // "Suspended" is the operator's hard stop: it blocks every sign-in and API call of that company (JwtStrategy checks
+    // Tenant.status on each request). Any other status lifts a suspension, so it is fully reversible.
+    const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId }, select: { status: true } });
+    if (status === 'suspended' && tenant?.status === 'ACTIVE') await this.prisma.tenant.update({ where: { id: tenantId }, data: { status: 'SUSPENDED' } });
+    else if (status !== 'suspended' && tenant?.status === 'SUSPENDED') await this.prisma.tenant.update({ where: { id: tenantId }, data: { status: 'ACTIVE' } });
+
     await this.audit(operatorUserId, 'SET_SUBSCRIPTION_STATUS', 'Tenant', tenantId, { status });
     return updated;
   }

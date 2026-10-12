@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { formatDate } from '@/lib/utils';
 import { PermissionGate } from '@/components/permission-gate';
+import { useAction } from '@/hooks/use-action';
+import { ErrorAlert } from '@/components/ui/alert';
 
 export default function LeavePage() {
   const [balances, setBalances] = useState<any[]>([]);
@@ -14,6 +16,7 @@ export default function LeavePage() {
   const [policies, setPolicies] = useState<any[]>([]);
   const [whosOut, setWhosOut] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const action = useAction();
   const [form, setForm] = useState({ policyId: '', startDate: '', endDate: '', reason: '' });
 
   useEffect(() => {
@@ -32,21 +35,25 @@ export default function LeavePage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    await api.leave.createRequest(form);
-    setShowForm(false);
-    const r = await api.leave.requests();
-    setRequests(r);
+    if (await action.run(() => api.leave.createRequest(form))) {
+      setShowForm(false);
+      setRequests(await api.leave.requests());
+      setBalances(await api.leave.balances());
+    }
   }
 
   async function handleApprove(id: string) {
-    await api.leave.approve(id);
-    setRequests(await api.leave.requests());
-    setBalances(await api.leave.balances());
+    if (await action.run(() => api.leave.approve(id))) {
+      setRequests(await api.leave.requests());
+      setBalances(await api.leave.balances());
+    }
   }
 
   async function handleReject(id: string) {
-    await api.leave.reject(id, 'Not approved at this time');
-    setRequests(await api.leave.requests());
+    if (await action.run(() => api.leave.reject(id, 'Not approved at this time'))) {
+      setRequests(await api.leave.requests());
+      setBalances(await api.leave.balances());
+    }
   }
 
   return (
@@ -55,6 +62,7 @@ export default function LeavePage() {
         <h1 className="text-2xl font-bold">Leave Management</h1>
         <Button onClick={() => setShowForm(!showForm)}>Apply for Leave</Button>
       </div>
+      <ErrorAlert message={action.error} />
 
       <div className="grid gap-4 sm:grid-cols-3">
         {balances.map((b) => (

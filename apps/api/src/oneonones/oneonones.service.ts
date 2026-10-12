@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { PrismaService } from '../prisma/prisma.service';
 import { UserRole } from '@matrixhr/database';
 import { CreateOneOnOneDto, UpdateOneOnOneDto } from './dto';
+import { assertInTenant } from '../common/data-scope';
 
 const EMPLOYEE_SELECT = {
   select: { id: true, firstName: true, lastName: true, photoUrl: true, designation: { select: { name: true } } },
@@ -23,8 +24,14 @@ export class OneOnOnesService {
     });
   }
 
-  async create(tenantId: string, managerId: string | null, dto: CreateOneOnOneDto) {
+  async create(tenantId: string, managerId: string | null, dto: CreateOneOnOneDto, role: UserRole) {
     if (!managerId) throw new ForbiddenException('No employee profile linked to this account');
+    // The other person must be in this company, and a manager may only meet their own reports (HR/admin: anyone).
+    await assertInTenant(this.prisma, tenantId, [{ model: 'employee', id: dto.employeeId, label: 'employee' }]);
+    if (role !== UserRole.HR_MANAGER && role !== UserRole.COMPANY_ADMIN) {
+      const report = await this.prisma.employee.findFirst({ where: { id: dto.employeeId, tenantId, managerId }, select: { id: true } });
+      if (!report) throw new ForbiddenException('You can only schedule 1-on-1s with your direct reports');
+    }
     return this.prisma.oneOnOne.create({
       data: {
         tenantId,

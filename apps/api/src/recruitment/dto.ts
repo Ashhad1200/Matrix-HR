@@ -1,7 +1,7 @@
-import { IsEmail, IsOptional, IsString, IsUrl, MaxLength, IsIn } from 'class-validator';
+import { IsEmail, IsOptional, IsString, IsUrl, MaxLength, IsIn, MinLength } from 'class-validator';
 
 export class CreateJobDto {
-  @IsString() @MaxLength(200) title: string;
+  @IsString() @MinLength(1) @MaxLength(200) title: string;
   @IsOptional() @IsString() @MaxLength(120) department?: string;
   @IsOptional() @IsString() @MaxLength(10000) description?: string;
   @IsOptional() @IsString() @MaxLength(10000) requirements?: string;

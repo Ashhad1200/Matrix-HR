@@ -7,22 +7,30 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PermissionGate } from '@/components/permission-gate';
+import { useAction } from '@/hooks/use-action';
+import { ErrorAlert } from '@/components/ui/alert';
+
+const PAGE_SIZE = 20;
 
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState<any>({ data: [], total: 0 });
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const action = useAction();
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ employeeCode: '', firstName: '', lastName: '', email: '' });
 
   function load() {
-    api.employees.list({ search, limit: '50' }).then(setEmployees).catch(console.error);
+    api.employees.list({ search, limit: String(PAGE_SIZE), page: String(page) }).then(setEmployees).catch(console.error);
   }
 
-  useEffect(() => { load(); }, [search]);
+  useEffect(() => { setPage(1); }, [search]);
+  useEffect(() => { load(); }, [search, page]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    await api.employees.create(form);
+    const ok = await action.run(() => api.employees.create({ ...form, email: form.email || undefined }));
+    if (!ok) return;
     setShowAdd(false);
     setForm({ employeeCode: '', firstName: '', lastName: '', email: '' });
     load();
@@ -52,6 +60,7 @@ export default function EmployeesPage() {
           <CardHeader><CardTitle>New Employee</CardTitle></CardHeader>
           <CardContent>
             <form onSubmit={handleCreate} className="grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2"><ErrorAlert message={action.error} /></div>
               <Input placeholder="Employee Code" value={form.employeeCode} onChange={(e) => setForm({ ...form, employeeCode: e.target.value })} required />
               <Input placeholder="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
               <Input placeholder="First Name" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} required />
@@ -96,6 +105,15 @@ export default function EmployeesPage() {
           </table>
         </CardContent>
       </Card>
+      {employees.total > PAGE_SIZE && (
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-[hsl(var(--muted-foreground))]">Page {page} of {employees.totalPages ?? Math.ceil(employees.total / PAGE_SIZE)}</span>
+          <div className="flex gap-2">
+            <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>Previous</Button>
+            <Button variant="secondary" size="sm" disabled={page >= (employees.totalPages ?? Math.ceil(employees.total / PAGE_SIZE))} onClick={() => setPage(page + 1)}>Next</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

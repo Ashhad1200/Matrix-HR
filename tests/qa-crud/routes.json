@@ -1,0 +1,2557 @@
+[
+ {
+  "method": "POST",
+  "path": "/ai/ask",
+  "auth": true,
+  "roles": [],
+  "file": "ai/ai.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/ai/rank-candidate",
+  "auth": true,
+  "roles": [],
+  "file": "ai/ai.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/ai/status",
+  "auth": true,
+  "roles": [],
+  "file": "ai/assistant.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/ai/tenant",
+  "auth": true,
+  "roles": [],
+  "file": "ai/assistant.controller.ts"
+ },
+ {
+  "method": "PUT",
+  "path": "/ai/tenant",
+  "auth": true,
+  "roles": [],
+  "file": "ai/assistant.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/ai/chat",
+  "auth": true,
+  "roles": [],
+  "file": "ai/assistant.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/ai/conversations",
+  "auth": true,
+  "roles": [],
+  "file": "ai/assistant.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/ai/conversations/:id",
+  "auth": true,
+  "roles": [],
+  "file": "ai/assistant.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/ai/conversations/:id",
+  "auth": true,
+  "roles": [],
+  "file": "ai/assistant.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/ai/actions/:id/confirm",
+  "auth": true,
+  "roles": [],
+  "file": "ai/assistant.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/ai/actions/:id/cancel",
+  "auth": true,
+  "roles": [],
+  "file": "ai/assistant.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/platform/ai/settings",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "ai/assistant.controller.ts"
+ },
+ {
+  "method": "PUT",
+  "path": "/platform/ai/settings",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "ai/assistant.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/api-keys",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN"
+  ],
+  "file": "api-keys/api-keys.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/api-keys",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN"
+  ],
+  "file": "api-keys/api-keys.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api-keys/:id",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN"
+  ],
+  "file": "api-keys/api-keys.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/approvals/inbox",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "approvals/approvals.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/attendance/clock-in",
+  "auth": true,
+  "roles": [],
+  "file": "attendance/attendance.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/attendance/clock-out",
+  "auth": true,
+  "roles": [],
+  "file": "attendance/attendance.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/attendance/my-logs",
+  "auth": true,
+  "roles": [],
+  "file": "attendance/attendance.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/attendance/dashboard",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN",
+   "MANAGER"
+  ],
+  "file": "attendance/attendance.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/attendance/regularization",
+  "auth": true,
+  "roles": [],
+  "file": "attendance/attendance.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/audit/logs",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "audit/audit.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/auth/signup",
+  "auth": false,
+  "roles": [],
+  "file": "auth/auth.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/auth/login",
+  "auth": false,
+  "roles": [],
+  "file": "auth/auth.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/auth/mfa/verify",
+  "auth": false,
+  "roles": [],
+  "file": "auth/auth.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/auth/refresh",
+  "auth": false,
+  "roles": [],
+  "file": "auth/auth.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/auth/logout",
+  "auth": false,
+  "roles": [],
+  "file": "auth/auth.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/auth/forgot-password",
+  "auth": false,
+  "roles": [],
+  "file": "auth/auth.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/auth/reset-password",
+  "auth": false,
+  "roles": [],
+  "file": "auth/auth.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/auth/change-password",
+  "auth": true,
+  "roles": [],
+  "file": "auth/auth.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/auth/mfa/setup",
+  "auth": true,
+  "roles": [],
+  "file": "auth/auth.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/auth/mfa/enable",
+  "auth": true,
+  "roles": [],
+  "file": "auth/auth.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/auth/mfa/disable",
+  "auth": true,
+  "roles": [],
+  "file": "auth/auth.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/auth/me",
+  "auth": true,
+  "roles": [],
+  "file": "auth/auth.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/platform/billing/queue",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/platform/billing/history",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/platform/billing/requests/:id/proof",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/platform/billing/requests/:id/receipt",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/platform/billing/requests/:id/approve",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/platform/billing/requests/:id/reject",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/platform/billing/accounts",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/platform/billing/accounts",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/platform/billing/accounts/:id",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/platform/billing/settings",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "PUT",
+  "path": "/platform/billing/settings",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/platform/billing/plans",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/platform/billing/plans/:code",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/platform/billing/packs",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/platform/billing/packs/:code",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/platform/billing/clock-report",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/platform/billing/tenants/:id",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "PUT",
+  "path": "/platform/billing/tenants/:id/period",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/platform/billing/tenants/:id/credits",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/platform/billing/ai-usage",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "billing/billing-admin.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/billing/state",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "billing/billing.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/billing/catalog",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "billing/billing.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/billing/quote",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "billing/billing.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/billing/requests",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "billing/billing.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/billing/requests",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "billing/billing.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/billing/requests/:id",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "billing/billing.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/billing/requests/:id/cancel",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "billing/billing.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/billing/requests/:id/proof",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "billing/billing.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/billing/requests/:id/proof",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "billing/billing.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/billing/requests/:id/receipt",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "billing/billing.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/biometric/devices",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "biometric/biometric.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/biometric/devices",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "biometric/biometric.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/biometric/devices/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "biometric/biometric.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/biometric/devices/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "biometric/biometric.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/iclock/cdata",
+  "auth": false,
+  "roles": [],
+  "file": "biometric/biometric.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/iclock/cdata",
+  "auth": false,
+  "roles": [],
+  "file": "biometric/biometric.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/iclock/getrequest",
+  "auth": false,
+  "roles": [],
+  "file": "biometric/biometric.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/iclock/devicecmd",
+  "auth": false,
+  "roles": [],
+  "file": "biometric/biometric.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/custom-fields",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "custom-fields/custom-fields.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/custom-fields/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "custom-fields/custom-fields.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/custom-fields",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "custom-fields/custom-fields.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/custom-fields/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "custom-fields/custom-fields.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/custom-fields/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "custom-fields/custom-fields.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/dashboard",
+  "auth": true,
+  "roles": [],
+  "file": "dashboard/dashboard.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/dev/outbox",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN"
+  ],
+  "file": "dev/dev.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/dev/seed-bulk",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN"
+  ],
+  "file": "dev/dev.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/employees",
+  "auth": true,
+  "roles": [],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/employees/org-chart",
+  "auth": true,
+  "roles": [],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/employees/departments",
+  "auth": true,
+  "roles": [],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/employees/departments",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/employees/team",
+  "auth": true,
+  "roles": [],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/employees/me/payslips",
+  "auth": true,
+  "roles": [],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/employees/me/payslips/:itemId/link",
+  "auth": true,
+  "roles": [],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/employees/me/self",
+  "auth": true,
+  "roles": [],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/employees/designations",
+  "auth": true,
+  "roles": [],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/employees/designations",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/employees/import",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/employees/:id",
+  "auth": true,
+  "roles": [],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/employees",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/employees/:id",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/employees/:id/documents/:docId/link",
+  "auth": true,
+  "roles": [],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/employees/:id/documents",
+  "auth": true,
+  "roles": [],
+  "file": "employees/employees.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/enps/surveys",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "enps/enps.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/enps/surveys/summary",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "enps/enps.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/enps/surveys/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "enps/enps.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/enps/surveys",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "enps/enps.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/enps/surveys/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "enps/enps.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/enps/surveys/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "enps/enps.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/enps/surveys/:id/respond",
+  "auth": true,
+  "roles": [],
+  "file": "enps/enps.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/eor/countries",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "eor/eor.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/eor/quote",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "eor/eor.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/esign/requests",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "esign/esign.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/esign/:id/sign",
+  "auth": true,
+  "roles": [],
+  "file": "esign/esign.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/expenses/categories",
+  "auth": true,
+  "roles": [],
+  "file": "expenses/expenses.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/expenses/categories",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "expenses/expenses.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/expenses/categories/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "expenses/expenses.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/expenses/claims",
+  "auth": true,
+  "roles": [],
+  "file": "expenses/expenses.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/expenses/inbox",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "expenses/expenses.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/expenses/claims",
+  "auth": true,
+  "roles": [],
+  "file": "expenses/expenses.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/expenses/claims/:id",
+  "auth": true,
+  "roles": [],
+  "file": "expenses/expenses.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/expenses/claims/:id/items/:itemId/receipt-link",
+  "auth": true,
+  "roles": [],
+  "file": "expenses/expenses.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/expenses/claims/:id",
+  "auth": true,
+  "roles": [],
+  "file": "expenses/expenses.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/expenses/claims/:id",
+  "auth": true,
+  "roles": [],
+  "file": "expenses/expenses.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/expenses/claims/:id/submit",
+  "auth": true,
+  "roles": [],
+  "file": "expenses/expenses.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/expenses/claims/:id/cancel",
+  "auth": true,
+  "roles": [],
+  "file": "expenses/expenses.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/expenses/claims/:id/decision",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "expenses/expenses.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/extensions/panels",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "extensions/extensions.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/extensions/access",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "extensions/extensions.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/formulas",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "formulas/formulas.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/formulas/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "formulas/formulas.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/formulas",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "formulas/formulas.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/formulas/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "formulas/formulas.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/formulas/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "formulas/formulas.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/health",
+  "auth": false,
+  "roles": [],
+  "file": "health/health.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/health/ready",
+  "auth": false,
+  "roles": [],
+  "file": "health/health.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/integrations",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "integrations/integrations.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/integrations",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "integrations/integrations.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/integrations/:provider/install",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "integrations/integrations.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/integrations/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "integrations/integrations.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/integrations/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "integrations/integrations.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/invites/people",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "invites/invites.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/invites",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "invites/invites.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/invites/:id/resend",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "invites/invites.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/invites/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "invites/invites.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/auth/invite/:token",
+  "auth": false,
+  "roles": [],
+  "file": "invites/invites.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/auth/invite/accept",
+  "auth": false,
+  "roles": [],
+  "file": "invites/invites.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/leave/policies",
+  "auth": true,
+  "roles": [],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/leave/balances",
+  "auth": true,
+  "roles": [],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/leave/requests",
+  "auth": true,
+  "roles": [],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/leave/whos-out",
+  "auth": true,
+  "roles": [],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/leave/holidays",
+  "auth": true,
+  "roles": [],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/leave/requests",
+  "auth": true,
+  "roles": [],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/leave/requests/:id/approve",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/leave/requests/:id/reject",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/leave/policies/all",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/leave/policies",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/leave/policies/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/leave/balances/rebuild",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/leave/holidays",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/leave/holidays/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/leave/holidays/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/lms/courses",
+  "auth": true,
+  "roles": [],
+  "file": "lms/lms.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/lms/courses",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "HR_MANAGER"
+  ],
+  "file": "lms/lms.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/lms/enroll",
+  "auth": true,
+  "roles": [],
+  "file": "lms/lms.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/lms/enrollments/:id/progress",
+  "auth": true,
+  "roles": [],
+  "file": "lms/lms.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/loans",
+  "auth": true,
+  "roles": [],
+  "file": "loans/loans.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/loans/inbox",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "loans/loans.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/loans",
+  "auth": true,
+  "roles": [],
+  "file": "loans/loans.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/loans/:id",
+  "auth": true,
+  "roles": [],
+  "file": "loans/loans.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/loans/:id/decision",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "loans/loans.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/loans/:id/cancel",
+  "auth": true,
+  "roles": [],
+  "file": "loans/loans.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/marketplace/integrations",
+  "auth": true,
+  "roles": [],
+  "file": "marketplace/marketplace.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/marketplace/categories",
+  "auth": true,
+  "roles": [],
+  "file": "marketplace/marketplace.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/marketplace/:id/connect",
+  "auth": true,
+  "roles": [],
+  "file": "marketplace/marketplace.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/marketplace/:id/disconnect",
+  "auth": true,
+  "roles": [],
+  "file": "marketplace/marketplace.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/marketplace/:id/logs",
+  "auth": true,
+  "roles": [],
+  "file": "marketplace/marketplace.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/notifications",
+  "auth": true,
+  "roles": [],
+  "file": "notifications/notifications.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/notifications/:id/read",
+  "auth": true,
+  "roles": [],
+  "file": "notifications/notifications.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/offboarding",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "offboarding/offboarding.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/offboarding/inbox",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "offboarding/offboarding.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/offboarding/mine",
+  "auth": true,
+  "roles": [],
+  "file": "offboarding/offboarding.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/offboarding",
+  "auth": true,
+  "roles": [],
+  "file": "offboarding/offboarding.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/offboarding/:id",
+  "auth": true,
+  "roles": [],
+  "file": "offboarding/offboarding.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/offboarding/:id/decision",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "offboarding/offboarding.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/offboarding/:id/clearance/:itemId/clear",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "offboarding/offboarding.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/offboarding/:id/exit-interview",
+  "auth": true,
+  "roles": [],
+  "file": "offboarding/offboarding.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/offboarding/:id/settlement/recalculate",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "offboarding/offboarding.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/offboarding/:id/complete",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN"
+  ],
+  "file": "offboarding/offboarding.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/offboarding/:id/cancel",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "offboarding/offboarding.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/onboarding/templates",
+  "auth": true,
+  "roles": [],
+  "file": "onboarding/onboarding.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/onboarding/progress",
+  "auth": true,
+  "roles": [],
+  "file": "onboarding/onboarding.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/onboarding/dashboard",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "onboarding/onboarding.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/onboarding/start",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "onboarding/onboarding.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/onboarding/tasks/:progressId/:taskId/complete",
+  "auth": true,
+  "roles": [],
+  "file": "onboarding/onboarding.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/one-on-ones",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "oneonones/oneonones.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/one-on-ones",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "oneonones/oneonones.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/one-on-ones/:id",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "oneonones/oneonones.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/one-on-ones/:id",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "oneonones/oneonones.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/payroll/runs",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "payroll/payroll.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/payroll/runs",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "payroll/payroll.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/payroll/runs/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "payroll/payroll.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/payroll/runs/:id/recalculate",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "payroll/payroll.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/payroll/runs/:id/submit",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "payroll/payroll.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/payroll/runs/:id/approve",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "payroll/payroll.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/payroll/runs/:id/lock",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "payroll/payroll.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/payroll/runs/:id/reopen",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN"
+  ],
+  "file": "payroll/payroll.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/payroll/runs/:id/items/:itemId/payslip",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "payroll/payroll.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/payroll/runs/:id/journal",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "payroll/payroll.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/payroll/runs/:id/bank-file",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "payroll/payroll.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/payroll/w2",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "payroll/payroll.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/payroll/compensation-items",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "payroll/payroll.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/payroll/compensation-items",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "payroll/payroll.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/payroll/compensation-items/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "payroll/payroll.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/peer-reviews",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN",
+   "MANAGER"
+  ],
+  "file": "peer-reviews/peer-reviews.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/peer-reviews/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN",
+   "MANAGER"
+  ],
+  "file": "peer-reviews/peer-reviews.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/peer-reviews",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN",
+   "MANAGER"
+  ],
+  "file": "peer-reviews/peer-reviews.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/peer-reviews/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN",
+   "MANAGER"
+  ],
+  "file": "peer-reviews/peer-reviews.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/peer-reviews/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN",
+   "MANAGER"
+  ],
+  "file": "peer-reviews/peer-reviews.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/performance/cycles",
+  "auth": true,
+  "roles": [],
+  "file": "performance/performance.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/performance/cycles",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "performance/performance.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/performance/goals",
+  "auth": true,
+  "roles": [],
+  "file": "performance/performance.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/performance/goals",
+  "auth": true,
+  "roles": [],
+  "file": "performance/performance.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/performance/goals/:id/progress",
+  "auth": true,
+  "roles": [],
+  "file": "performance/performance.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/performance/reviews",
+  "auth": true,
+  "roles": [],
+  "file": "performance/performance.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/performance/reviews",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "performance/performance.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/performance/reviews/:id",
+  "auth": true,
+  "roles": [],
+  "file": "performance/performance.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/platform/tenants",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "platform/platform.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/platform/tenants/:id",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "platform/platform.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/platform/tenants",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "platform/platform.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/platform/plans",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "platform/platform.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/platform/plans",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "platform/platform.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/platform/tenants/:id/subscription",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "platform/platform.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/platform/tenants/:id/subscription/status",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "platform/platform.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/platform/tenants/:id/overrides",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "platform/platform.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/platform/tenants/:id/overrides/:overrideId",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "platform/platform.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/platform/audit",
+  "auth": true,
+  "roles": [
+   "SUPER_ADMIN"
+  ],
+  "file": "platform/platform.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/preboarding",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "preboarding/preboarding.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/preboarding/invite",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "preboarding/preboarding.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/preboarding/portal/:token",
+  "auth": false,
+  "roles": [],
+  "file": "preboarding/preboarding.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/careers/:subdomain/jobs",
+  "auth": false,
+  "roles": [],
+  "file": "recruitment/careers.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/careers/:subdomain/feed.xml",
+  "auth": false,
+  "roles": [],
+  "file": "recruitment/careers.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/recruitment/jobs",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "recruitment/recruitment.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/recruitment/jobs",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "recruitment/recruitment.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/recruitment/applications",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "recruitment/recruitment.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/recruitment/applications",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "recruitment/recruitment.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/recruitment/applications/:id/status",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "recruitment/recruitment.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/recruitment/applications/:id/hire",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "recruitment/recruitment.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/report-definitions",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "reports-builder/reports-builder.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/report-definitions/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "reports-builder/reports-builder.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/report-definitions",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "reports-builder/reports-builder.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/report-definitions/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "reports-builder/reports-builder.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/report-definitions/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "reports-builder/reports-builder.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/reports/headcount",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN",
+   "MANAGER"
+  ],
+  "file": "reports/reports.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/reports/leave-consumption",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN",
+   "MANAGER"
+  ],
+  "file": "reports/reports.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/reports/attendance",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN",
+   "MANAGER"
+  ],
+  "file": "reports/reports.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/reports/payroll-cost",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "reports/reports.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/sso/config",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN"
+  ],
+  "file": "sso/sso.controller.ts"
+ },
+ {
+  "method": "PUT",
+  "path": "/sso/config",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN"
+  ],
+  "file": "sso/sso.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/sso/:subdomain/metadata",
+  "auth": false,
+  "roles": [],
+  "file": "sso/sso.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/sso/:subdomain/login-hint",
+  "auth": false,
+  "roles": [],
+  "file": "sso/sso.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/tenants/subdomain/:subdomain",
+  "auth": false,
+  "roles": [],
+  "file": "tenants/tenants.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/tenants/branding",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN",
+   "SUPER_ADMIN"
+  ],
+  "file": "tenants/tenants.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/timesheets/projects",
+  "auth": true,
+  "roles": [],
+  "file": "timesheets/timesheets.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/timesheets/projects",
+  "auth": true,
+  "roles": [],
+  "file": "timesheets/timesheets.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/timesheets/projects/:id",
+  "auth": true,
+  "roles": [],
+  "file": "timesheets/timesheets.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/timesheets/projects/:id",
+  "auth": true,
+  "roles": [],
+  "file": "timesheets/timesheets.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/timesheets/entries",
+  "auth": true,
+  "roles": [],
+  "file": "timesheets/timesheets.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/timesheets/entries",
+  "auth": true,
+  "roles": [],
+  "file": "timesheets/timesheets.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/timesheets/entries/:id",
+  "auth": true,
+  "roles": [],
+  "file": "timesheets/timesheets.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/timesheets/entries/:id",
+  "auth": true,
+  "roles": [],
+  "file": "timesheets/timesheets.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/timesheets/submit",
+  "auth": true,
+  "roles": [],
+  "file": "timesheets/timesheets.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/timesheets/pending",
+  "auth": true,
+  "roles": [],
+  "file": "timesheets/timesheets.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/timesheets/entries/:id/approve",
+  "auth": true,
+  "roles": [],
+  "file": "timesheets/timesheets.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/timesheets/entries/:id/reject",
+  "auth": true,
+  "roles": [],
+  "file": "timesheets/timesheets.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/files/:token",
+  "auth": false,
+  "roles": [],
+  "file": "uploads/files.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/uploads",
+  "auth": true,
+  "roles": [],
+  "file": "uploads/uploads.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/webhooks",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "webhooks/webhooks.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/webhooks/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "webhooks/webhooks.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/webhooks/:id/deliveries",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "webhooks/webhooks.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/webhooks/:id/test",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "webhooks/webhooks.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/webhooks/deliveries/:deliveryId/redeliver",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "webhooks/webhooks.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/webhooks",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "webhooks/webhooks.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/webhooks/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "webhooks/webhooks.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/webhooks/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "webhooks/webhooks.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/whatsapp/webhook",
+  "auth": false,
+  "roles": [],
+  "file": "whatsapp/whatsapp.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/whatsapp/webhook",
+  "auth": false,
+  "roles": [],
+  "file": "whatsapp/whatsapp.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/whatsapp/messages",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "whatsapp/whatsapp.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/whatsapp/consents",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "whatsapp/whatsapp.controller.ts"
+ },
+ {
+  "method": "PUT",
+  "path": "/whatsapp/consents",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "whatsapp/whatsapp.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/whatsapp/consent/me",
+  "auth": true,
+  "roles": [],
+  "file": "whatsapp/whatsapp.controller.ts"
+ },
+ {
+  "method": "PUT",
+  "path": "/whatsapp/consent/me",
+  "auth": true,
+  "roles": [],
+  "file": "whatsapp/whatsapp.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/workflows",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "workflows/workflows.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/workflows/instances",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "workflows/workflows.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/workflows/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "workflows/workflows.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/workflows",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "workflows/workflows.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/workflows/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "workflows/workflows.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/workflows/:id",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "workflows/workflows.controller.ts"
+ }
+]

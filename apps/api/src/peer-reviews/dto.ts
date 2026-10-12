@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsInt, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsInt, IsBoolean, Min, Max } from 'class-validator';
 
 export class CreatePeerReviewDto {
   @IsString()
@@ -22,6 +22,8 @@ export class CreatePeerReviewDto {
 export class UpdatePeerReviewDto {
   @IsOptional()
   @IsInt()
+  @Min(1)
+  @Max(5)
   rating?: number;
 
   @IsOptional()

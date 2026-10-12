@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePeerReviewDto, UpdatePeerReviewDto } from './dto';
+import { assertInTenant } from '../common/data-scope';
 
 @Injectable()
 export class PeerReviewsService {
@@ -22,6 +23,11 @@ export class PeerReviewsService {
   }
 
   async create(tenantId: string, dto: CreatePeerReviewDto) {
+    await assertInTenant(this.prisma, tenantId, [
+      { model: 'reviewCycle', id: dto.cycleId, label: 'review cycle' },
+      { model: 'employee', id: dto.employeeId, label: 'employee' },
+      { model: 'employee', id: dto.reviewerId, label: 'reviewer' },
+    ]);
     return this.prisma.peerReview360.create({
       data: {
         tenantId,

@@ -46,7 +46,8 @@ export default function TimesheetsPage() {
   const load = useCallback(() => {
     setLoading(true);
     Promise.all([
-      api.timesheets.entries(weekStart),
+      // A login with no employee profile (e.g. the company owner created at signup) has no timesheet of its own.
+      user?.employeeId ? api.timesheets.entries(weekStart) : Promise.resolve({ weekStart, entries: [], totalHours: 0 }),
       api.timesheets.projects(),
       canApprove ? api.timesheets.pending() : Promise.resolve([]),
     ])
@@ -58,7 +59,7 @@ export default function TimesheetsPage() {
       })
       .catch((err) => setError(err.message || 'Failed to load timesheets'))
       .finally(() => setLoading(false));
-  }, [weekStart, canApprove]);
+  }, [weekStart, canApprove, user?.employeeId]);
 
   useEffect(load, [load]);
 
@@ -217,8 +218,8 @@ export default function TimesheetsPage() {
                             {e.status === 'draft' && (
                               <button
                                 type="button"
-                                onClick={async () => { await api.timesheets.deleteEntry(e.id); load(); }}
-                                className="hidden text-rose-500 group-hover:block"
+                                onClick={async () => { try { await api.timesheets.deleteEntry(e.id); load(); } catch (err: any) { setError(err?.message || 'Could not delete the entry'); } }}
+                                className="text-rose-500 opacity-60 hover:opacity-100 focus-visible:opacity-100"
                                 aria-label="Delete entry"
                               >
                                 <X className="h-3 w-3" />
@@ -285,17 +286,17 @@ export default function TimesheetsPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium">Date</label>
-              <Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+              <label htmlFor="ts-8732" className="mb-1 block text-sm font-medium">Date</label>
+              <Input id="ts-8732" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Hours</label>
-              <Input type="number" min="0.25" max="24" step="0.25" value={form.hours} onChange={(e) => setForm({ ...form, hours: e.target.value })} />
+              <label htmlFor="ts-6774" className="mb-1 block text-sm font-medium">Hours</label>
+              <Input id="ts-6774" type="number" min="0.25" max="24" step="0.25" value={form.hours} onChange={(e) => setForm({ ...form, hours: e.target.value })} />
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Project</label>
-            <select
+            <label htmlFor="ts-5181" className="mb-1 block text-sm font-medium">Project</label>
+            <select id="ts-5181"
               className="input-base"
               value={form.projectId}
               onChange={(e) => setForm({ ...form, projectId: e.target.value })}
@@ -307,8 +308,8 @@ export default function TimesheetsPage() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Note</label>
-            <Input placeholder="What did you work on?" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
+            <label htmlFor="ts-5657" className="mb-1 block text-sm font-medium">Note</label>
+            <Input id="ts-5657" placeholder="What did you work on?" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setModalOpen(false)}>Cancel</Button>
@@ -321,12 +322,12 @@ export default function TimesheetsPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium">Key</label>
-              <Input placeholder="MTX" value={projectForm.key} onChange={(e) => setProjectForm({ ...projectForm, key: e.target.value.toUpperCase() })} />
+              <label htmlFor="ts-9282" className="mb-1 block text-sm font-medium">Key</label>
+              <Input id="ts-9282" placeholder="MTX" value={projectForm.key} onChange={(e) => setProjectForm({ ...projectForm, key: e.target.value.toUpperCase() })} />
             </div>
             <div className="col-span-2">
-              <label className="mb-1 block text-sm font-medium">Name</label>
-              <Input placeholder="Matrix Platform" value={projectForm.name} onChange={(e) => setProjectForm({ ...projectForm, name: e.target.value })} />
+              <label htmlFor="ts-1243" className="mb-1 block text-sm font-medium">Name</label>
+              <Input id="ts-1243" placeholder="Matrix Platform" value={projectForm.name} onChange={(e) => setProjectForm({ ...projectForm, name: e.target.value })} />
             </div>
           </div>
           <div className="flex justify-end gap-2">
