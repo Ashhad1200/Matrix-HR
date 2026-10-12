@@ -1,4 +1,5 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { FilesService } from '../uploads/files.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { AuditService } from '../audit/audit.service';
@@ -22,6 +23,7 @@ export class ExpensesService implements OnModuleInit {
     private workflow: WorkflowEngineService,
     private notifications: NotificationsService,
     private audit: AuditService,
+    private files: FilesService,
   ) {}
 
   onModuleInit() {
@@ -94,6 +96,10 @@ export class ExpensesService implements OnModuleInit {
         throw new BadRequestException(`${label}: ${cat.name} is limited to ${Number(cat.maxAmountPerItem)} per item`);
       }
       if (cat.requiresReceipt && !i.receiptUrl) throw new BadRequestException(`${label}: ${cat.name} requires a receipt`);
+      if (i.receiptUrl) {
+        // Only this company's own uploaded files: never an arbitrary URL, never another tenant's object.
+        try { this.files.linkFor(tenantId, i.receiptUrl); } catch { throw new BadRequestException(`${label}: the receipt must be a file you uploaded`); }
+      }
       total += Math.round(i.amount * 100);
       return { categoryId: i.categoryId, date, amount: i.amount, description: i.description, receiptUrl: i.receiptUrl };
     });
@@ -199,6 +205,14 @@ export class ExpensesService implements OnModuleInit {
         history: instance.actions,
       },
     };
+  }
+
+  /** Signed link to one receipt, for anyone who may see the claim (the owner, their manager, HR). */
+  async getReceiptLink(tenantId: string, viewer: Viewer, claimId: string, itemId: string) {
+    const claim = await this.getClaim(tenantId, viewer, claimId); // applies the same visibility rules as viewing the claim
+    const item = claim.items.find((i: { id: string }) => i.id === itemId);
+    if (!item?.receiptUrl) throw new NotFoundException('Receipt not found');
+    return this.files.linkFor(tenantId, item.receiptUrl, { name: 'receipt' });
   }
 
   /** Submitted claims this person is expected to act on (their reports' for managers; everyone else's for HR). */

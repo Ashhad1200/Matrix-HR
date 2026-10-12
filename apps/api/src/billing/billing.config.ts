@@ -14,8 +14,8 @@ export const RECEIPT_ISSUER = {
 export const PROOF_MAX_BYTES = 5 * 1024 * 1024;
 export const PROVISIONAL_DEFAULT_HOURS = 72;
 export const GRACE_DEFAULT_DAYS = 3;
-export const TRIAL_DAYS = 30;
-export const TRIAL_CREDITS = 100;
+import { TRIAL_DAYS, TRIAL_CREDITS } from '@matrixhr/shared';
+export { TRIAL_DAYS, TRIAL_CREDITS };
 export const OPEN_REQUEST_STATUSES = ['AWAITING_PROOF', 'PENDING'] as const;
 /** No 0/O/1/I so a reference read off a phone or typed into a bank note survives. */
 export const REFERENCE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';

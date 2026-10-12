@@ -50,6 +50,7 @@ export default function MyPayPage() {
                   <th className="p-4">Deductions</th>
                   <th className="p-4">Net Pay</th>
                   <th className="p-4">Paid On</th>
+                  <th className="p-4"><span className="sr-only">Payslip</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -62,6 +63,24 @@ export default function MyPayPage() {
                     </td>
                     <td className="p-4 font-medium">{formatCurrency(Number(p.netSalary ?? p.net ?? 0))}</td>
                     <td className="p-4 text-sm">{p.paidAt ? formatDate(p.paidAt) : '—'}</td>
+                    <td className="p-4 text-sm">
+                      {p.hasPayslip ? (
+                        <button
+                          type="button"
+                          className="text-brand-600 hover:underline"
+                          onClick={async () => {
+                            try {
+                              const { url } = await api.files.myPayslipLink(p.id);
+                              window.open(url, '_blank', 'noopener');
+                            } catch (err: any) {
+                              setError(err.message || 'Could not open this payslip');
+                            }
+                          }}
+                        >
+                          PDF
+                        </button>
+                      ) : null}
+                    </td>
                   </tr>
                 ))}
               </tbody>

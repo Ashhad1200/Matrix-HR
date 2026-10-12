@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { USD_PLAN_CATALOG, AI_CREDIT_PACKS } from '@matrixhr/shared';
 import { FEATURES, GROWTH, PRO, STARTER } from './seed-commercial';
 
 /**
@@ -13,17 +14,14 @@ import { FEATURES, GROWTH, PRO, STARTER } from './seed-commercial';
  * Run it after the migration:  DATABASE_URL=... pnpm --filter @matrixhr/database exec tsx prisma/seed-usd-catalog.ts
  */
 const AI = 'ai.ask';
-const CATALOG = [
-  { code: 'starter', name: 'Starter', monthly: 25, yearly: 250, maxEmployees: 25, maxAdminUsers: 2, credits: 150, overage: null as number | null, features: [...STARTER, AI] },
-  { code: 'growth', name: 'Growth', monthly: 69, yearly: 690, maxEmployees: 100, maxAdminUsers: 5, credits: 500, overage: null, features: [...GROWTH, AI] },
+const FEATURES_BY_PLAN: Record<string, string[]> = {
+  starter: [...STARTER, AI],
+  growth: [...GROWTH, AI],
   // Business: everything in Growth plus the Pro feature set. SSO, EOR and marketplace stay Enterprise-only.
-  { code: 'business', name: 'Business', monthly: 149, yearly: 1490, maxEmployees: 300, maxAdminUsers: 15, credits: 1500, overage: 0.5, features: [...PRO, AI] },
-];
-const PACKS = [
-  { code: 'small', name: 'Small', credits: 1000, price: 10 },
-  { code: 'medium', name: 'Medium', credits: 5000, price: 45 },
-  { code: 'large', name: 'Large', credits: 15000, price: 120 },
-];
+  business: [...PRO, AI],
+};
+const CATALOG = USD_PLAN_CATALOG.map((c) => ({ ...c, credits: c.aiCreditsMonthly, overage: c.overagePerEmployee, features: FEATURES_BY_PLAN[c.code] }));
+const PACKS = AI_CREDIT_PACKS;
 
 export async function seedUsdCatalog(prisma: PrismaClient, log: (m: string) => void = () => {}) {
   for (const f of FEATURES) await prisma.productFeature.upsert({ where: { key: f.key }, update: {}, create: f });

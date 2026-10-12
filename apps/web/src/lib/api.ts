@@ -15,7 +15,7 @@ export type WhatsAppConsent = {
 };
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(public status: number, message: string, public code?: string) {
     super(message);
     this.name = 'ApiError';
     Object.setPrototypeOf(this, new.target.prototype);
@@ -94,9 +94,33 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
-    throw new ApiError(res.status, err.message || 'Request failed');
+    const message = Array.isArray(err.message) ? err.message.join(', ') : err.message;
+    throw new ApiError(res.status, message || 'Request failed', err.code);
   }
 
+  return res.json();
+}
+
+/** Authenticated download (a proof image or PDF) as an object URL the browser can show. The caller revokes it. */
+async function fetchBlobUrl(path: string): Promise<{ url: string; type: string }> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  const res = await fetch(`${API_URL}${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  if (!res.ok) throw new ApiError(res.status, 'Could not load the file');
+  const blob = await res.blob();
+  return { url: URL.createObjectURL(blob), type: blob.type };
+}
+
+/** Multipart upload with extra text fields (the browser sets the boundary). */
+async function uploadWithFields<T>(path: string, file: File, fields: Record<string, string | undefined>): Promise<T> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  const form = new FormData();
+  form.append('file', file);
+  for (const [k, v] of Object.entries(fields)) if (v !== undefined && v !== '') form.append(k, v);
+  const res = await fetch(`${API_URL}${path}`, { method: 'POST', headers: token ? { Authorization: `Bearer ${token}` } : {}, body: form });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: res.statusText }));
+    throw new ApiError(res.status, (Array.isArray(err.message) ? err.message.join(', ') : err.message) || 'Upload failed', err.code);
+  }
   return res.json();
 }
 
@@ -130,7 +154,7 @@ async function uploadFile<T>(path: string, file: File): Promise<T> {
 
 export const api = {
   uploads: {
-    upload: (file: File) => uploadFile<{ url: string; key: string }>('/uploads', file),
+    upload: (file: File) => uploadFile<{ ref: string; key: string }>('/uploads', file),
   },
   auth: {
     signup: (data: { email: string; password: string; companyName: string; subdomain: string }) =>
@@ -161,7 +185,7 @@ export const api = {
     get: (id: string) => request<any>(`/employees/${id}`),
     create: (data: any) => request<any>('/employees', { method: 'POST', body: JSON.stringify(data) }),
     update: (id: string, data: any) => request<any>(`/employees/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
-    addDocument: (id: string, data: { type: string; name: string; fileUrl: string; expiryDate?: string }) =>
+    addDocument: (id: string, data: { type: string; name: string; fileKey: string; expiryDate?: string }) =>
       request<any>(`/employees/${id}/documents`, { method: 'POST', body: JSON.stringify(data) }),
     updateSelf: (data: { phone?: string; address?: string; emergencyContact?: string }) =>
       request<any>('/employees/me/self', { method: 'PATCH', body: JSON.stringify(data) }),
@@ -234,6 +258,7 @@ export const api = {
     deleteCompensationItem: (id: string) => request<any>(`/payroll/compensation-items/${id}`, { method: 'DELETE' }),
   },
   expenses: {
+    receiptLink: (claimId: string, itemId: string) => request<{ url: string }>(`/expenses/claims/${claimId}/items/${itemId}/receipt-link`),
     categories: (all = false) => request<any>(`/expenses/categories${all ? '?all=true' : ''}`),
     createCategory: (data: { name: string; maxAmountPerItem?: number; requiresReceipt?: boolean }) =>
       request<any>('/expenses/categories', { method: 'POST', body: JSON.stringify(data) }),
@@ -296,6 +321,8 @@ export const api = {
     applications: () => request<any>('/recruitment/applications'),
     updateApplicationStatus: (id: string, status: string) =>
       request<any>(`/recruitment/applications/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+    hire: (id: string, inviteRole?: string) =>
+      request<any>(`/recruitment/applications/${id}/hire`, { method: 'POST', body: JSON.stringify(inviteRole ? { inviteRole } : {}) }),
     preboarding: () => request<any>('/preboarding'),
   },
   performance: {
@@ -425,5 +452,71 @@ export const api = {
     deleteOverride: (tenantId: string, overrideId: string) =>
       request<any>(`/platform/tenants/${tenantId}/overrides/${overrideId}`, { method: 'DELETE' }),
     audit: (limit = 100) => request<any>(`/platform/audit?limit=${limit}`),
+  },
+  // Tenant billing (company admins and HR managers)
+  billing: {
+    state: () => request<any>('/billing/state'),
+    catalog: () => request<any>('/billing/catalog'),
+    quote: (data: { purpose: string; planCode?: string; period?: string; packCode?: string }) =>
+      request<any>('/billing/quote', { method: 'POST', body: JSON.stringify(data) }),
+    createRequest: (data: { purpose: string; planCode?: string; period?: string; packCode?: string; accountId: string }) =>
+      request<any>('/billing/requests', { method: 'POST', body: JSON.stringify(data) }),
+    requests: () => request<any[]>('/billing/requests'),
+    request: (id: string) => request<any>(`/billing/requests/${id}`),
+    cancel: (id: string) => request<any>(`/billing/requests/${id}/cancel`, { method: 'POST' }),
+    uploadProof: (id: string, file: File, fields: { declaredAmount?: string; declaredCurrency?: string; note?: string }) =>
+      uploadWithFields<any>(`/billing/requests/${id}/proof`, file, fields),
+    proof: (id: string) => fetchBlobUrl(`/billing/requests/${id}/proof`),
+    receipt: (id: string) => request<any>(`/billing/requests/${id}/receipt`),
+  },
+  // Operator billing backoffice (SUPER_ADMIN)
+  platformBilling: {
+    queue: () => request<any[]>('/platform/billing/queue'),
+    history: (status?: string) => request<any[]>(`/platform/billing/history${status ? `?status=${status}` : ''}`),
+    proof: (id: string) => fetchBlobUrl(`/platform/billing/requests/${id}/proof`),
+    receipt: (id: string) => request<any>(`/platform/billing/requests/${id}/receipt`),
+    approve: (id: string, data: { approvedAmount?: number; periodEnd?: string; reason?: string }) =>
+      request<any>(`/platform/billing/requests/${id}/approve`, { method: 'POST', body: JSON.stringify(data) }),
+    reject: (id: string, reason: string) => request<any>(`/platform/billing/requests/${id}/reject`, { method: 'POST', body: JSON.stringify({ reason }) }),
+    accounts: () => request<any[]>('/platform/billing/accounts'),
+    createAccount: (data: any) => request<any>('/platform/billing/accounts', { method: 'POST', body: JSON.stringify(data) }),
+    updateAccount: (id: string, data: any) => request<any>(`/platform/billing/accounts/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    settings: () => request<any>('/platform/billing/settings'),
+    updateSettings: (data: any) => request<any>('/platform/billing/settings', { method: 'PUT', body: JSON.stringify(data) }),
+    plans: () => request<any[]>('/platform/billing/plans'),
+    editPlan: (code: string, data: any) => request<any>(`/platform/billing/plans/${code}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    packs: () => request<any[]>('/platform/billing/packs'),
+    editPack: (code: string, data: any) => request<any>(`/platform/billing/packs/${code}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    tenant: (id: string) => request<any>(`/platform/billing/tenants/${id}`),
+    setPeriod: (id: string, data: { periodEnd?: string | null; billingPeriod?: string; reason: string }) =>
+      request<any>(`/platform/billing/tenants/${id}/period`, { method: 'PUT', body: JSON.stringify(data) }),
+    grantCredits: (id: string, data: { credits: number; reason: string; idempotencyKey: string }) =>
+      request<any>(`/platform/billing/tenants/${id}/credits`, { method: 'POST', body: JSON.stringify(data) }),
+    clockReport: () => request<any[]>('/platform/billing/clock-report'),
+    usage: () => request<any[]>('/platform/billing/ai-usage'),
+  },
+  // Staff logins
+  invites: {
+    people: () => request<any[]>('/invites/people'),
+    create: (data: { employeeId: string; role: string }) => request<any>('/invites', { method: 'POST', body: JSON.stringify(data) }),
+    resend: (id: string) => request<any>(`/invites/${id}/resend`, { method: 'POST' }),
+    revoke: (id: string) => request<any>(`/invites/${id}`, { method: 'DELETE' }),
+    preview: (token: string) => request<any>(`/auth/invite/${encodeURIComponent(token)}`),
+    accept: (token: string, password: string) => request<any>('/auth/invite/accept', { method: 'POST', body: JSON.stringify({ token, password }) }),
+  },
+  // Leave setup (HR/admin)
+  leaveSetup: {
+    policies: () => request<any[]>('/leave/policies/all'),
+    createPolicy: (data: any) => request<any>('/leave/policies', { method: 'POST', body: JSON.stringify(data) }),
+    updatePolicy: (id: string, data: any) => request<any>(`/leave/policies/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    rebuild: () => request<any>('/leave/balances/rebuild', { method: 'POST' }),
+    holidays: (year?: number) => request<any[]>(`/leave/holidays${year ? `?year=${year}` : ''}`),
+    createHoliday: (data: any) => request<any>('/leave/holidays', { method: 'POST', body: JSON.stringify(data) }),
+    deleteHoliday: (id: string) => request<any>(`/leave/holidays/${id}`, { method: 'DELETE' }),
+  },
+  // Short-lived signed links for private files
+  files: {
+    documentLink: (employeeId: string, docId: string) => request<{ url: string }>(`/employees/${employeeId}/documents/${docId}/link`),
+    myPayslipLink: (itemId: string) => request<{ url: string }>(`/employees/me/payslips/${itemId}/link`),
   },
 };
