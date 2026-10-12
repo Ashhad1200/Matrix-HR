@@ -196,6 +196,14 @@ export const api = {
     orgChart: () => request<any>('/employees/org-chart'),
     departments: () => request<any>('/employees/departments'),
     designations: () => request<any>('/employees/designations'),
+    createDepartment: (data: { name: string; parentId?: string }) => request<any>('/employees/departments', { method: 'POST', body: JSON.stringify(data) }),
+    updateDepartment: (id: string, data: { name?: string; parentId?: string | null }) => request<any>(`/employees/departments/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    deleteDepartment: (id: string) => request<any>(`/employees/departments/${id}`, { method: 'DELETE' }),
+    importDepartments: (rows: { name: string; parent?: string }[]) => request<any>('/employees/departments/import', { method: 'POST', body: JSON.stringify({ rows }) }),
+    createDesignation: (data: { name: string; grade?: string; departmentId?: string }) => request<any>('/employees/designations', { method: 'POST', body: JSON.stringify(data) }),
+    updateDesignation: (id: string, data: { name?: string; grade?: string | null; departmentId?: string | null }) => request<any>(`/employees/designations/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    deleteDesignation: (id: string) => request<any>(`/employees/designations/${id}`, { method: 'DELETE' }),
+    importDesignations: (rows: { name: string; grade?: string; department?: string }[]) => request<any>('/employees/designations/import', { method: 'POST', body: JSON.stringify({ rows }) }),
     import: (rows: any[]) => request<any>('/employees/import', { method: 'POST', body: JSON.stringify({ rows }) }),
   },
   approvals: {
@@ -264,6 +272,8 @@ export const api = {
     compensationItems: (employeeId?: string) => request<any>(`/payroll/compensation-items${employeeId ? `?employeeId=${employeeId}` : ''}`),
     createCompensationItem: (data: { employeeId: string; type: string; label: string; amount: number; recurring?: boolean; startPeriod?: string; endPeriod?: string }) =>
       request<any>('/payroll/compensation-items', { method: 'POST', body: JSON.stringify(data) }),
+    updateCompensationItem: (id: string, data: { type?: string; label?: string; amount?: number; recurring?: boolean; startPeriod?: string; endPeriod?: string }) =>
+      request<any>(`/payroll/compensation-items/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     deleteCompensationItem: (id: string) => request<any>(`/payroll/compensation-items/${id}`, { method: 'DELETE' }),
   },
   expenses: {

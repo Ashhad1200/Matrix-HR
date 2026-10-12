@@ -28,6 +28,15 @@ export class CreateCompensationItemDto {
   endPeriod?: string;
 }
 
+export class UpdateCompensationItemDto {
+  @IsOptional() @IsIn(COMPENSATION_TYPES) type?: string;
+  @IsOptional() @IsString() label?: string;
+  @IsOptional() @IsNumber() amount?: number;
+  @IsOptional() @IsBoolean() recurring?: boolean;
+  @IsOptional() @IsString() startPeriod?: string;
+  @IsOptional() @IsString() endPeriod?: string;
+}
+
 export class ReopenPayrollRunDto {
   @IsString()
   reason!: string;

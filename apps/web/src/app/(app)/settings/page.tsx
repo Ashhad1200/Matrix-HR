@@ -4,11 +4,13 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import {
-  Sliders, GitBranch, Shield, ChevronRight, KeyRound, Fingerprint, Globe2, MonitorSmartphone, BookOpen, Webhook, ScanFace, UserPlus, CalendarDays, CreditCard,
+  Sliders, GitBranch, Shield, ChevronRight, KeyRound, Fingerprint, Globe2, MonitorSmartphone, BookOpen, Webhook, ScanFace, UserPlus, CalendarDays, CreditCard, Building2, Coins,
 } from 'lucide-react';
 
 const settingsLinks = [
   { href: '/settings/logins', label: 'Staff logins', description: 'Invite employees to sign in and choose their role', icon: UserPlus },
+  { href: '/settings/structure', label: 'Departments & designations', description: 'Create, rename, import and remove your org structure', icon: Building2 },
+  { href: '/settings/compensation', label: 'Pay components', description: 'Allowances, bonuses, arrears and deductions per employee', icon: Coins },
   { href: '/settings/leave', label: 'Leave setup', description: 'Leave types, yearly days, carry-forward and holidays', icon: CalendarDays },
   { href: '/billing', label: 'Billing', description: 'Your plan, bank-transfer payments and receipts', icon: CreditCard },
   { href: '/settings/audit', label: 'Audit Log', description: 'Review system activity and changes', icon: Shield },

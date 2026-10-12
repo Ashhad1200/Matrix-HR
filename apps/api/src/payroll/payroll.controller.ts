@@ -1,11 +1,11 @@
-import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { PayrollService } from './payroll.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles, CurrentUser, TenantId, RequireFeature } from '../common/decorators';
 import { EntitlementGuard } from '../common/guards/entitlement.guard';
 import { UserRole } from '@matrixhr/database';
-import { CreateCompensationItemDto, ReopenPayrollRunDto } from './dto';
+import { CreateCompensationItemDto, UpdateCompensationItemDto, ReopenPayrollRunDto } from './dto';
 
 @Controller('payroll')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -93,12 +93,17 @@ export class PayrollController {
   }
 
   @Post('compensation-items')
-  createCompensationItem(@TenantId() tenantId: string, @Body() dto: CreateCompensationItemDto) {
-    return this.payroll.createCompensationItem(tenantId, dto);
+  createCompensationItem(@TenantId() tenantId: string, @CurrentUser('id') userId: string, @Body() dto: CreateCompensationItemDto) {
+    return this.payroll.createCompensationItem(tenantId, dto, userId);
+  }
+
+  @Patch('compensation-items/:id')
+  updateCompensationItem(@TenantId() tenantId: string, @CurrentUser('id') userId: string, @Param('id') id: string, @Body() dto: UpdateCompensationItemDto) {
+    return this.payroll.updateCompensationItem(tenantId, id, dto, userId);
   }
 
   @Delete('compensation-items/:id')
-  deleteCompensationItem(@TenantId() tenantId: string, @Param('id') id: string) {
-    return this.payroll.deleteCompensationItem(tenantId, id);
+  deleteCompensationItem(@TenantId() tenantId: string, @CurrentUser('id') userId: string, @Param('id') id: string) {
+    return this.payroll.deleteCompensationItem(tenantId, id, userId);
   }
 }
