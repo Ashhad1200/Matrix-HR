@@ -175,7 +175,7 @@ await lapsedPage.reload({ waitUntil: 'networkidle' });
 await lapsedPage.goto(`${WEB}/dashboard`, { waitUntil: 'networkidle' });
 ok('uploading proof opens temporary access', !(await lapsedPage.getByRole('heading', { name: 'Your subscription has ended' }).isVisible().catch(() => false)));
 await lapsedPage.getByText(/Temporary access until/).waitFor({ timeout: 8000 }).catch(() => {});
-ok('banner says access is temporary', await lapsedPage.getByText(/Temporary access until/).isVisible());
+{ const seen = await lapsedPage.getByText(/Temporary access until/).isVisible(); ok('banner says access is temporary', seen, seen ? '' : 'strip shows: ' + JSON.stringify(await lapsedPage.locator('[role=status]').allInnerTexts())); }
 await shot(lapsedPage, '11-provisional-banner');
 // reject ends it immediately
 const r2 = sql(`select id from "PaymentRequest" where "tenantId"='${T2.tenant.id}' order by "createdAt" desc limit 1`);

@@ -1,6 +1,6 @@
 {
  "admin:/dashboard": {
-  "title": "Good afternoon, zz-admin-a-mv5gdm5p",
+  "title": "Good afternoon, zz-admin-a-mv5ghxzf",
   "buttons": [],
   "inputs": 0,
   "tableRows": 0
@@ -21,7 +21,7 @@
    "Add Employee"
   ],
   "inputs": 1,
-  "tableRows": 4
+  "tableRows": 12
  },
  "admin:/recruitment": {
   "title": "Recruitment",
@@ -50,15 +50,18 @@
  "admin:/offboarding": {
   "title": "Offboarding",
   "buttons": [
-   "Start offboarding"
+   "Start offboarding",
+   "View"
   ],
   "inputs": 5,
-  "tableRows": 0
+  "tableRows": 1
  },
  "admin:/leave": {
   "title": "Leave Management",
   "buttons": [
-   "Apply for Leave"
+   "Apply for Leave",
+   "Approve",
+   "Reject"
   ],
   "inputs": 0,
   "tableRows": 0
@@ -78,7 +81,7 @@
    "New Project",
    "Log Hours",
    "My Week",
-   "Approvals",
+   "Approvals (1)",
    "Previous week",
    "Next week",
    "Submit Week"
@@ -89,28 +92,42 @@
  "admin:/payroll": {
   "title": "Payroll",
   "buttons": [
-   "Run Payroll"
+   "Run Payroll",
+   "View"
   ],
   "inputs": 0,
-  "tableRows": 0
+  "tableRows": 1
  },
  "admin:/expenses": {
   "title": "Expenses & reimbursements",
   "buttons": [
    "Add item",
    "Save draft",
-   "Add category"
+   "View",
+   "View",
+   "Cancel",
+   "View",
+   "View",
+   "View",
+   "View",
+   "View",
+   "Add category",
+   "Deactivate"
   ],
   "inputs": 11,
-  "tableRows": 0
+  "tableRows": 8
  },
  "admin:/loans": {
   "title": "Loans & advances",
   "buttons": [
-   "Submit request"
+   "Submit request",
+   "View",
+   "View",
+   "View",
+   "View"
   ],
   "inputs": 6,
-  "tableRows": 0
+  "tableRows": 4
  },
  "admin:/performance": {
   "title": "Performance",
@@ -137,7 +154,7 @@
   "title": "Reports & Analytics",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 12
+  "tableRows": 49
  },
  "admin:/ai": {
   "title": "Ask MatrixHR",
@@ -185,7 +202,7 @@
   "title": "Audit Log",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 11
+  "tableRows": 45
  },
  "admin:/billing": {
   "title": "Billing",
@@ -200,7 +217,7 @@
    "Continue to payment details"
   ],
   "inputs": 0,
-  "tableRows": 0
+  "tableRows": 1
  },
  "admin:/marketplace": {
   "title": "Marketplace",
@@ -218,7 +235,9 @@
    "recruitment",
    "screening",
    "Connect",
-   "Connect"
+   "Connected",
+   "Disconnect",
+   "View log"
   ],
   "inputs": 0,
   "tableRows": 0
@@ -256,19 +275,29 @@
    "Stop offering",
    "Edit",
    "Stop offering",
+   "Edit",
+   "Stop offering",
    "Add"
   ],
   "inputs": 3,
-  "tableRows": 3
+  "tableRows": 4
  },
  "admin:/settings/logins": {
   "title": "Staff logins",
   "buttons": [
    "Everyone",
-   "No login yet"
+   "No login yet",
+   "Invite",
+   "Invite",
+   "Invite",
+   "Invite",
+   "Invite",
+   "Invite",
+   "Invite",
+   "Invite"
   ],
   "inputs": 0,
-  "tableRows": 4
+  "tableRows": 12
  },
  "admin:/settings/api-keys": {
   "title": "API Keys",
@@ -282,10 +311,14 @@
  "admin:/settings/webhooks": {
   "title": "Webhooks",
   "buttons": [
-   "Create webhook"
+   "Create webhook",
+   "Send test",
+   "Deliveries",
+   "Enable",
+   "Delete"
   ],
   "inputs": 6,
-  "tableRows": 0
+  "tableRows": 1
  },
  "admin:/settings/devices": {
   "title": "Biometric devices",
@@ -316,7 +349,12 @@
   "buttons": [
    "New Review",
    "Review Forms",
-   "360 Peer Feedback"
+   "360 Peer Feedback",
+   "1 stars",
+   "2 stars",
+   "3 stars",
+   "4 stars",
+   "5 stars"
   ],
   "inputs": 0,
   "tableRows": 0
@@ -343,7 +381,7 @@
    "Add Employee"
   ],
   "inputs": 1,
-  "tableRows": 4
+  "tableRows": 12
  },
  "hr:/recruitment": {
   "title": "Recruitment",
@@ -372,15 +410,18 @@
  "hr:/offboarding": {
   "title": "Offboarding",
   "buttons": [
-   "Start offboarding"
+   "Start offboarding",
+   "View"
   ],
   "inputs": 5,
-  "tableRows": 0
+  "tableRows": 1
  },
  "hr:/leave": {
   "title": "Leave Management",
   "buttons": [
-   "Apply for Leave"
+   "Apply for Leave",
+   "Approve",
+   "Reject"
   ],
   "inputs": 0,
   "tableRows": 0
@@ -400,7 +441,7 @@
    "New Project",
    "Log Hours",
    "My Week",
-   "Approvals",
+   "Approvals (1)",
    "Previous week",
    "Next week",
    "Submit Week"
@@ -411,28 +452,38 @@
  "hr:/payroll": {
   "title": "Payroll",
   "buttons": [
-   "Run Payroll"
+   "Run Payroll",
+   "View"
   ],
   "inputs": 0,
-  "tableRows": 0
+  "tableRows": 1
  },
  "hr:/expenses": {
   "title": "Expenses & reimbursements",
   "buttons": [
    "Add item",
    "Save draft",
-   "Add category"
+   "View",
+   "View",
+   "View",
+   "View",
+   "Add category",
+   "Deactivate"
   ],
   "inputs": 11,
-  "tableRows": 0
+  "tableRows": 5
  },
  "hr:/loans": {
   "title": "Loans & advances",
   "buttons": [
-   "Submit request"
+   "Submit request",
+   "View",
+   "View",
+   "View",
+   "View"
   ],
   "inputs": 6,
-  "tableRows": 0
+  "tableRows": 4
  },
  "hr:/performance": {
   "title": "Performance",
@@ -459,7 +510,7 @@
   "title": "Reports & Analytics",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 12
+  "tableRows": 49
  },
  "hr:/ai": {
   "title": "Ask MatrixHR",
@@ -507,7 +558,7 @@
   "title": "Audit Log",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 12
+  "tableRows": 46
  },
  "hr:/billing": {
   "title": "Billing",
@@ -522,7 +573,7 @@
    "Continue to payment details"
   ],
   "inputs": 0,
-  "tableRows": 0
+  "tableRows": 1
  },
  "hr:/marketplace": {
   "title": "Marketplace",
@@ -540,7 +591,9 @@
    "recruitment",
    "screening",
    "Connect",
-   "Connect"
+   "Connected",
+   "Disconnect",
+   "View log"
   ],
   "inputs": 0,
   "tableRows": 0
@@ -652,10 +705,12 @@
  "manager:/loans": {
   "title": "Loans & advances",
   "buttons": [
-   "Submit request"
+   "Submit request",
+   "View",
+   "View"
   ],
   "inputs": 5,
-  "tableRows": 0
+  "tableRows": 2
  },
  "manager:/performance": {
   "title": "Performance",
@@ -670,7 +725,7 @@
   "title": "Reports & Analytics",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 12
+  "tableRows": 49
  },
  "manager:/ai": {
   "title": "Ask MatrixHR",
@@ -755,18 +810,22 @@
   "title": "Expenses & reimbursements",
   "buttons": [
    "Add item",
-   "Save draft"
+   "Save draft",
+   "View",
+   "View"
   ],
   "inputs": 7,
-  "tableRows": 0
+  "tableRows": 2
  },
  "employee:/loans": {
   "title": "Loans & advances",
   "buttons": [
-   "Submit request"
+   "Submit request",
+   "View",
+   "View"
   ],
   "inputs": 5,
-  "tableRows": 0
+  "tableRows": 2
  },
  "employee:/performance": {
   "title": "Performance",
@@ -812,7 +871,7 @@
    "New tenant"
   ],
   "inputs": 0,
-  "tableRows": 116
+  "tableRows": 119
  },
  "superadmin:/platform/billing": {
   "title": "Billing",
@@ -838,7 +897,7 @@
   "title": "Audit log",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 87
+  "tableRows": 100
  },
  "superadmin:/platform/ai": {
   "title": "AI assistant",
@@ -850,7 +909,7 @@
    "Grant"
   ],
   "inputs": 12,
-  "tableRows": 113
+  "tableRows": 115
  },
  "superadmin:/security": {
   "title": "Security",
