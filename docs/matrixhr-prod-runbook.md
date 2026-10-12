@@ -47,7 +47,7 @@ Existing tenants are untouched: no period end, so they **never lapse or see bann
 ## 5. Environment (Coolify), set before deploying
 Required for the new features (names only here; values come from the owner's secret store):
 `SMTP_HOST` `SMTP_PORT` `SMTP_USER` `SMTP_PASS` `SMTP_FROM` (+ optional `SMTP_REPLY_TO`) for invites, receipts and reminders; `TRUST_PROXY=1`;
-`CREDENTIAL_KEY` (already required; AI provider keys are encrypted with it); `FILE_LINK_SECRET` if set separately, else the JWT secret is used.
+`CREDENTIAL_KEY` (already required; AI provider keys are encrypted with it); `FILE_SIGNING_KEY` (signs private file links; falls back to the JWT secret) and `API_URL` (the public API origin, used inside file links).
 Do **not** set AI provider keys here: the owner pastes them in the backoffice (step 9). `AI_*_BASE_URL` must be unset in production.
 
 ## 6. Merge and deploy
@@ -67,7 +67,7 @@ Existing tenants need leave balances: as each company admin (or via the API with
 2. In the backoffice add a **payment account** (Billing > Payment accounts) if none exists.
 3. As the ZZ-TEST admin: Billing > Choose plan > Starter monthly > copy the reference > upload a test image as proof.
 4. As the operator: Billing > To check > open the proof > Approve. Confirm the receipt number `TVX-R-<year>-<n>` and the new period end; approve twice (no second receipt).
-5. Operator sets ZZ-TEST's period end to yesterday + 4 days in the past (Tenants > ZZ-TEST > Billing): the tenant sees the lapsed, billing-only screen; request provisional access once; reject a later proof and see it end.
+5. Operator sets ZZ-TEST's period end to 4 days ago (Tenants > ZZ-TEST > Billing; the grace period is 3 days): the tenant sees the lapsed, billing-only screen; request provisional access once; reject a later proof and see it end.
 6. Invite a second user from Settings > Staff logins; accept the link; log in.
 7. **Suspend ZZ-TEST** afterwards (Tenants > Suspend). Do not delete it.
 
