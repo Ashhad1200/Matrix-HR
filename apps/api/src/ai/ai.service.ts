@@ -2,6 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { EntitlementsService } from '../entitlements/entitlements.service';
+import { CreditsService } from '../credits/credits.service';
+import { AiSettingsService } from './ai-settings.service';
+import { PROVIDERS } from './providers';
+import { MAX_OUTPUT_TOKENS, estimateTokens, mcFor } from './pricing';
 
 const SYSTEM_PROMPT = `You are Ask MatrixHR, an HR assistant for a Pakistani/GCC HR & payroll SaaS platform.
 Answer concisely in plain English. Cover leave, attendance, onboarding, payroll (FBR tax, EOBI, PF), and labour law when relevant.
@@ -16,25 +20,28 @@ export class AiService {
     private prisma: PrismaService,
     private config: ConfigService,
     private entitlements: EntitlementsService,
+    private credits: CreditsService,
+    private settings: AiSettingsService,
   ) {}
 
   async askMatrixHR(tenantId: string, employeeId: string | undefined, question: string) {
     await this.entitlements.recordUsage(tenantId, 'ai.calls');
 
     const context = await this.buildContext(tenantId, employeeId);
-    const geminiAnswer = await this.callGemini(
+    const geminiAnswer = await this.callModel(
+      tenantId,
       `${context}\n\nUser question: ${question}`,
       SYSTEM_PROMPT,
     );
 
     if (geminiAnswer) {
-      return { answer: geminiAnswer, source: 'gemini' };
+      return { answer: geminiAnswer, source: 'ai' };
     }
 
     return this.fallbackAsk(tenantId, employeeId, question);
   }
 
-  async rankCandidate(jobDescription: string, resumeText: string) {
+  async rankCandidate(tenantId: string, jobDescription: string, resumeText: string) {
     const prompt = `Score this candidate resume against the job description from 0-100.
 Reply as JSON only: {"score":number,"matchedKeywords":string[],"recommendation":"shortlist"|"review"|"reject","summary":string}
 
@@ -44,7 +51,7 @@ ${jobDescription}
 Resume:
 ${resumeText}`;
 
-    const raw = await this.callGemini(prompt, 'You are an ATS screening assistant. Output valid JSON only.');
+    const raw = await this.callModel(tenantId, prompt, 'You are an ATS screening assistant. Output valid JSON only.');
     if (raw) {
       try {
         const parsed = JSON.parse(raw.replace(/```json\n?|\n?```/g, '').trim());
@@ -53,10 +60,10 @@ ${resumeText}`;
           matchedKeywords: parsed.matchedKeywords ?? [],
           recommendation: parsed.recommendation ?? 'review',
           summary: parsed.summary,
-          source: 'gemini',
+          source: 'ai',
         };
       } catch {
-        this.logger.warn('Gemini rank-candidate returned non-JSON; using fallback');
+        this.logger.warn('rank-candidate returned non-JSON; using fallback');
       }
     }
 
@@ -114,35 +121,33 @@ ${resumeText}`;
     return lines.join('\n');
   }
 
-  private async callGemini(userPrompt: string, systemPrompt: string): Promise<string | null> {
-    const apiKey = this.config.get<string>('GEMINI_API_KEY');
-    if (!apiKey) return null;
-
-    const model = this.config.get<string>('GEMINI_MODEL') || 'gemini-2.0-flash';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
+  /**
+   * One-shot completion through the configured provider, metered like the chat (reserve, then settle on real usage).
+   * Returns null whenever AI is off, unconfigured, out of credits or failing, so callers use their built-in fallback.
+   */
+  private async callModel(tenantId: string, prompt: string, systemPrompt: string): Promise<string | null> {
     try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemPrompt }] },
-          contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-          generationConfig: { temperature: 0.4, maxOutputTokens: 1024 },
-        }),
-      });
-
-      if (!res.ok) {
-        const err = await res.text();
-        this.logger.error(`Gemini API error ${res.status}: ${err.slice(0, 200)}`);
+      const row = await this.settings.row();
+      const t = await this.prisma.tenant.findUnique({ where: { id: tenantId }, select: { aiEnabled: true } });
+      if (!row.enabled || !t?.aiEnabled) return null;
+      const provider = row.provider as 'openai' | 'anthropic' | 'gemini';
+      const key = await this.settings.apiKey(provider);
+      if (!key) return null;
+      const model = provider === 'openai' ? row.openaiModel : provider === 'anthropic' ? row.anthropicModel : row.geminiModel;
+      await this.credits.ensureMonthly(tenantId);
+      const res = await this.credits.reserve(tenantId, mcFor(model, estimateTokens(prompt + systemPrompt), MAX_OUTPUT_TOKENS), `ai_c_${Date.now()}_${Math.random().toString(36).slice(2)}`);
+      if (!res) return null;
+      try {
+        const out = await PROVIDERS[provider]({ apiKey: key, model, system: systemPrompt, messages: [{ role: 'user', content: prompt }], tools: [], maxTokens: MAX_OUTPUT_TOKENS });
+        await this.credits.settle(res, out.inputTokens || out.outputTokens ? mcFor(model, out.inputTokens, out.outputTokens) : res.reservedMc);
+        return out.text.trim() || null;
+      } catch (err) {
+        await this.credits.refund(res, 'provider call failed');
+        this.logger.error(`AI provider call failed: ${(err as Error).message}`);
         return null;
       }
-
-      const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      return typeof text === 'string' ? text.trim() : null;
     } catch (err) {
-      this.logger.error(`Gemini request failed: ${err}`);
+      this.logger.error(`AI request failed: ${(err as Error).message}`);
       return null;
     }
   }

@@ -62,14 +62,19 @@ MatrixHR fills this gap with localization, modern UX, WhatsApp-native workflows,
 13. AI-Powered Features
 14. Marketplace & Integrations
 
-## Pricing Tiers (Pakistan)
+## Pricing (USD, manual bank-transfer renewal)
 
-| Plan | PEPM (PKR) | Includes |
-|------|------------|----------|
-| Starter | 250 | Core HR, Leave, Attendance, Self-Service, Mobile |
-| Growth | 500 | Starter + Payroll, Recruitment, Onboarding, WhatsApp |
-| Pro | 850 | Growth + Performance, LMS, Advanced Reporting, API |
-| Enterprise | Custom | Pro + AI, SSO, Dedicated CSM, SLA |
+Source of truth: `USD_PLAN_CATALOG` and `AI_CREDIT_PACKS` in `packages/shared/src/constants.ts`.
+
+| Plan | Monthly / yearly | Includes |
+|------|------------------|----------|
+| Starter | $25 / $250 | Core HR, leave, attendance, self-service, mobile |
+| Growth | $69 / $690 | Starter + payroll, recruitment, onboarding, WhatsApp |
+| Business | $149 / $1,490 | Growth + performance, LMS, reporting, API, AI credits; +$0.50 per extra active employee |
+| Enterprise | Custom | SSO, dedicated CSM, SLA |
+
+New signups get a 30-day trial with 100 AI credits. AI credit packs: 1,000 for $10, 5,000 for $45, 15,000 for $120 (never expire).
+The earlier PKR per-employee plans are kept for existing customers and are not offered to new signups.
 
 ## Success Metrics — Year 1
 

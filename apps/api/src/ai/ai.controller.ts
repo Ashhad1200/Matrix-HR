@@ -28,11 +28,11 @@ export class AiController {
   }
 
   @Post('rank-candidate')
-  rankCandidate(@Body() body: RankCandidateDto) {
+  rankCandidate(@TenantId() tenantId: string, @Body() body: RankCandidateDto) {
     const resumeText = body.resumeText ?? body.resume;
     if (!resumeText || !body.jobDescription) {
       throw new BadRequestException('jobDescription and resumeText are required');
     }
-    return this.ai.rankCandidate(body.jobDescription, resumeText);
+    return this.ai.rankCandidate(tenantId, body.jobDescription, resumeText);
   }
 }
