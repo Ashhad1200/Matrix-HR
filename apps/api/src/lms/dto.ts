@@ -1,4 +1,4 @@
-import { IsBoolean, IsInt, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsString, Max, MaxLength, Min, MinLength , IsIn } from 'class-validator';
 
 export class CreateCourseDto {
   @IsString() @MinLength(1) @MaxLength(200) title: string;
@@ -15,4 +15,11 @@ export class EnrollDto {
 export class UpdateProgressDto {
   @IsInt() @Min(0) @Max(100) progress: number;
   @IsOptional() @IsInt() @Min(0) @Max(100) score?: number;
+}
+
+export class UpdateCourseDto {
+  @IsOptional() @IsString() @MinLength(1) @MaxLength(200) title?: string;
+  @IsOptional() @IsString() @MaxLength(4000) description?: string;
+  @IsOptional() @IsBoolean() isMandatory?: boolean;
+  @IsOptional() @IsIn(['PUBLISHED', 'ARCHIVED']) status?: 'PUBLISHED' | 'ARCHIVED';
 }

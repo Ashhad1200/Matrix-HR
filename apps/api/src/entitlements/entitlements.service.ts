@@ -16,8 +16,8 @@ const UNSUBSCRIBED_DEFAULT: ResolvedEntitlements = {
   features: {},
 };
 
-/** Customers who buy the source run one company with no plans or billing: every module is on. */
-export const singleCompanyMode = () => process.env.SINGLE_COMPANY_MODE === 'true';
+export { singleCompanyMode } from '../common/deployment';
+import { singleCompanyMode } from '../common/deployment';
 
 @Injectable()
 export class EntitlementsService {

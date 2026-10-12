@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Viewer, isHrPlus, scopedEmployeeIds, employeeIdFilter, assertInTenant } from '../common/data-scope';
 
@@ -10,6 +10,36 @@ export class OnboardingService {
     return this.prisma.onboardingTemplate.findMany({
       where: { tenantId, isActive: true },
       include: { tasks: { orderBy: { order: 'asc' } } },
+    });
+  }
+
+  async createTemplate(tenantId: string, dto: { name: string; description?: string; role?: string; department?: string; tasks: { title: string; description?: string; phase?: string; assignee?: string; isRequired?: boolean }[] }) {
+    return this.prisma.onboardingTemplate.create({
+      data: {
+        tenantId, name: dto.name, description: dto.description, role: dto.role, department: dto.department,
+        tasks: { create: dto.tasks.map((t, i) => ({ title: t.title, description: t.description, phase: t.phase ?? 'day1', assignee: t.assignee ?? 'employee', isRequired: t.isRequired ?? true, order: i })) },
+      },
+      include: { tasks: { orderBy: { order: 'asc' } } },
+    });
+  }
+
+  async updateTemplate(tenantId: string, id: string, dto: { name?: string; description?: string; isActive?: boolean; tasks?: { title: string; description?: string; phase?: string; assignee?: string; isRequired?: boolean }[] }) {
+    const t = await this.prisma.onboardingTemplate.findFirst({ where: { id, tenantId } });
+    if (!t) throw new NotFoundException('Template not found');
+    if (dto.tasks) {
+      const started = await this.prisma.onboardingProgress.count({ where: { templateId: id } });
+      if (started > 0) throw new BadRequestException('Someone has already started this checklist, so its tasks can no longer be changed. Create a new template instead, or switch this one off.');
+    }
+    return this.prisma.$transaction(async (tx) => {
+      if (dto.tasks) {
+        await tx.onboardingTask.deleteMany({ where: { templateId: id } });
+        await tx.onboardingTask.createMany({ data: dto.tasks.map((x, i) => ({ templateId: id, title: x.title, description: x.description, phase: x.phase ?? 'day1', assignee: x.assignee ?? 'employee', isRequired: x.isRequired ?? true, order: i })) });
+      }
+      return tx.onboardingTemplate.update({
+        where: { id },
+        data: { ...(dto.name !== undefined ? { name: dto.name } : {}), ...(dto.description !== undefined ? { description: dto.description } : {}), ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}) },
+        include: { tasks: { orderBy: { order: 'asc' } } },
+      });
     });
   }
 

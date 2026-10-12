@@ -1,33 +1,27 @@
-import { IsString, IsOptional, IsInt, Min, Max } from 'class-validator';
+import { IsString, IsOptional, IsInt, IsIn, IsDateString, Min, Max, MaxLength, MinLength } from 'class-validator';
 
 export class CreateEnpsSurveyDto {
-  @IsString()
+  @IsString() @MinLength(1) @MaxLength(200)
   title: string;
 
-  @IsOptional()
-  @IsString()
+  @IsOptional() @IsString() @MaxLength(500)
   question?: string;
 
-  @IsOptional()
-  @IsString()
+  @IsOptional() @IsDateString()
   closesAt?: string;
 }
 
 export class UpdateEnpsSurveyDto {
-  @IsOptional()
-  @IsString()
+  @IsOptional() @IsString() @MinLength(1) @MaxLength(200)
   title?: string;
 
-  @IsOptional()
-  @IsString()
+  @IsOptional() @IsString() @MaxLength(500)
   question?: string;
 
-  @IsOptional()
-  @IsString()
+  @IsOptional() @IsIn(['draft', 'active', 'closed'])
   status?: string;
 
-  @IsOptional()
-  @IsString()
+  @IsOptional() @IsDateString()
   closesAt?: string;
 }
 
@@ -37,7 +31,6 @@ export class EnpsRespondDto {
   @Max(10)
   score: number;
 
-  @IsOptional()
-  @IsString()
+  @IsOptional() @IsString() @MaxLength(2000)
   comment?: string;
 }

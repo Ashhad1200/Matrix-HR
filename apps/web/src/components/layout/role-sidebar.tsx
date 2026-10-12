@@ -34,7 +34,7 @@ const GROUPS: { label: string | null; hrefs: string[] }[] = [
   { label: 'People', hrefs: ['/employees', '/recruitment', '/recruitment/kanban', '/recruitment/preboarding', '/onboarding', '/offboarding'] },
   { label: 'Time', hrefs: ['/leave', '/attendance', '/timesheets'] },
   { label: 'Pay', hrefs: ['/payroll', '/my-pay', '/expenses', '/loans'] },
-  { label: 'Talent', hrefs: ['/performance', '/performance/enps', '/lms'] },
+  { label: 'Talent', hrefs: ['/performance', '/performance/enps', '/surveys', '/lms'] },
   { label: 'Insights', hrefs: ['/reports', '/ai'] },
   { label: 'Company', hrefs: ['/whatsapp', '/settings', '/settings/custom-fields', '/settings/workflows', '/settings/audit', '/billing', '/marketplace', '/extensions'] },
 ];

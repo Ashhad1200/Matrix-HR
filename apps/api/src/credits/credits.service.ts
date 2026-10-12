@@ -3,6 +3,8 @@ import { Prisma } from '@matrixhr/database';
 import { PrismaService } from '../prisma/prisma.service';
 import { addMonths } from '../billing/lifecycle';
 
+import { singleCompanyMode } from '../common/deployment';
+
 export type Db = PrismaService | Prisma.TransactionClient;
 
 /** 1 credit = $0.01 and customers pay provider cost x 4. Balances are integers in millicredits (1 credit = 1000). */
@@ -107,6 +109,8 @@ export class CreditsService {
 
   /** Atomically take `mc` from the balance (monthly first). Returns null when the balance cannot cover it. */
   async reserve(tenantId: string, mc: number, callId: string): Promise<Reservation | null> {
+    // Single-company install: the company pays its AI provider directly, so there is nothing to meter.
+    if (singleCompanyMode()) return { callId, tenantId, reservedMc: 0, monthlyPartMc: 0, purchasedPartMc: 0 };
     return this.prisma.$transaction(async (tx) => {
       await this.ensureAccount(tx, tenantId);
       const rows = await tx.$queryRaw<{ mpart: number }[]>`
@@ -134,6 +138,7 @@ export class CreditsService {
 
   /** Charge the actual cost: return the unused part of the reservation (or take a little more, if available). A call is closed exactly once, by whichever of settle/refund comes first. */
   async settle(r: Reservation, actualMc: number): Promise<{ chargedMc: number }> {
+    if (singleCompanyMode()) return { chargedMc: 0 };
     return this.prisma.$transaction(async (tx) => {
       const diff = r.reservedMc - actualMc;
       const first = await this.ledger(tx, { tenantId: r.tenantId, kind: 'SETTLE', deltaMc: diff, refId: r.callId, key: `close:${r.callId}`, detail: { reservedMc: r.reservedMc, actualMc } });
@@ -149,6 +154,7 @@ export class CreditsService {
 
   /** The provider call failed: give the whole reservation back. A no-op if the call was already settled. */
   async refund(r: Reservation, reason: string): Promise<void> {
+    if (singleCompanyMode()) return;
     await this.prisma.$transaction(async (tx) => {
       const first = await this.ledger(tx, { tenantId: r.tenantId, kind: 'REFUND', deltaMc: r.reservedMc, refId: r.callId, key: `close:${r.callId}`, detail: { reason: reason.slice(0, 200) } });
       if (first) await this.giveBack(tx, r, r.reservedMc);

@@ -21,3 +21,11 @@ export class HireDto {
   /** Also invite the new hire to sign in, with this role. */
   @IsOptional() @IsIn(['EMPLOYEE', 'MANAGER', 'HR_MANAGER', 'COMPANY_ADMIN']) inviteRole?: 'EMPLOYEE' | 'MANAGER' | 'HR_MANAGER' | 'COMPANY_ADMIN';
 }
+
+export class UpdateJobDto {
+  @IsOptional() @IsString() @MinLength(1) @MaxLength(200) title?: string;
+  @IsOptional() @IsString() @MaxLength(120) department?: string;
+  @IsOptional() @IsString() @MaxLength(10000) description?: string;
+  @IsOptional() @IsString() @MaxLength(10000) requirements?: string;
+  @IsOptional() @IsIn(['open', 'closed', 'draft']) status?: 'open' | 'closed' | 'draft';
+}

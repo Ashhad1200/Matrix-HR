@@ -223,6 +223,11 @@ export const api = {
       request<any>(`/leave/requests/${id}/reject`, { method: 'PATCH', body: JSON.stringify({ reason }) }),
     whosOut: (month?: string) => request<any>(`/leave/whos-out${month ? `?month=${month}` : ''}`),
     holidays: () => request<any>('/leave/holidays'),
+    workingDays: (start: string, end: string) => request<{ days: number; weekendDays: number[] }>(`/leave/working-days?start=${start}&end=${end}`),
+    cancel: (id: string) => request<any>(`/leave/requests/${id}/cancel`, { method: 'POST' }),
+    update: (id: string, data: any) => request<any>(`/leave/requests/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    weekend: () => request<{ weekendDays: number[] }>('/leave/weekend'),
+    setWeekend: (days: number[]) => request<{ weekendDays: number[] }>('/leave/weekend', { method: 'PUT', body: JSON.stringify({ days }) }),
   },
   attendance: {
     clockIn: (data?: { latitude?: number; longitude?: number }) =>
@@ -239,6 +244,8 @@ export const api = {
     dashboard: () => request<any>('/onboarding/dashboard'),
     start: (data: { employeeId: string; templateId: string }) =>
       request<any>('/onboarding/start', { method: 'POST', body: JSON.stringify(data) }),
+    createTemplate: (data: any) => request<any>('/onboarding/templates', { method: 'POST', body: JSON.stringify(data) }),
+    updateTemplate: (id: string, data: any) => request<any>(`/onboarding/templates/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     completeTask: (progressId: string, taskId: string) =>
       request<any>(`/onboarding/tasks/${progressId}/${taskId}/complete`, { method: 'PATCH' }),
   },
@@ -326,6 +333,8 @@ export const api = {
     hire: (id: string, inviteRole?: string) =>
       request<any>(`/recruitment/applications/${id}/hire`, { method: 'POST', body: JSON.stringify(inviteRole ? { inviteRole } : {}) }),
     preboarding: () => request<any>('/preboarding'),
+    updateJob: (id: string, data: any) => request<any>(`/recruitment/jobs/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    createApplication: (data: any) => request<any>('/recruitment/applications', { method: 'POST', body: JSON.stringify(data) }),
   },
   performance: {
     goals: () => request<any>('/performance/goals'),
@@ -336,6 +345,13 @@ export const api = {
       request<any>(`/performance/goals/${id}/progress`, { method: 'PATCH', body: JSON.stringify({ progress }) }),
     enps: () => request<any>('/enps/surveys/summary'),
     enpsSurveys: () => request<any>('/enps/surveys'),
+    createSurvey: (data: any) => request<any>('/enps/surveys', { method: 'POST', body: JSON.stringify(data) }),
+    updateSurvey: (id: string, data: any) => request<any>(`/enps/surveys/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    deleteSurvey: (id: string) => request<any>(`/enps/surveys/${id}`, { method: 'DELETE' }),
+    activeSurveys: () => request<any[]>('/enps/surveys/active'),
+    respondSurvey: (id: string, data: { score: number; comment?: string }) => request<any>(`/enps/surveys/${id}/respond`, { method: 'POST', body: JSON.stringify(data) }),
+    updateCycle: (id: string, data: any) => request<any>(`/performance/cycles/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    updateGoal: (id: string, data: any) => request<any>(`/performance/goals/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     reviews: (cycleId?: string) => request<any>(`/performance/reviews${cycleId ? `?cycleId=${cycleId}` : ''}`),
     createReview: (data: any) => request<any>('/performance/reviews', { method: 'POST', body: JSON.stringify(data) }),
     submitReview: (id: string, data: any) =>
@@ -388,7 +404,11 @@ export const api = {
   },
   lms: {
     courses: () => request<any>('/lms/courses'),
-    enroll: (courseId: string) => request<any>('/lms/enroll', { method: 'POST', body: JSON.stringify({ courseId }) }),
+    enroll: (courseId: string, employeeId?: string) => request<any>('/lms/enroll', { method: 'POST', body: JSON.stringify(employeeId ? { courseId, employeeId } : { courseId }) }),
+    createCourse: (data: any) => request<any>('/lms/courses', { method: 'POST', body: JSON.stringify(data) }),
+    updateCourse: (id: string, data: any) => request<any>(`/lms/courses/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    myEnrollments: () => request<any[]>('/lms/my-enrollments'),
+    setProgress: (enrollmentId: string, progress: number) => request<any>(`/lms/enrollments/${enrollmentId}/progress`, { method: 'PATCH', body: JSON.stringify({ progress }) }),
   },
   whatsapp: {
     messages: () => request<any>('/whatsapp/messages'),

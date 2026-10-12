@@ -5,7 +5,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { CurrentUser, Roles, TenantId } from '../common/decorators';
 import { viewerOf } from '../common/data-scope';
-import { CreateCycleDto, CreateGoalDto, CreateReviewDto, SubmitReviewDto, UpdateGoalProgressDto } from './dto';
+import { CreateCycleDto, CreateGoalDto, CreateReviewDto, SubmitReviewDto, UpdateGoalProgressDto, UpdateCycleDto, UpdateGoalDto } from './dto';
 
 type Me = { id: string; role: string; employeeId?: string };
 
@@ -28,6 +28,13 @@ export class PerformanceController {
     return this.performance.createCycle(tenantId, body);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN)
+  @Patch('cycles/:id')
+  updateCycle(@TenantId() tenantId: string, @Param('id') id: string, @Body() body: UpdateCycleDto) {
+    return this.performance.updateCycle(tenantId, id, body);
+  }
+
   @Get('goals')
   getGoals(@TenantId() tenantId: string, @CurrentUser() user: Me, @Query('employeeId') employeeId?: string) {
     return this.performance.getGoals(tenantId, employeeId, viewerOf(user));
@@ -36,6 +43,11 @@ export class PerformanceController {
   @Post('goals')
   createGoal(@TenantId() tenantId: string, @CurrentUser() user: Me, @Body() body: CreateGoalDto) {
     return this.performance.createGoal(tenantId, viewerOf(user), body);
+  }
+
+  @Patch('goals/:id')
+  updateGoal(@TenantId() tenantId: string, @CurrentUser() user: Me, @Param('id') id: string, @Body() body: UpdateGoalDto) {
+    return this.performance.updateGoal(tenantId, viewerOf(user), id, body);
   }
 
   @Patch('goals/:id/progress')

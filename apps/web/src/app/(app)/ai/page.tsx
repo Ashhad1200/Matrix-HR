@@ -80,8 +80,8 @@ export default function AiPage() {
           <p className="text-sm text-[hsl(var(--muted-foreground))]">Ask about your leave, policies and company data, or have me prepare a request for you to confirm.</p>
         </div>
         <div className="flex items-center gap-3 text-sm">
-          {status && <span data-testid="ai-credits" className="rounded-full border px-3 py-1 tabular-nums">{Number(status.credits).toLocaleString('en-US', { maximumFractionDigits: 1 })} credits</span>}
-          {canManage && <Link href="/billing" className="font-medium text-[hsl(var(--primary))] underline-offset-2 hover:underline">Buy credits</Link>}
+          {status && !status.unlimited && <span data-testid="ai-credits" className="rounded-full border px-3 py-1 tabular-nums">{Number(status.credits).toLocaleString('en-US', { maximumFractionDigits: 1 })} credits</span>}
+          {canManage && !status?.unlimited && <Link href="/billing" className="font-medium text-[hsl(var(--primary))] underline-offset-2 hover:underline">Buy credits</Link>}
         </div>
       </div>
 

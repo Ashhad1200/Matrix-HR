@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { ForbiddenException } from '@nestjs/common';
+import { singleCompanyMode } from '../common/deployment';
 import { ensureBalances } from '../common/leave-balances';
 import { createHash, randomBytes, randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -93,10 +94,11 @@ export class AuthService {
   }
 
   async signUp(dto: SignUpDto) {
+    if (singleCompanyMode() && (await this.prisma.tenant.count()) > 0) throw new ForbiddenException('Sign-up is closed on this installation. Ask your administrator for an invitation.');
     const passwordHash = await bcrypt.hash(dto.password, 12);
     const tenant = await this.provisionTenant({ ...dto, passwordHash });
-    // New public signups only. Operator-created tenants and every pre-existing tenant get no clock.
-    await this.billing.startTrial(tenant.id).catch((e) => this.logger.error(`trial start failed for ${tenant.id}: ${e.message}`));
+    // New public signups only. Operator-created tenants and every pre-existing tenant get no clock; a single-company install has no trial.
+    if (!singleCompanyMode()) await this.billing.startTrial(tenant.id).catch((e) => this.logger.error(`trial start failed for ${tenant.id}: ${e.message}`));
     const user = tenant.users[0];
     const tokens = await this.generateTokens(user.id, tenant.id, user.role, user.tokenVersion);
     // Without a session row the refresh token issued here could never be redeemed.
@@ -424,8 +426,10 @@ export class AuthService {
       where: { tenantId: user.tenantId, userId: user.id, read: false },
     });
 
+    const single = singleCompanyMode();
     const permissions = getPermissionsForRole(user.role);
-    const nav = permissions.nav.map((item) =>
+    const HIDDEN_WHEN_SINGLE = ['/billing', '/platform', '/platform/billing', '/platform/plans', '/platform/ai'];
+    const nav = permissions.nav.filter((i) => !(single && HIDDEN_WHEN_SINGLE.includes(i.href))).map((item) =>
       item.badge === 'pendingApprovals' && pendingApprovals > 0
         ? { ...item, badgeCount: pendingApprovals }
         : item,
@@ -435,7 +439,7 @@ export class AuthService {
       user.role === 'SUPER_ADMIN' ? null : await this.entitlements.resolve(user.tenantId);
     // Everyone in a tenant learns whether it is blocked (a lapsed employee needs a clear message); only roles that can
     // act on it get the banner details.
-    const billing = user.role === 'SUPER_ADMIN' ? null : await this.billing.state(user.tenantId);
+    const billing = user.role === 'SUPER_ADMIN' || single ? null : await this.billing.state(user.tenantId);
     const billingForRole = billing && (user.role === 'COMPANY_ADMIN' || user.role === 'HR_MANAGER') ? billing : billing ? { blocked: billing.blocked, state: billing.state, banner: null } : null;
 
     // Credential material (password hash, 2FA secret/recovery codes, reset/verify tokens, lockout
@@ -452,6 +456,7 @@ export class AuthService {
       badges: { pendingApprovals, unreadNotifications },
       entitlements,
       billing: billingForRole,
+      deployment: { singleCompany: single },
     };
   }
 

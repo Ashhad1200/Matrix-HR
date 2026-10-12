@@ -1,3 +1,4 @@
+import { singleCompanyMode } from '../common/deployment';
 import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -49,7 +50,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * period end has no billing clock and is never blocked. The operator (SUPER_ADMIN) is never gated.
    */
   private async enforceBilling(req: { originalUrl?: string; url?: string }, user: { id: string; role: string; tenantId: string }) {
-    if (user.role === 'SUPER_ADMIN') return;
+    if (user.role === 'SUPER_ADMIN' || singleCompanyMode()) return;
     const sub = await this.prisma.subscription.findUnique({ where: { tenantId: user.tenantId }, select: { id: true, currentPeriodEnd: true } });
     if (!sub?.currentPeriodEnd) return;
     const path = req.originalUrl ?? req.url ?? '';

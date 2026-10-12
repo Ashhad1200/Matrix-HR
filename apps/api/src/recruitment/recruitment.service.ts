@@ -46,6 +46,22 @@ export class RecruitmentService {
     });
   }
 
+  /** Edit a posting, or close / reopen it. Closing stamps closedAt; reopening clears it. */
+  async updateJob(tenantId: string, id: string, data: { title?: string; department?: string; description?: string; requirements?: string; status?: string }) {
+    const job = await this.prisma.jobPosting.findFirst({ where: { id, tenantId } });
+    if (!job) throw new NotFoundException('Job not found');
+    return this.prisma.jobPosting.update({
+      where: { id },
+      data: {
+        ...(data.title !== undefined ? { title: data.title } : {}),
+        ...(data.department !== undefined ? { department: data.department } : {}),
+        ...(data.description !== undefined ? { description: data.description } : {}),
+        ...(data.requirements !== undefined ? { requirements: data.requirements } : {}),
+        ...(data.status ? { status: data.status, closedAt: data.status === 'closed' ? new Date() : null } : {}),
+      },
+    });
+  }
+
   async updateApplicationStatus(tenantId: string, id: string, status: string) {
     const allowed = ['APPLIED', 'SCREENING', 'SHORTLISTED', 'INTERVIEW', 'ASSESSMENT', 'OFFER', 'REJECTED'];
     if (status === 'HIRED') throw new BadRequestException('Use the Hire action to hire a candidate');

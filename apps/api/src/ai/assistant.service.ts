@@ -9,6 +9,8 @@ import { IMAGE_TOKENS, MAX_OUTPUT_TOKENS, estimateTokens, mcFor, priceFor } from
 import { Extracted } from './extract';
 import { TOOLS, ToolCtx, allowed, toolByName, toolsFor } from './tools';
 
+import { singleCompanyMode } from '../common/deployment';
+
 export const MAX_TOOL_ITERATIONS = 6;
 const HISTORY_MESSAGES = 20;
 const TOKEN_TTL_MS = 10 * 60_000;
@@ -54,7 +56,7 @@ export class AssistantService {
     await this.credits.ensureMonthly(tenantId);
     const a = await this.availability(tenantId);
     const bal = await this.credits.balance(tenantId);
-    return { available: a.ok, reason: a.ok ? null : a.reason, message: a.ok ? null : a.message, credits: bal.credits, monthlyResetAt: bal.monthlyResetAt };
+    return { available: a.ok, reason: a.ok ? null : a.reason, message: a.ok ? null : a.message, credits: bal.credits, monthlyResetAt: bal.monthlyResetAt, unlimited: singleCompanyMode() };
   }
 
   async setTenantEnabled(tenantId: string, userId: string, enabled: boolean) {
