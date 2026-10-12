@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import {
-  ArrayMaxSize, ArrayMinSize, IsBoolean, IsDateString, IsIn, IsNumber, IsOptional, IsString, Max, MaxLength, Min, ValidateNested,, MinLength } from 'class-validator';
+  ArrayMaxSize, ArrayMinSize, IsBoolean, IsDateString, IsIn, IsNumber, IsOptional, IsString, Max, MaxLength, Min, ValidateNested, MinLength } from 'class-validator';
 
 export class CreateCategoryDto {
   @IsString() @MinLength(1) @MaxLength(80) name: string;
