@@ -31,6 +31,11 @@ export default async function setup() {
   };
   const A = await mkTenant('A'); const B = await mkTenant('B');
 
+  // Give tenant A the top plan so every feature-gated screen is testable; tenant B stays on the signup default (isolation of plan gates).
+  const op = await call('/auth/login', 'POST', undefined, { email: 'superadmin@acme.com', password: 'Password123!' });
+  const plan = await call(`/platform/tenants/${A.tenantId}/subscription`, 'POST', op.body.accessToken, { planCode: 'enterprise' });
+  if (plan.status >= 300) throw new Error(`could not assign the enterprise plan to tenant A: ${plan.status} ${JSON.stringify(plan.body)}`);
+
   const accounts: Record<string, any> = { tenantA: A.tenantId, tenantB: B.tenantId, users: {} as Record<string, { email: string; role: string; employeeId?: string; token?: string }> };
   accounts.users.admin = { email: A.adminEmail, role: 'COMPANY_ADMIN' };
   accounts.users.adminB = { email: B.adminEmail, role: 'COMPANY_ADMIN' };

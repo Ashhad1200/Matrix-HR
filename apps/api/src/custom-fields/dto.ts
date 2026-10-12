@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsBoolean, IsNumber, IsObject } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsNumber, IsObject, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class CreateCustomFieldDto {
   @IsOptional()
@@ -6,12 +6,17 @@ export class CreateCustomFieldDto {
   entity?: string;
 
   @IsString()
+  @Matches(/^[a-z][a-z0-9_]{1,39}$/, { message: 'key must be lowercase letters, numbers or _ (2-40 characters), starting with a letter' })
   key: string;
 
   @IsString()
+  @MinLength(1)
+  @MaxLength(100)
   label: string;
 
   @IsString()
+  @MinLength(1)
+  @MaxLength(30)
   fieldType: string;
 
   @IsOptional()

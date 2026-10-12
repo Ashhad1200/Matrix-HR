@@ -9,3 +9,4 @@ B7 | Major | PATCH application status took any string -> 500 from Prisma enum, a
 B8 | Minor | Peer review rating unbounded (9 accepted) | FIXED
 B9 | BLOCKER (security) | POST /enps/surveys/:id/respond had no auth guard: anyone on the internet could post eNPS scores into any company's survey (tenant not checked) | FIXED (guard + tenant check)
 OPEN-1 | Decision | eNPS responses carry no respondent id, so one user can vote repeatedly (needs an additive table to dedupe while staying anonymous)
+B10 | Minor | Custom field key accepted any text (spaces, symbols), no length limits | FIXED
