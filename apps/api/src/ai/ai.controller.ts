@@ -24,7 +24,7 @@ export class AiController {
     @CurrentUser('employeeId') employeeId: string,
     @Body('question') question: string,
   ) {
-    return this.ai.askMatrixHR(tenantId, employeeId, question);
+    return this.ai.askAssistant(tenantId, employeeId, question);
   }
 
   @Post('rank-candidate')

@@ -14,7 +14,7 @@ mkdirSync(SHOTS, { recursive: true });
 const census: Record<string, any> = {};
 const ROLES: Who[] = ['admin', 'hr', 'manager', 'employee', 'superadmin'];
 // pages that need an id in the path are visited through their list page
-const EXTRA: Record<string, string[]> = { admin: ['/employees/org-chart', '/recruitment/kanban', '/recruitment/preboarding', '/settings/leave', '/settings/logins', '/settings/api-keys', '/settings/webhooks', '/settings/workflows', '/settings/custom-fields', '/settings/devices', '/settings/sso', '/settings/eor', '/settings/audit', '/performance/reviews', '/performance/enps'], superadmin: ['/platform/ai', '/platform/billing'] };
+const EXTRA: Record<string, string[]> = { admin: ['/employees/org-chart', '/recruitment/kanban', '/recruitment/preboarding', '/settings/leave', '/settings/structure', '/settings/compensation', '/settings/logins', '/settings/api-keys', '/settings/webhooks', '/settings/devices', '/settings/sso', '/settings/eor', '/settings/audit', '/performance/reviews', '/performance/enps', '/surveys'], hr: ['/settings/structure', '/settings/compensation'], superadmin: ['/platform/ai', '/platform/billing'] };
 
 for (const who of ROLES) {
   test(`pages as ${who}: no console/network errors, no broken text, no overflow`, async ({ page }) => {

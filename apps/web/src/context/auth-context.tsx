@@ -31,7 +31,7 @@ export type AuthUser = {
   role: string;
   tenantId: string;
   employeeId?: string | null;
-  tenant: { id: string; name: string; subdomain: string };
+  tenant: { id: string; name: string; subdomain: string; logoUrl?: string | null };
   employee?: {
     id: string;
     firstName: string;
@@ -62,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [suspended, setSuspended] = useState(false);
 
   const loadUser = useCallback(async () => {
     const token = localStorage.getItem('accessToken');
@@ -73,10 +74,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const me = await api.auth.me();
       setUser(me);
-    } catch {
+    } catch (e: any) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
-      router.push('/login');
+      if (e?.code === 'ACCOUNT_SUSPENDED') setSuspended(true);
+      else router.push('/login');
     } finally {
       setLoading(false);
     }
@@ -86,6 +88,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadUser();
   }, [loadUser]);
 
+  useEffect(() => {
+    const on = () => { localStorage.removeItem('accessToken'); localStorage.removeItem('refreshToken'); setSuspended(true); };
+    window.addEventListener('matrixhr:suspended', on);
+    return () => window.removeEventListener('matrixhr:suspended', on);
+  }, []);
+
   function logout() {
     const refreshToken = localStorage.getItem('refreshToken');
     if (refreshToken) void api.auth.logout({ refreshToken }).catch(() => undefined);
@@ -93,6 +101,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('refreshToken');
     setUser(null);
     router.push('/login');
+  }
+
+  if (suspended) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[hsl(var(--background))] p-6">
+        <div role="alert" className="max-w-md rounded-2xl border border-[hsl(var(--border))] p-8 text-center">
+          <h1 className="text-2xl font-bold">Account suspended</h1>
+          <p className="mt-2 text-[hsl(var(--muted-foreground))]">Access to this company has been suspended. Please contact support to restore it.</p>
+          <a href="/login" className="mt-6 inline-block text-sm font-medium underline">Back to sign in</a>
+        </div>
+      </main>
+    );
   }
 
   return (

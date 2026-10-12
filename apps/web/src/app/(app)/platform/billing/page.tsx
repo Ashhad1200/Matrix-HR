@@ -152,7 +152,7 @@ function AccountModal({ account, onClose, onSaved }: { account?: any; onClose: (
           <Field id="pa-iban" label="IBAN"><Input id="pa-iban" value={f.iban ?? ''} onChange={set('iban')} /></Field>
           <Field id="pa-num" label="Account number"><Input id="pa-num" value={f.accountNumber ?? ''} onChange={set('accountNumber')} /></Field>
           <Field id="pa-swift" label="SWIFT"><Input id="pa-swift" value={f.swift ?? ''} onChange={set('swift')} /></Field>
-          <Field id="pa-cur" label="Currency"><Input id="pa-cur" required maxLength={3} value={f.currency} onChange={set('currency')} /></Field>
+          <Field id="pa-cur" label="Currency (PKR: local bank / Raast. USD: Payoneer, Wise, international)"><select id="pa-cur" required value={f.currency} onChange={(e) => setF((p: any) => ({ ...p, currency: e.target.value }))} className="flex h-10 w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 text-sm"><option value="USD">USD</option><option value="PKR">PKR</option></select></Field>
         </div>
         <Field id="pa-ins" label="Instructions shown to the customer (optional)"><Input id="pa-ins" value={f.instructions ?? ''} onChange={set('instructions')} /></Field>
         <Err msg={error} />
@@ -164,7 +164,7 @@ function AccountModal({ account, onClose, onSaved }: { account?: any; onClose: (
 
 function PlanEditor({ plan, onClose, onSaved }: { plan: any; onClose: () => void; onSaved: () => void }) {
   const v = plan.versions.find((x: any) => x.isCurrent) ?? plan.versions[0];
-  const [f, setF] = useState({ currency: v.currency, priceMonthly: v.priceMonthly ?? '', priceYearly: v.priceYearly ?? '', aiCreditsMonthly: String(v.aiCreditsMonthly), maxEmployees: v.maxEmployees ?? '', maxAdminUsers: v.maxAdminUsers ?? '', overagePerEmployee: v.overagePerEmployee ?? '', isActive: plan.isActive, offeredToNew: v.offeredToNew });
+  const [f, setF] = useState({ currency: v.currency, priceMonthly: v.priceMonthly ?? '', priceYearly: v.priceYearly ?? '', priceMonthlyPkr: v.priceMonthlyPkr ?? '', priceYearlyPkr: v.priceYearlyPkr ?? '', overagePerEmployeePkr: v.overagePerEmployeePkr ?? '', aiCreditsMonthly: String(v.aiCreditsMonthly), maxEmployees: v.maxEmployees ?? '', maxAdminUsers: v.maxAdminUsers ?? '', overagePerEmployee: v.overagePerEmployee ?? '', isActive: plan.isActive, offeredToNew: v.offeredToNew });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) => setF((p: any) => ({ ...p, [k]: e.target.value }));
@@ -172,7 +172,7 @@ function PlanEditor({ plan, onClose, onSaved }: { plan: any; onClose: () => void
     e.preventDefault(); setBusy(true); setError('');
     const n = (x: any) => (x === '' || x == null ? undefined : Number(x));
     try {
-      await api.platformBilling.editPlan(plan.code, { currency: f.currency, priceMonthly: n(f.priceMonthly), priceYearly: n(f.priceYearly), aiCreditsMonthly: n(f.aiCreditsMonthly), maxEmployees: n(f.maxEmployees), maxAdminUsers: n(f.maxAdminUsers), overagePerEmployee: n(f.overagePerEmployee), isActive: f.isActive, offeredToNew: f.offeredToNew });
+      await api.platformBilling.editPlan(plan.code, { currency: f.currency, priceMonthly: n(f.priceMonthly), priceYearly: n(f.priceYearly), priceMonthlyPkr: n(f.priceMonthlyPkr), priceYearlyPkr: n(f.priceYearlyPkr), overagePerEmployeePkr: n(f.overagePerEmployeePkr), aiCreditsMonthly: n(f.aiCreditsMonthly), maxEmployees: n(f.maxEmployees), maxAdminUsers: n(f.maxAdminUsers), overagePerEmployee: n(f.overagePerEmployee), isActive: f.isActive, offeredToNew: f.offeredToNew });
       onSaved(); onClose();
     } catch (err: any) { setError(err.message); } finally { setBusy(false); }
   }
@@ -181,13 +181,18 @@ function PlanEditor({ plan, onClose, onSaved }: { plan: any; onClose: () => void
       <form onSubmit={submit} className="space-y-3">
         <div className="grid grid-cols-3 gap-3">
           <Field id="pl-cur" label="Currency"><Input id="pl-cur" maxLength={3} value={f.currency} onChange={set('currency')} /></Field>
-          <Field id="pl-m" label="Monthly price"><Input id="pl-m" inputMode="decimal" value={f.priceMonthly} onChange={set('priceMonthly')} /></Field>
-          <Field id="pl-y" label="Yearly price"><Input id="pl-y" inputMode="decimal" value={f.priceYearly} onChange={set('priceYearly')} /></Field>
+          <Field id="pl-m" label="USD monthly price"><Input id="pl-m" inputMode="decimal" value={f.priceMonthly} onChange={set('priceMonthly')} /></Field>
+          <Field id="pl-y" label="USD yearly price"><Input id="pl-y" inputMode="decimal" value={f.priceYearly} onChange={set('priceYearly')} /></Field>
           <Field id="pl-ai" label="AI credits / month"><Input id="pl-ai" inputMode="numeric" value={f.aiCreditsMonthly} onChange={set('aiCreditsMonthly')} /></Field>
           <Field id="pl-emp" label="Employee limit"><Input id="pl-emp" inputMode="numeric" value={f.maxEmployees} onChange={set('maxEmployees')} /></Field>
           <Field id="pl-adm" label="Admin users"><Input id="pl-adm" inputMode="numeric" value={f.maxAdminUsers} onChange={set('maxAdminUsers')} /></Field>
         </div>
-        <Field id="pl-over" label="Price per extra employee (empty = hard limit)"><Input id="pl-over" inputMode="decimal" value={f.overagePerEmployee} onChange={set('overagePerEmployee')} /></Field>
+        <div className="grid grid-cols-3 gap-3">
+          <Field id="pl-mp" label="PKR monthly price"><Input id="pl-mp" inputMode="decimal" value={f.priceMonthlyPkr} onChange={set('priceMonthlyPkr')} /></Field>
+          <Field id="pl-yp" label="PKR yearly price"><Input id="pl-yp" inputMode="decimal" value={f.priceYearlyPkr} onChange={set('priceYearlyPkr')} /></Field>
+          <Field id="pl-op" label="PKR per extra employee"><Input id="pl-op" inputMode="decimal" value={f.overagePerEmployeePkr} onChange={set('overagePerEmployeePkr')} /></Field>
+        </div>
+        <Field id="pl-over" label="USD per extra employee (empty = hard limit)"><Input id="pl-over" inputMode="decimal" value={f.overagePerEmployee} onChange={set('overagePerEmployee')} /></Field>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.isActive} onChange={(e) => setF((p: any) => ({ ...p, isActive: e.target.checked }))} /> Plan is active</label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.offeredToNew} onChange={(e) => setF((p: any) => ({ ...p, offeredToNew: e.target.checked }))} /> Offered to new customers in Billing</label>
         <Err msg={error} />
@@ -286,6 +291,7 @@ export default function PlatformBillingPage() {
                       <p className="font-display text-lg font-bold">{p.name} <span className="font-mono text-xs font-normal text-[hsl(var(--muted-foreground))]">{p.code}</span></p>
                       <div className="flex gap-1">{v.offeredToNew ? <Badge variant="success">Offered</Badge> : <Badge variant="neutral">Not offered</Badge>}{!p.isActive && <Badge variant="danger">Inactive</Badge>}</div>
                     </div>
+                    {v.priceMonthly && <p className="text-sm tabular-nums" data-testid="plan-pkr">{v.priceMonthlyPkr ? `${money(v.priceMonthlyPkr, 'PKR')} / month, ${money(v.priceYearlyPkr, 'PKR')} / year` : <span className="text-amber-700">PKR price not set</span>}</p>}
                     <p className="text-sm tabular-nums">{v.priceMonthly ? `${money(v.priceMonthly, v.currency)} / month, ${money(v.priceYearly, v.currency)} / year` : `Legacy: PKR ${v.legacyPricePkrMonthly ?? '—'} / month`}</p>
                     <p className="text-sm text-[hsl(var(--muted-foreground))]">{v.maxEmployees ? `${v.maxEmployees} employees` : 'No employee limit'}{v.overagePerEmployee ? ` + ${money(v.overagePerEmployee, v.currency)} each extra` : ''} · {v.maxAdminUsers ?? '∞'} admins · {v.aiCreditsMonthly} AI credits/mo</p>
                     <p className="text-sm text-[hsl(var(--muted-foreground))]">{v.subscribers} tenant{v.subscribers === 1 ? '' : 's'} on this version{p.versions.length > 1 ? ` · ${p.versions.length} versions` : ''}</p>
@@ -298,9 +304,9 @@ export default function PlatformBillingPage() {
           <Card>
             <CardHeader><CardTitle>AI credit packs</CardTitle></CardHeader>
             <CardContent>
-              <table className="data-table"><thead><tr><th>Pack</th><th>Credits</th><th>Price</th><th>Status</th><th /></tr></thead>
+              <table className="data-table"><thead><tr><th>Pack</th><th>Credits</th><th>USD</th><th>PKR</th><th>Status</th><th /></tr></thead>
                 <tbody>{data.packs.map((p: any) => (
-                  <tr key={p.code}><td>{p.name}</td><td className="tabular-nums">{p.credits.toLocaleString('en-US')}</td><td className="tabular-nums">{money(p.price, p.currency)}</td><td><Badge variant={p.isActive ? 'success' : 'neutral'}>{p.isActive ? 'Active' : 'Inactive'}</Badge></td>
+                  <tr key={p.code}><td>{p.name}</td><td className="tabular-nums">{p.credits.toLocaleString('en-US')}</td><td className="tabular-nums">{money(p.price, p.currency)}</td><td className="tabular-nums">{p.pricePkr ? money(p.pricePkr, 'PKR') : '—'}</td><td><Badge variant={p.isActive ? 'success' : 'neutral'}>{p.isActive ? 'Active' : 'Inactive'}</Badge></td>
                     <td className="text-right"><Button size="sm" variant="ghost" onClick={() => setPackEdit(p)}>Edit</Button></td></tr>
                 ))}</tbody></table>
             </CardContent>
@@ -325,9 +331,10 @@ export default function PlatformBillingPage() {
       {editPlan && <PlanEditor plan={editPlan} onClose={() => setEditPlan(null)} onSaved={load} />}
       {packEdit && (
         <Modal open onClose={() => setPackEdit(null)} title={`Edit ${packEdit.name} pack`}>
-          <form className="space-y-3" onSubmit={async (e) => { e.preventDefault(); try { await api.platformBilling.editPack(packEdit.code, { credits: Number(packEdit.credits), price: Number(packEdit.price), isActive: packEdit.isActive }); setPackEdit(null); load(); } catch (err: any) { setError(err.message); setPackEdit(null); } }}>
+          <form className="space-y-3" onSubmit={async (e) => { e.preventDefault(); try { await api.platformBilling.editPack(packEdit.code, { credits: Number(packEdit.credits), price: Number(packEdit.price), pricePkr: packEdit.pricePkr === '' || packEdit.pricePkr == null ? undefined : Number(packEdit.pricePkr), isActive: packEdit.isActive }); setPackEdit(null); load(); } catch (err: any) { setError(err.message); setPackEdit(null); } }}>
             <Field id="pk-c" label="Credits"><Input id="pk-c" inputMode="numeric" value={packEdit.credits} onChange={(e) => setPackEdit({ ...packEdit, credits: e.target.value })} /></Field>
-            <Field id="pk-p" label="Price"><Input id="pk-p" inputMode="decimal" value={packEdit.price} onChange={(e) => setPackEdit({ ...packEdit, price: e.target.value })} /></Field>
+            <Field id="pk-pp" label="PKR price"><Input id="pk-pp" inputMode="decimal" value={packEdit.pricePkr ?? ''} onChange={(e) => setPackEdit({ ...packEdit, pricePkr: e.target.value })} /></Field>
+            <Field id="pk-p" label="USD price"><Input id="pk-p" inputMode="decimal" value={packEdit.price} onChange={(e) => setPackEdit({ ...packEdit, price: e.target.value })} /></Field>
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={packEdit.isActive} onChange={(e) => setPackEdit({ ...packEdit, isActive: e.target.checked })} /> Active</label>
             <div className="flex justify-end"><Button type="submit">Save</Button></div>
           </form>

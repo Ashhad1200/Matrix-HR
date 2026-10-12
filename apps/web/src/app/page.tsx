@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { getBrand } from '@/lib/brand-server';
 import { Logo } from '@/components/brand/logo';
 import { LandingNav } from '@/components/landing/nav';
 import { PayslipDemo } from '@/components/landing/payslip-demo';
@@ -8,7 +10,10 @@ import { WhatsAppThread } from '@/components/landing/whatsapp-thread';
 import { RecordLens } from '@/components/landing/record-lens';
 import { Pricing } from '@/components/landing/pricing';
 import { In } from '@/components/landing/motion';
-import { USD_PLAN_CATALOG, TRIAL_DAYS } from '@matrixhr/shared';
+import { TRIAL_DAYS } from '@matrixhr/shared';
+import { headers } from 'next/headers';
+import { detectCurrency } from '@/lib/geo';
+import { getPricing, type PricingData } from '@/lib/pricing-server';
 import { siteUrl } from '@/lib/site';
 import { cn } from '@/lib/utils';
 
@@ -108,7 +113,7 @@ const FAQ: { q: string; a: string }[] = [
   },
 ];
 
-function JsonLd() {
+function JsonLd({ pricing }: { pricing: PricingData | null }) {
   const data = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -120,12 +125,12 @@ function JsonLd() {
         url: siteUrl,
         description:
           'HR and payroll for growing companies in Pakistan: attendance, leave, expenses, loans and payroll with a second approver, payslips and bank files.',
-        offers: USD_PLAN_CATALOG.map((p) => ({
+        offers: (pricing?.plans ?? []).map((p) => ({
           '@type': 'Offer',
           name: p.name,
-          price: p.monthly,
+          price: p.USD.monthly,
           priceCurrency: 'USD',
-          priceSpecification: { '@type': 'UnitPriceSpecification', price: p.monthly, priceCurrency: 'USD', unitText: 'per month' },
+          priceSpecification: { '@type': 'UnitPriceSpecification', price: p.USD.monthly, priceCurrency: 'USD', unitText: 'per month' },
         })),
       },
       {
@@ -137,10 +142,14 @@ function JsonLd() {
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />;
 }
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  // The vendor's marketing page is never shown on a white-label install: visitors go straight to the sign-in.
+  if (getBrand().whiteLabel) redirect('/login');
+  const singleCompany = (process.env.SINGLE_COMPANY_MODE || '').toLowerCase() === 'true';
+  const [pricing, detected] = singleCompany ? [null, null] : await Promise.all([getPricing(), detectCurrency(headers())]);
   return (
     <div className="mx relative min-h-dvh overflow-x-clip">
-      <JsonLd />
+      <JsonLd pricing={pricing} />
       <a href="#main" className="skip-link">
         Skip to content
       </a>
@@ -310,10 +319,10 @@ export default function LandingPage() {
         <section id="pricing" aria-labelledby="pricing-title" className="scroll-mt-16 py-24 sm:py-32">
           <div className={WRAP}>
             <h2 id="pricing-title" className="mx-display max-w-[24ch] text-[clamp(2.6rem,5.4vw,4.75rem)]">
-              Simple monthly pricing, in dollars.
+              Simple monthly pricing.
             </h2>
             <div className="mt-12">
-              <Pricing />
+              {pricing ? <Pricing data={pricing} initial={detected} /> : null}
             </div>
           </div>
         </section>

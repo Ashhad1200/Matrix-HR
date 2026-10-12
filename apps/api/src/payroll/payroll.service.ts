@@ -1,11 +1,14 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { brandName } from '../common/brand';
+import { logoBufferForPdf } from '../platform/logo';
+import { Injectable, Optional, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PayrollEngineFactory } from './engines/payroll-engine.factory';
 import { PayrollRules } from './engines/payroll-engine.interface';
 import { PayslipPdfService } from './payslip-pdf.service';
 import { UploadsService } from '../uploads/uploads.service';
 import { FilesService } from '../uploads/files.service';
-import { CreateCompensationItemDto } from './dto';
+import { CreateCompensationItemDto, UpdateCompensationItemDto } from './dto';
+import { AuditService } from '../audit/audit.service';
 import { IntegrationSyncService } from '../integrations/integration-sync.service';
 import { buildBankFile } from './bank-file';
 import { buildJournal } from './journal';
@@ -19,6 +22,7 @@ export class PayrollService {
     private uploads: UploadsService,
     private files: FilesService,
     private syncLogs: IntegrationSyncService,
+    @Optional() private audit?: AuditService,
   ) {}
 
   // ── Period helpers ──────────────────────────────────────────────────────
@@ -114,10 +118,18 @@ export class PayrollService {
     });
   }
 
-  async createCompensationItem(tenantId: string, dto: CreateCompensationItemDto) {
+  private checkPeriods(start?: string | null, end?: string | null) {
+    const re = /^\d{4}-(0[1-9]|1[0-2])$/;
+    if (start && !re.test(start)) throw new BadRequestException('Start month must be YYYY-MM');
+    if (end && !re.test(end)) throw new BadRequestException('End month must be YYYY-MM');
+    if (start && end && end < start) throw new BadRequestException('End month cannot be before the start month');
+  }
+
+  async createCompensationItem(tenantId: string, dto: CreateCompensationItemDto, userId?: string) {
     const employee = await this.prisma.employee.findFirst({ where: { id: dto.employeeId, tenantId } });
     if (!employee) throw new NotFoundException('Employee not found');
-    return this.prisma.compensationItem.create({
+    this.checkPeriods(dto.startPeriod, dto.endPeriod);
+    const created = await this.prisma.compensationItem.create({
       data: {
         tenantId,
         employeeId: dto.employeeId,
@@ -129,15 +141,41 @@ export class PayrollService {
         endPeriod: dto.endPeriod,
       },
     });
+    await this.audit?.log({ tenantId, userId, action: 'CREATE', entity: 'CompensationItem', entityId: created.id, after: created as any });
+    return created;
   }
 
-  async deleteCompensationItem(tenantId: string, id: string) {
+  async updateCompensationItem(tenantId: string, id: string, dto: UpdateCompensationItemDto, userId?: string) {
+    const item = await this.prisma.compensationItem.findFirst({ where: { id, tenantId } });
+    if (!item) throw new NotFoundException('Compensation item not found');
+    if (item.sourceType) throw new BadRequestException('This item is managed by its source record');
+    const start = dto.startPeriod !== undefined ? dto.startPeriod : item.startPeriod;
+    const end = dto.endPeriod !== undefined ? dto.endPeriod : item.endPeriod;
+    this.checkPeriods(start, end);
+    const updated = await this.prisma.compensationItem.update({
+      where: { id },
+      data: {
+        ...(dto.type !== undefined ? { type: dto.type } : {}),
+        ...(dto.label !== undefined ? { label: dto.label } : {}),
+        ...(dto.amount !== undefined ? { amount: dto.amount } : {}),
+        ...(dto.recurring !== undefined ? { recurring: dto.recurring } : {}),
+        ...(dto.startPeriod !== undefined ? { startPeriod: dto.startPeriod || null } : {}),
+        ...(dto.endPeriod !== undefined ? { endPeriod: dto.endPeriod || null } : {}),
+      },
+    });
+    await this.audit?.log({ tenantId, userId, action: 'UPDATE', entity: 'CompensationItem', entityId: id, before: item as any, after: updated as any });
+    return updated;
+  }
+
+  async deleteCompensationItem(tenantId: string, id: string, userId?: string) {
     const item = await this.prisma.compensationItem.findFirst({ where: { id, tenantId } });
     if (!item) throw new NotFoundException('Compensation item not found');
     if (item.sourceType) {
       throw new BadRequestException(`This item is managed by its ${item.sourceType === 'LoanRequest' ? 'loan' : 'source'} record — cancel that instead`);
     }
-    return this.prisma.compensationItem.delete({ where: { id } });
+    const res = await this.prisma.compensationItem.delete({ where: { id } });
+    await this.audit?.log({ tenantId, userId, action: 'DELETE', entity: 'CompensationItem', entityId: id, before: item as any });
+    return res;
   }
 
   // ── Final settlement (offboarding) ──────────────────────────────────────
@@ -425,7 +463,8 @@ export class PayrollService {
     for (const item of run.items) {
       if (item.payslipUrl) continue; // idempotent — safe to call repeatedly
       const buffer = await this.payslipPdf.generate({
-        tenantName: tenant?.name ?? 'MatrixHR',
+        tenantName: tenant?.name ?? brandName(),
+        logo: logoBufferForPdf(tenant?.logoUrl),
         period: run.period,
         employeeName: `${item.employee.firstName} ${item.employee.lastName}`,
         employeeCode: item.employee.employeeCode,
@@ -454,7 +493,8 @@ export class PayrollService {
 
     const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
     const buffer = await this.payslipPdf.generate({
-      tenantName: tenant?.name ?? 'MatrixHR',
+      tenantName: tenant?.name ?? brandName(),
+      logo: logoBufferForPdf(tenant?.logoUrl),
       period: item.payrollRun.period,
       employeeName: `${item.employee.firstName} ${item.employee.lastName}`,
       employeeCode: item.employee.employeeCode,

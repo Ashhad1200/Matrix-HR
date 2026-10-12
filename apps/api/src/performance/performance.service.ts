@@ -29,6 +29,30 @@ export class PerformanceService {
     });
   }
 
+  async updateCycle(tenantId: string, id: string, data: { name?: string; type?: string; startDate?: string; endDate?: string; status?: 'DRAFT' | 'ACTIVE' | 'COMPLETED' }) {
+    const c = await this.prisma.reviewCycle.findFirst({ where: { id, tenantId } });
+    if (!c) throw new NotFoundException('Cycle not found');
+    const start = data.startDate ? new Date(data.startDate) : c.startDate;
+    const end = data.endDate ? new Date(data.endDate) : c.endDate;
+    if (end <= start) throw new BadRequestException('The end date must be after the start date');
+    return this.prisma.reviewCycle.update({
+      where: { id },
+      data: { ...(data.name !== undefined ? { name: data.name } : {}), ...(data.type ? { type: data.type } : {}), startDate: start, endDate: end, ...(data.status ? { status: data.status } : {}) },
+    });
+  }
+
+  /** Edit a goal's wording or due date: its owner, their manager (for reports) or HR. */
+  async updateGoal(tenantId: string, viewer: Viewer, id: string, data: { title?: string; description?: string; dueDate?: string }) {
+    const goal = await this.prisma.goal.findFirst({ where: { id, tenantId } });
+    if (!goal) throw new NotFoundException('Goal not found');
+    const allowed = await scopedEmployeeIds(this.prisma, tenantId, viewer);
+    if (allowed !== null && !allowed.includes(goal.employeeId)) throw new ForbiddenException('You cannot change this goal');
+    return this.prisma.goal.update({
+      where: { id },
+      data: { ...(data.title !== undefined ? { title: data.title } : {}), ...(data.description !== undefined ? { description: data.description } : {}), ...(data.dueDate ? { dueDate: new Date(data.dueDate) } : {}) },
+    });
+  }
+
   async getGoals(tenantId: string, employeeId: string | undefined, viewer: Viewer) {
     const allowed = await scopedEmployeeIds(this.prisma, tenantId, viewer);
     return this.prisma.goal.findMany({

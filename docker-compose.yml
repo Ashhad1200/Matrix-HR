@@ -65,6 +65,15 @@ services:
     ports:
       - "3001:3001"
     environment:
+      WL_CURRENCIES: ${WL_CURRENCIES:-}
+      WL_PRODUCT_NAME: ${WL_PRODUCT_NAME:-}
+      WL_LOGO_URL: ${WL_LOGO_URL:-}
+      WL_FAVICON_URL: ${WL_FAVICON_URL:-}
+      WL_PRIMARY_COLOR: ${WL_PRIMARY_COLOR:-}
+      WL_SUPPORT_EMAIL: ${WL_SUPPORT_EMAIL:-}
+      WL_EMAIL_FROM_NAME: ${WL_EMAIL_FROM_NAME:-}
+      WL_WEBSITE_URL: ${WL_WEBSITE_URL:-}
+      WL_LEGAL_TEXT: ${WL_LEGAL_TEXT:-}
       DATABASE_URL: postgresql://matrixhr:matrixhr@postgres:5432/matrixhr?schema=public
       REDIS_URL: redis://redis:6379
       JWT_SECRET: dev-secret-change-in-production-32chars
@@ -101,6 +110,18 @@ services:
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:3001/api/v1
       WEB_URL: http://localhost:3000
+      WL_CURRENCIES: ${WL_CURRENCIES:-}
+      SINGLE_COMPANY_MODE: ${SINGLE_COMPANY_MODE:-}
+      GEOIP_LOOKUP: ${GEOIP_LOOKUP:-}
+      API_INTERNAL_URL: http://api:3001/api/v1
+      WL_PRODUCT_NAME: ${WL_PRODUCT_NAME:-}
+      WL_LOGO_URL: ${WL_LOGO_URL:-}
+      WL_FAVICON_URL: ${WL_FAVICON_URL:-}
+      WL_PRIMARY_COLOR: ${WL_PRIMARY_COLOR:-}
+      WL_SUPPORT_EMAIL: ${WL_SUPPORT_EMAIL:-}
+      WL_EMAIL_FROM_NAME: ${WL_EMAIL_FROM_NAME:-}
+      WL_WEBSITE_URL: ${WL_WEBSITE_URL:-}
+      WL_LEGAL_TEXT: ${WL_LEGAL_TEXT:-}
       WATCHPACK_POLLING: "true"
     entrypoint: ["/bin/sh", "/app/docker/entrypoint-web.sh"]
     depends_on:

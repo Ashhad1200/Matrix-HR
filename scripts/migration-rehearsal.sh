@@ -42,7 +42,8 @@ verify_new() {
   for t in PaymentRequest PaymentProof Receipt AiCreditLedger EmailOutbox ExpenseClaim LoanRequest; do
     [ "$(q "$db" "select to_regclass('public.\"$t\"') is not null")" = t ] || bad "$db: missing table $t"
   done
-  [ "$(q "$db" "select count(*) from _prisma_migrations where finished_at is not null")" = 2 ] || bad "$db: expected 2 applied migrations"
+  WANT=$(ls $DBPKG/prisma/migrations | grep -cE '^[0-9]+_')
+  [ "$(q "$db" "select count(*) from _prisma_migrations where finished_at is not null")" = "$WANT" ] || bad "$db: expected $WANT applied migrations"
 }
 
 run() { # name, builder-fn
@@ -63,7 +64,7 @@ run() { # name, builder-fn
   out="$(prisma migrate deploy)"; rc=$?
   { [ $rc -eq 0 ] && echo "$out" | grep -q "No pending migrations"; } && ok "second deploy is a no-op" || bad "second deploy: $(echo "$out" | tail -3)"
   # re-run the SQL file directly: proves the statements themselves are idempotent, not just Prisma's bookkeeping
-  psql -qX -v ON_ERROR_STOP=1 -d "$db" -f $DBPKG/prisma/migrations/1_ai_billing/migration.sql >/dev/null 2>"$TMP/err" && ok "migration.sql re-applied by hand: no errors" || bad "re-apply: $(head -3 "$TMP/err")"
+  cat $DBPKG/prisma/migrations/[1-9]*_*/migration.sql | psql -qX -v ON_ERROR_STOP=1 -d "$db" >/dev/null 2>"$TMP/err" && ok "migration.sql re-applied by hand: no errors" || bad "re-apply: $(head -3 "$TMP/err")"
   verify_new "$db"
   if [ "$name" != fresh ]; then after="$(fingerprint "$db")"; [ -n "$before" ] && [ "$before" = "$after" ] && ok "existing rows unchanged (fingerprint $before)" || bad "data changed"; fi
   echo "     tables: $(tables "$db")"

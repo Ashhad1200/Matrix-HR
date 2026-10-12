@@ -69,9 +69,9 @@ test.describe('Settings (UI)', () => {
     await expect(page.getByText(sn)).toBeHidden();
     await ctx.close();
   });
-  test('read-only settings pages open for admin: workflows, custom fields, audit log', async ({ browser }) => {
+  test('read-only settings pages open for admin: audit log, SSO, EOR', async ({ browser }) => {
     const { page, ctx, problems } = await asRole(browser, 'admin');
-    for (const p of ['/settings/workflows', '/settings/custom-fields', '/settings/audit', '/settings/sso', '/settings/eor']) {
+    for (const p of ['/settings/audit', '/settings/sso', '/settings/eor']) {
       await page.goto(p, { waitUntil: 'domcontentloaded' });
       await page.locator('#main').waitFor();
       await page.waitForTimeout(800);

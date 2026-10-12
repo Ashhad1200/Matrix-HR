@@ -1,5 +1,6 @@
 'use client';
 
+import { useBrand } from '@/lib/brand-context';
 import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -10,6 +11,7 @@ import { Input } from '@/components/ui/input';
 const ROLE_LABEL: Record<string, string> = { EMPLOYEE: 'an employee', MANAGER: 'a manager', HR_MANAGER: 'an HR manager', COMPANY_ADMIN: 'a company admin' };
 
 function AcceptInviteForm() {
+  const brand = useBrand();
   const token = useSearchParams().get('token');
   const [info, setInfo] = useState<{ company: string; name: string | null; email: string; role: string } | null>(null);
   const [bad, setBad] = useState(false);
@@ -58,7 +60,7 @@ function AcceptInviteForm() {
 
   return (
     <form onSubmit={submit} className="mt-6 space-y-4">
-      <p className="text-sm">{info.company} has invited <strong>{info.name ?? info.email}</strong> to MatrixHR as {ROLE_LABEL[info.role] ?? 'a team member'}.</p>
+      <p className="text-sm">{info.company} has invited <strong>{info.name ?? info.email}</strong> to {brand.name} as {ROLE_LABEL[info.role] ?? 'a team member'}.</p>
       <div>
         <label htmlFor="inv-email" className="mb-1.5 block text-sm font-medium">Email</label>
         <Input id="inv-email" value={info.email} readOnly disabled />
@@ -79,10 +81,11 @@ function AcceptInviteForm() {
 }
 
 export default function AcceptInvitePage() {
+  const brand = useBrand();
   return (
     <main className="flex min-h-screen items-center justify-center bg-[hsl(var(--muted))] p-4 sm:p-6">
       <div className="w-full max-w-md rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-sm sm:p-8">
-        <Link href="/login" className="font-display text-lg font-bold text-brand-700 dark:text-brand-400">MatrixHR</Link>
+        <Link href="/login" className="font-display text-lg font-bold text-brand-700 dark:text-brand-400">{brand.name}</Link>
         <h1 className="mt-8 font-display text-2xl font-bold tracking-tight">Set up your account</h1>
         <Suspense fallback={<p className="mt-6 text-sm text-[hsl(var(--muted-foreground))]">Loading…</p>}>
           <AcceptInviteForm />

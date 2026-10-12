@@ -95,6 +95,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
     const message = Array.isArray(err.message) ? err.message.join(', ') : err.message;
+    // The operator suspended this company: tell the shell so it can show the suspended screen instead of a raw error.
+    if (err.code === 'ACCOUNT_SUSPENDED' && typeof window !== 'undefined') window.dispatchEvent(new Event('matrixhr:suspended'));
     throw new ApiError(res.status, message || 'Request failed', err.code);
   }
 
@@ -117,6 +119,19 @@ async function uploadWithFields<T>(path: string, file: File, fields: Record<stri
   form.append('file', file);
   for (const [k, v] of Object.entries(fields)) if (v !== undefined && v !== '') form.append(k, v);
   const res = await fetch(`${API_URL}${path}`, { method: 'POST', headers: token ? { Authorization: `Bearer ${token}` } : {}, body: form });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: res.statusText }));
+    throw new ApiError(res.status, (Array.isArray(err.message) ? err.message.join(', ') : err.message) || 'Upload failed', err.code);
+  }
+  return res.json();
+}
+
+/** Multipart PUT (replace-in-place uploads such as a client's logo). */
+async function putFile<T>(path: string, file: File): Promise<T> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  const form = new FormData();
+  form.append('file', file);
+  const res = await fetch(`${API_URL}${path}`, { method: 'PUT', headers: token ? { Authorization: `Bearer ${token}` } : {}, body: form });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
     throw new ApiError(res.status, (Array.isArray(err.message) ? err.message.join(', ') : err.message) || 'Upload failed', err.code);
@@ -157,7 +172,7 @@ export const api = {
     upload: (file: File) => uploadFile<{ ref: string; key: string }>('/uploads', file),
   },
   auth: {
-    signup: (data: { email: string; password: string; companyName: string; subdomain: string }) =>
+    signup: (data: { email: string; password: string; companyName: string; subdomain: string; country?: string }) =>
       request<any>('/auth/signup', { method: 'POST', body: JSON.stringify(data) }),
     login: (data: { email: string; password: string }) =>
       request<LoginResponse>('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
@@ -194,6 +209,14 @@ export const api = {
     orgChart: () => request<any>('/employees/org-chart'),
     departments: () => request<any>('/employees/departments'),
     designations: () => request<any>('/employees/designations'),
+    createDepartment: (data: { name: string; parentId?: string }) => request<any>('/employees/departments', { method: 'POST', body: JSON.stringify(data) }),
+    updateDepartment: (id: string, data: { name?: string; parentId?: string | null }) => request<any>(`/employees/departments/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    deleteDepartment: (id: string) => request<any>(`/employees/departments/${id}`, { method: 'DELETE' }),
+    importDepartments: (rows: { name: string; parent?: string }[]) => request<any>('/employees/departments/import', { method: 'POST', body: JSON.stringify({ rows }) }),
+    createDesignation: (data: { name: string; grade?: string; departmentId?: string }) => request<any>('/employees/designations', { method: 'POST', body: JSON.stringify(data) }),
+    updateDesignation: (id: string, data: { name?: string; grade?: string | null; departmentId?: string | null }) => request<any>(`/employees/designations/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    deleteDesignation: (id: string) => request<any>(`/employees/designations/${id}`, { method: 'DELETE' }),
+    importDesignations: (rows: { name: string; grade?: string; department?: string }[]) => request<any>('/employees/designations/import', { method: 'POST', body: JSON.stringify({ rows }) }),
     import: (rows: any[]) => request<any>('/employees/import', { method: 'POST', body: JSON.stringify({ rows }) }),
   },
   approvals: {
@@ -221,6 +244,11 @@ export const api = {
       request<any>(`/leave/requests/${id}/reject`, { method: 'PATCH', body: JSON.stringify({ reason }) }),
     whosOut: (month?: string) => request<any>(`/leave/whos-out${month ? `?month=${month}` : ''}`),
     holidays: () => request<any>('/leave/holidays'),
+    workingDays: (start: string, end: string) => request<{ days: number; weekendDays: number[] }>(`/leave/working-days?start=${start}&end=${end}`),
+    cancel: (id: string) => request<any>(`/leave/requests/${id}/cancel`, { method: 'POST' }),
+    update: (id: string, data: any) => request<any>(`/leave/requests/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    weekend: () => request<{ weekendDays: number[] }>('/leave/weekend'),
+    setWeekend: (days: number[]) => request<{ weekendDays: number[] }>('/leave/weekend', { method: 'PUT', body: JSON.stringify({ days }) }),
   },
   attendance: {
     clockIn: (data?: { latitude?: number; longitude?: number }) =>
@@ -237,6 +265,8 @@ export const api = {
     dashboard: () => request<any>('/onboarding/dashboard'),
     start: (data: { employeeId: string; templateId: string }) =>
       request<any>('/onboarding/start', { method: 'POST', body: JSON.stringify(data) }),
+    createTemplate: (data: any) => request<any>('/onboarding/templates', { method: 'POST', body: JSON.stringify(data) }),
+    updateTemplate: (id: string, data: any) => request<any>(`/onboarding/templates/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     completeTask: (progressId: string, taskId: string) =>
       request<any>(`/onboarding/tasks/${progressId}/${taskId}/complete`, { method: 'PATCH' }),
   },
@@ -255,6 +285,8 @@ export const api = {
     compensationItems: (employeeId?: string) => request<any>(`/payroll/compensation-items${employeeId ? `?employeeId=${employeeId}` : ''}`),
     createCompensationItem: (data: { employeeId: string; type: string; label: string; amount: number; recurring?: boolean; startPeriod?: string; endPeriod?: string }) =>
       request<any>('/payroll/compensation-items', { method: 'POST', body: JSON.stringify(data) }),
+    updateCompensationItem: (id: string, data: { type?: string; label?: string; amount?: number; recurring?: boolean; startPeriod?: string; endPeriod?: string }) =>
+      request<any>(`/payroll/compensation-items/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     deleteCompensationItem: (id: string) => request<any>(`/payroll/compensation-items/${id}`, { method: 'DELETE' }),
   },
   expenses: {
@@ -324,6 +356,8 @@ export const api = {
     hire: (id: string, inviteRole?: string) =>
       request<any>(`/recruitment/applications/${id}/hire`, { method: 'POST', body: JSON.stringify(inviteRole ? { inviteRole } : {}) }),
     preboarding: () => request<any>('/preboarding'),
+    updateJob: (id: string, data: any) => request<any>(`/recruitment/jobs/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    createApplication: (data: any) => request<any>('/recruitment/applications', { method: 'POST', body: JSON.stringify(data) }),
   },
   performance: {
     goals: () => request<any>('/performance/goals'),
@@ -334,6 +368,13 @@ export const api = {
       request<any>(`/performance/goals/${id}/progress`, { method: 'PATCH', body: JSON.stringify({ progress }) }),
     enps: () => request<any>('/enps/surveys/summary'),
     enpsSurveys: () => request<any>('/enps/surveys'),
+    createSurvey: (data: any) => request<any>('/enps/surveys', { method: 'POST', body: JSON.stringify(data) }),
+    updateSurvey: (id: string, data: any) => request<any>(`/enps/surveys/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    deleteSurvey: (id: string) => request<any>(`/enps/surveys/${id}`, { method: 'DELETE' }),
+    activeSurveys: () => request<any[]>('/enps/surveys/active'),
+    respondSurvey: (id: string, data: { score: number; comment?: string }) => request<any>(`/enps/surveys/${id}/respond`, { method: 'POST', body: JSON.stringify(data) }),
+    updateCycle: (id: string, data: any) => request<any>(`/performance/cycles/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    updateGoal: (id: string, data: any) => request<any>(`/performance/goals/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     reviews: (cycleId?: string) => request<any>(`/performance/reviews${cycleId ? `?cycleId=${cycleId}` : ''}`),
     createReview: (data: any) => request<any>('/performance/reviews', { method: 'POST', body: JSON.stringify(data) }),
     submitReview: (id: string, data: any) =>
@@ -386,7 +427,11 @@ export const api = {
   },
   lms: {
     courses: () => request<any>('/lms/courses'),
-    enroll: (courseId: string) => request<any>('/lms/enroll', { method: 'POST', body: JSON.stringify({ courseId }) }),
+    enroll: (courseId: string, employeeId?: string) => request<any>('/lms/enroll', { method: 'POST', body: JSON.stringify(employeeId ? { courseId, employeeId } : { courseId }) }),
+    createCourse: (data: any) => request<any>('/lms/courses', { method: 'POST', body: JSON.stringify(data) }),
+    updateCourse: (id: string, data: any) => request<any>(`/lms/courses/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    myEnrollments: () => request<any[]>('/lms/my-enrollments'),
+    setProgress: (enrollmentId: string, progress: number) => request<any>(`/lms/enrollments/${enrollmentId}/progress`, { method: 'PATCH', body: JSON.stringify({ progress }) }),
   },
   whatsapp: {
     messages: () => request<any>('/whatsapp/messages'),
@@ -453,6 +498,9 @@ export const api = {
   },
   platform: {
     tenants: () => request<any>('/platform/tenants'),
+    setLogo: (tenantId: string, file: File) => putFile<{ logoUrl: string }>(`/platform/tenants/${tenantId}/logo`, file),
+    setCurrency: (tenantId: string, currency: 'PKR' | 'USD', reason: string) => request<any>(`/platform/tenants/${tenantId}/currency`, { method: 'PATCH', body: JSON.stringify({ currency, reason }) }),
+    clearLogo: (tenantId: string) => request<any>(`/platform/tenants/${tenantId}/logo`, { method: 'DELETE' }),
     tenant: (id: string) => request<any>(`/platform/tenants/${id}`),
     createTenant: (data: { companyName: string; subdomain: string; adminEmail: string; adminPassword?: string; planCode?: string }) =>
       request<any>('/platform/tenants', { method: 'POST', body: JSON.stringify(data) }),

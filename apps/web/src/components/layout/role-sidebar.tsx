@@ -1,5 +1,6 @@
 'use client';
 
+import { useBrand } from '@/lib/brand-context';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -34,7 +35,7 @@ const GROUPS: { label: string | null; hrefs: string[] }[] = [
   { label: 'People', hrefs: ['/employees', '/recruitment', '/recruitment/kanban', '/recruitment/preboarding', '/onboarding', '/offboarding'] },
   { label: 'Time', hrefs: ['/leave', '/attendance', '/timesheets'] },
   { label: 'Pay', hrefs: ['/payroll', '/my-pay', '/expenses', '/loans'] },
-  { label: 'Talent', hrefs: ['/performance', '/performance/enps', '/lms'] },
+  { label: 'Talent', hrefs: ['/performance', '/performance/enps', '/surveys', '/lms'] },
   { label: 'Insights', hrefs: ['/reports', '/ai'] },
   { label: 'Company', hrefs: ['/whatsapp', '/settings', '/settings/custom-fields', '/settings/workflows', '/settings/audit', '/billing', '/marketplace', '/extensions'] },
 ];
@@ -55,6 +56,7 @@ function groupNav(navItems: NavItemWithBadge[]) {
 }
 
 export function RoleSidebar({ className, onNavigate }: { className?: string; onNavigate?: () => void }) {
+  const brand = useBrand();
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const navItems: NavItemWithBadge[] = user?.permissions.nav ?? [];
@@ -72,7 +74,7 @@ export function RoleSidebar({ className, onNavigate }: { className?: string; onN
   return (
     <aside className={cn('flex h-dvh w-64 flex-col border-r border-[hsl(var(--border))] bg-[hsl(var(--card))]', className)}>
       <div className="flex h-16 shrink-0 items-center justify-between gap-2 px-5">
-        <Link href={homeHref} onClick={onNavigate} className="rounded-md" aria-label="MatrixHR home">
+        <Link href={homeHref} onClick={onNavigate} className="rounded-md" aria-label={`${brand.name} home`}>
           <Logo markClassName="h-7 w-7" />
         </Link>
         {user && (

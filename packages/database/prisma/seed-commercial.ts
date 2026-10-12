@@ -16,7 +16,7 @@ export const FEATURES: { key: string; name: string }[] = [
   { key: 'api.access', name: 'Public API Access' },
   { key: 'custom_fields.manage', name: 'Custom Fields' },
   { key: 'workflows.manage', name: 'Workflow Automation' },
-  { key: 'ai.ask', name: 'Ask MatrixHR (AI)' },
+  { key: 'ai.ask', name: 'AI assistant' },
   { key: 'sso.saml', name: 'Enterprise SSO' },
   { key: 'marketplace.connect', name: 'Marketplace Integrations' },
   { key: 'extensions.manage', name: 'Extensions' },

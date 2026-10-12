@@ -1,3 +1,4 @@
+import { brandName } from '../common/brand';
 import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHash, randomInt } from 'crypto';
@@ -185,7 +186,7 @@ export class WhatsAppService {
     }
     if (['START', 'YES', 'SUBSCRIBE'].includes(cmd)) {
       await this.setConsent(tenantId, msg.from, 'OPTED_IN', 'WHATSAPP_REPLY');
-      return reply('You are subscribed to MatrixHR notifications. Reply STOP at any time to unsubscribe.');
+      return reply(`You are subscribed to ${brandName()} notifications. Reply STOP at any time to unsubscribe.`);
     }
 
     const sender = await this.findSender(tenantId, msg.from);
@@ -226,7 +227,7 @@ export class WhatsAppService {
       }
     }
 
-    return reply('MatrixHR Commands:\n• BALANCE - View your leave balance\n• APPROVE <code> / REJECT <code> - Answer a leave request sent to you\n• STOP - Unsubscribe from messages');
+    return reply(`${brandName()} Commands:\n• BALANCE - View your leave balance\n• APPROVE <code> / REJECT <code> - Answer a leave request sent to you\n• STOP - Unsubscribe from messages`);
   }
 
   async getMessageLog(tenantId: string) {

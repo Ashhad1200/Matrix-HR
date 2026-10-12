@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { PlatformService } from './platform.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles, CurrentUser } from '../common/decorators';
 import { UserRole } from '@matrixhr/database';
-import { AssignPlanDto, SetSubscriptionStatusDto, CreateOverrideDto, CreateTenantDto, CreatePlanDto } from './dto';
+import { AssignPlanDto, SetSubscriptionStatusDto, CreateOverrideDto, CreateTenantDto, CreatePlanDto, SetTenantCurrencyDto } from './dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { LOGO_MAX_BYTES, logoFromBytes } from './logo';
 
 // Platform operations are cross-tenant by nature (a SUPER_ADMIN manages every
 // tenant's commercial state), so this controller deliberately does NOT use
@@ -62,6 +64,22 @@ export class PlatformController {
     @Param('overrideId') overrideId: string,
   ) {
     return this.platform.deleteOverride(operatorId, tenantId, overrideId);
+  }
+
+  @Patch('tenants/:id/currency')
+  setCurrency(@CurrentUser('id') operatorId: string, @Param('id') tenantId: string, @Body() dto: SetTenantCurrencyDto) {
+    return this.platform.setTenantCurrency(operatorId, tenantId, dto);
+  }
+
+  @Put('tenants/:id/logo')
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: LOGO_MAX_BYTES, files: 1 } }))
+  setLogo(@CurrentUser('id') operatorId: string, @Param('id') tenantId: string, @UploadedFile() file: Express.Multer.File) {
+    return this.platform.setTenantLogo(operatorId, tenantId, logoFromBytes(file?.buffer));
+  }
+
+  @Delete('tenants/:id/logo')
+  clearLogo(@CurrentUser('id') operatorId: string, @Param('id') tenantId: string) {
+    return this.platform.setTenantLogo(operatorId, tenantId, null);
   }
 
   @Get('audit')

@@ -1,3 +1,4 @@
+import { brandName } from '../common/brand';
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { createHash, randomBytes } from 'crypto';
 import * as bcrypt from 'bcryptjs';
@@ -151,8 +152,8 @@ export class InvitesService {
     const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId }, select: { name: true } });
     await this.outbox.enqueue({
       to: inv.email, tenantId, dedupeKey: `invite:${inv.id}:${inv.sentCount}`,
-      subject: `You have been invited to ${tenant?.name ?? 'MatrixHR'} on MatrixHR`,
-      body: `Hi ${firstName},\n\n${tenant?.name ?? 'Your company'} has set up a MatrixHR account for you. Use this link to choose your password and sign in. It works once and expires in 7 days.\n\n${this.link(token)}\n\nIf you were not expecting this, you can ignore this email.\n`,
+      subject: `You have been invited to ${tenant?.name ?? brandName()} on ${brandName()}`,
+      body: `Hi ${firstName},\n\n${tenant?.name ?? 'Your company'} has set up a ${brandName()} account for you. Use this link to choose your password and sign in. It works once and expires in 7 days.\n\n${this.link(token)}\n\nIf you were not expecting this, you can ignore this email.\n`,
     });
   }
 

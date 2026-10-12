@@ -4,7 +4,7 @@ import { Logo } from '@/components/brand/logo';
 export default function NotFoundPage() {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-8 p-6">
-      <Link href="/" aria-label="MatrixHR home" className="rounded-md">
+      <Link href="/" aria-label="Home" className="rounded-md">
         <Logo />
       </Link>
       <div className="w-full max-w-md text-center">

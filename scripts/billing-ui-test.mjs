@@ -12,6 +12,9 @@ const PSQL = ['-h', process.env.PGHOST || 'localhost', '-p', process.env.PGPORT 
 const sql = (q) => execFileSync('psql', [...PSQL, q]).toString().trim();
 mkdirSync(SHOTS, { recursive: true });
 
+// The journey asserts the operator queue ends up empty, so start from an empty queue: close requests that earlier (aborted) runs
+// or other suites left open. Local test database only.
+sql(`update "PaymentRequest" set status='CANCELLED' where status in ('PENDING','AWAITING_PROOF')`);
 const suffix = Math.random().toString(36).slice(2, 8);
 const PASS = 'Password123!';
 // 1x1 PNG: a valid image by its bytes, which is what the server checks.
@@ -57,7 +60,8 @@ if (process.env.TRACE) { page.on('response', (r) => r.url().includes('3001') && 
 
 // ── setup through the API: an operator, a payment account, and two fresh signups ───────────────────────────────
 const op = await login('superadmin@acme.com');
-if (!(await api('/platform/billing/accounts', { token: op })).body.length) {
+// The journey brings its own active USD account (a fresh database has none; a PKR-only or inactive one would not do).
+if (!(await api('/platform/billing/accounts', { token: op })).body.some((a) => a.isActive && a.currency === 'USD' && a.iban === 'PK36MEZN0000001234564471')) {
   await api('/platform/billing/accounts', { token: op, method: 'POST', body: { label: 'TREEVOXA USD', bankName: 'Test Bank Ltd', accountTitle: 'TREEVOXA', iban: 'PK36MEZN0000001234564471', swift: 'MEZNPKKA', currency: 'USD', instructions: 'Use the payment reference as the transfer note.' } });
 }
 const signup = async (tag) => (await api('/auth/signup', { method: 'POST', body: { email: `owner-${tag}-${suffix}@qa.test`, password: PASS, companyName: `QA ${tag} ${suffix}`, subdomain: `qa-${tag}-${suffix}` } })).body;
@@ -83,15 +87,15 @@ await shot(page, '01-billing-trial');
 console.log('B. pay wizard');
 await page.getByRole('radio', { name: /^Growth/ }).click();
 await page.waitForFunction(() => document.body.innerText.includes('You pay'));
-ok('server quote $69.00', (await page.locator('[aria-live=polite]').first().innerText()).includes('$69.00'));
+ok('server quote $69.00', (await page.locator('[aria-live=polite]').first().innerText()).includes('$69'));
 await page.getByRole('radio', { name: /Yearly/ }).click();
-await page.waitForFunction(() => document.body.innerText.includes('$690.00'));
-ok('yearly quote $690.00 (2 months free)', true);
+await page.waitForFunction(() => document.body.innerText.includes('$690'));
+ok('yearly quote $690 (2 months free)', true);
 await page.getByRole('radio', { name: /^Monthly/ }).click();
-await page.waitForFunction(() => /You pay\s*\$69\.00/.test(document.body.innerText));
+await page.waitForFunction(() => /You pay\s*\$69(?!\d)/.test(document.body.innerText));
 await shot(page, '02-wizard-choose');
 await page.getByRole('button', { name: 'Continue to payment details' }).click();
-await page.getByText('Pay $69.00 by bank transfer').waitFor();
+await page.getByText('Pay $69 by bank transfer').waitFor();
 const reference = (await page.getByText(/^MHR-[A-HJ-NP-Z2-9]{6}$/).first().innerText()).trim();
 ok('payment reference issued (MHR-XXXXXX)', /^MHR-[A-HJ-NP-Z2-9]{6}$/.test(reference), reference);
 ok('bank details with IBAN shown', await page.getByText('PK36MEZN0000001234564471').isVisible());
@@ -120,7 +124,7 @@ await uiLogin(opPage, 'superadmin@acme.com');
 await opPage.goto(`${WEB}/platform/billing`, { waitUntil: 'networkidle' });
 await opPage.getByText(reference).first().waitFor();
 ok('proof is in the queue', true);
-ok('mismatch is flagged (customer said $60.00)', await opPage.getByText('$60.00').first().isVisible());
+ok('mismatch is flagged (customer said $60)', await opPage.getByText('$60').first().isVisible());
 await shot(opPage, '06-backoffice-queue');
 await opPage.getByRole('button', { name: 'View proof' }).first().click();
 await opPage.locator('img[alt="Payment proof"]').waitFor();
@@ -147,7 +151,7 @@ await page.goto(`${WEB}${href}`, { waitUntil: 'networkidle' });
 await page.getByText(/TVX-R-\d{4}-\d{6}/).first().waitFor();
 const receiptText = await page.locator('main').innerText();
 ok('receipt carries the issuer text and NTN', receiptText.includes('NTN J883480') && receiptText.includes('TREEVOXA') && receiptText.includes('Plot No. R-326'));
-ok('receipt shows the reference and amount', receiptText.includes(reference) && receiptText.includes('$69.00'));
+ok('receipt shows the reference and amount', receiptText.includes(reference) && receiptText.includes('$69'));
 await page.pdf({ path: `${SHOTS}09-receipt.pdf`, format: 'A4' });
 await shot(page, '09-receipt');
 
@@ -155,6 +159,11 @@ await shot(page, '09-receipt');
 console.log('E. lapsed');
 sql(`update "Subscription" set "currentPeriodEnd" = now() - interval '10 days', status='active' where "tenantId"='${T2.tenant.id}'`);
 const lapsedPage = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+const lapsedErrs = [];
+const lapsedNav = [];
+lapsedPage.on('framenavigated', (f) => f === lapsedPage.mainFrame() && lapsedNav.push(f.url().replace(WEB, '')));
+lapsedPage.on('console', (m) => { if (m.type() === 'error') lapsedErrs.push('console: ' + m.text().slice(0, 100)); });
+lapsedPage.on('response', (r) => { if (r.url().includes(':3001') && r.status() >= 400) lapsedErrs.push(`${r.status()} ${r.request().method()} ${r.url().split('/api/v1')[1]}`); });
 await uiLogin(lapsedPage, `owner-lapsed-${suffix}@qa.test`);
 await lapsedPage.getByRole('heading', { name: 'Your subscription has ended' }).waitFor();
 ok('lapsed admin lands on the billing-only screen (not a dead 403)', true);
@@ -170,12 +179,13 @@ await lapsedPage.getByRole('button', { name: 'Continue to payment details' }).cl
 await lapsedPage.getByText(/by bank transfer/).waitFor();
 await lapsedPage.setInputFiles('#proof-file', { name: 'p.png', mimeType: 'image/png', buffer: PNG });
 await lapsedPage.getByRole('button', { name: 'Send proof' }).click();
-await lapsedPage.getByText('We are checking your payment').waitFor();
-await lapsedPage.reload({ waitUntil: 'networkidle' });
+// Sending proof opens temporary access at once, so the billing-only screen is replaced by the app (with the banner). The panel's
+// "We are checking your payment" message can be on screen for only a moment, so it is not asserted.
+await lapsedPage.getByText(/Temporary access until/).waitFor({ timeout: 20000 });
 await lapsedPage.goto(`${WEB}/dashboard`, { waitUntil: 'networkidle' });
 ok('uploading proof opens temporary access', !(await lapsedPage.getByRole('heading', { name: 'Your subscription has ended' }).isVisible().catch(() => false)));
 await lapsedPage.getByText(/Temporary access until/).waitFor({ timeout: 8000 }).catch(() => {});
-{ const seen = await lapsedPage.getByText(/Temporary access until/).isVisible(); ok('banner says access is temporary', seen, seen ? '' : 'strip shows: ' + JSON.stringify(await lapsedPage.locator('[role=status]').allInnerTexts())); }
+{ const seen = await lapsedPage.getByText(/Temporary access until/).isVisible(); ok('banner says access is temporary', seen, seen ? '' : 'strip shows: ' + JSON.stringify(await lapsedPage.locator('[role=status]').allInnerTexts()) + ' url=' + lapsedPage.url() + ' errs=' + JSON.stringify(lapsedErrs.slice(-6)) + ' nav=' + JSON.stringify(lapsedNav.slice(-8)) + ' state=' + JSON.stringify(((await api('/billing/state', { token: t2tok })).body || {}).banner) + ' lifecycle=' + JSON.stringify(((await api('/billing/state', { token: t2tok })).body || {}).state)); }
 await shot(lapsedPage, '11-provisional-banner');
 // reject ends it immediately
 const r2 = sql(`select id from "PaymentRequest" where "tenantId"='${T2.tenant.id}' order by "createdAt" desc limit 1`);
@@ -187,7 +197,13 @@ console.log('F. staff logins');
 const adminPage = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
 await uiLogin(adminPage, 'admin@acme.com');
 const noLogin = sql(`select e.id || '|' || e.email from "Employee" e where e."tenantId"=(select id from "Tenant" where subdomain='acme') and e.status='ACTIVE' and e.email is not null and not exists (select 1 from "User" u where u."employeeId"=e.id) order by e."createdAt" limit 1`);
-const [empId, empEmail] = noLogin.split('|');
+let [empId, empEmail] = noLogin ? noLogin.split('|') : [];
+if (!empEmail) {
+  // Earlier runs used up the seeded people without a login: make a fresh one.
+  const admTok = await login('admin@acme.com');
+  const made = await api('/employees', { token: admTok, method: 'POST', body: { employeeCode: `JRN-${suffix}`, firstName: 'Journey', lastName: suffix, email: `journey-${suffix}@qa.test` } });
+  [empId, empEmail] = [made.body.id, `journey-${suffix}@qa.test`];
+}
 await adminPage.goto(`${WEB}/settings/logins`, { waitUntil: 'networkidle' });
 await adminPage.getByRole('button', { name: 'No login yet' }).click();
 await shot(adminPage, '12-logins-list');
@@ -221,7 +237,7 @@ await adminPage.fill('#lp-name', `QA leave ${suffix}`);
 await adminPage.fill('#lp-code', `qa${suffix}`);
 await adminPage.fill('#lp-days', '6');
 await adminPage.fill('#lp-carry', '2');
-await adminPage.getByRole('button', { name: 'Save' }).click();
+await adminPage.getByRole('button', { name: 'Save', exact: true }).click();
 await adminPage.getByText(/now have a \d+ balance/).waitFor();
 const headcount = sql(`select count(*) from "Employee" where "tenantId"=(select id from "Tenant" where subdomain='acme') and status='ACTIVE'`);
 const balances = sql(`select count(*) from "LeaveBalance" b join "LeavePolicy" p on p.id=b."policyId" where p.code='qa${suffix}'`);

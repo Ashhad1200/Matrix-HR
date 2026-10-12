@@ -7,12 +7,13 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { CurrentUser, Roles, TenantId } from '../common/decorators';
 import { BillingService } from './billing.service';
+import { BillingEnabledGuard } from '../common/guards/billing-enabled.guard';
 import { CreateRequestDto, UploadProofDto } from './dto';
 import { PROOF_MAX_BYTES } from './billing.config';
 
 /** Tenant-facing billing. Only company admins and HR managers may use it; every lookup is scoped to the caller's tenant. */
 @Controller('billing')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(BillingEnabledGuard, JwtAuthGuard, RolesGuard)
 @Roles(UserRole.COMPANY_ADMIN, UserRole.HR_MANAGER)
 export class BillingController {
   constructor(private billing: BillingService) {}

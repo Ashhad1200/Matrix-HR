@@ -1,6 +1,6 @@
 {
  "admin:/dashboard": {
-  "title": "Good afternoon, zz-admin-a-mv5ghxzf",
+  "title": "Good evening, Company",
   "buttons": [],
   "inputs": 0,
   "tableRows": 0
@@ -21,11 +21,19 @@
    "Add Employee"
   ],
   "inputs": 1,
-  "tableRows": 12
+  "tableRows": 13
  },
  "admin:/recruitment": {
   "title": "Recruitment",
-  "buttons": [],
+  "buttons": [
+   "Applicant board",
+   "Add candidate",
+   "New job",
+   "Edit",
+   "Close job",
+   "Edit",
+   "Close job"
+  ],
   "inputs": 0,
   "tableRows": 0
  },
@@ -43,7 +51,11 @@
  },
  "admin:/onboarding": {
   "title": "Onboarding",
-  "buttons": [],
+  "buttons": [
+   "Start onboarding",
+   "New template",
+   "Complete Next Task"
+  ],
   "inputs": 0,
   "tableRows": 0
  },
@@ -105,17 +117,13 @@
    "Save draft",
    "View",
    "View",
-   "Cancel",
-   "View",
-   "View",
-   "View",
    "View",
    "View",
    "Add category",
    "Deactivate"
   ],
   "inputs": 11,
-  "tableRows": 8
+  "tableRows": 5
  },
  "admin:/loans": {
   "title": "Loans & advances",
@@ -133,20 +141,72 @@
   "title": "Performance",
   "buttons": [
    "Reviews & 360s",
-   "eNPS"
+   "eNPS",
+   "New cycle",
+   "Edit",
+   "Edit",
+   "Edit",
+   "New goal",
+   "Update progress",
+   "Edit",
+   "Update progress",
+   "Edit"
   ],
-  "inputs": 0,
+  "inputs": 2,
   "tableRows": 0
  },
  "admin:/performance/enps": {
   "title": "Employee Net Promoter Score",
-  "buttons": [],
+  "buttons": [
+   "New survey",
+   "Close",
+   "Edit",
+   "Delete",
+   "Close",
+   "Edit",
+   "Delete"
+  ],
   "inputs": 0,
   "tableRows": 0
  },
+ "admin:/surveys": {
+  "title": "Surveys",
+  "buttons": [
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "5",
+   "6",
+   "7",
+   "8",
+   "9",
+   "10",
+   "Submit answer",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "5",
+   "6",
+   "7",
+   "8",
+   "9",
+   "10",
+   "Submit answer"
+  ],
+  "inputs": 2,
+  "tableRows": 0
+ },
  "admin:/lms": {
-  "title": "Learning Management",
-  "buttons": [],
+  "title": "Learning",
+  "buttons": [
+   "New course",
+   "Enrol",
+   "Edit course"
+  ],
   "inputs": 0,
   "tableRows": 0
  },
@@ -154,7 +214,7 @@
   "title": "Reports & Analytics",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 49
+  "tableRows": 53
  },
  "admin:/ai": {
   "title": "Ask MatrixHR",
@@ -182,42 +242,17 @@
   "inputs": 0,
   "tableRows": 0
  },
- "admin:/settings/custom-fields": {
-  "title": "Custom Fields",
-  "buttons": [
-   "Add Field"
-  ],
-  "inputs": 0,
-  "tableRows": 1
- },
- "admin:/settings/workflows": {
-  "title": "Workflows",
-  "buttons": [
-   "Create Workflow"
-  ],
-  "inputs": 0,
-  "tableRows": 0
- },
  "admin:/settings/audit": {
   "title": "Audit Log",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 45
+  "tableRows": 50
  },
  "admin:/billing": {
   "title": "Billing",
-  "buttons": [
-   "Plan",
-   "AI credits",
-   "Monthly",
-   "Yearly (2 months free)",
-   "Starter$25.00 a monthUp to 25 employees2 admin users150 AI credits a month",
-   "Growth$69.00 a monthUp to 100 employees5 admin users500 AI credits a month",
-   "Business$149.00 a monthUp to 300 employees, then $0.50 each15 admin users1,500 AI credits a month",
-   "Continue to payment details"
-  ],
+  "buttons": [],
   "inputs": 0,
-  "tableRows": 1
+  "tableRows": 0
  },
  "admin:/marketplace": {
   "title": "Marketplace",
@@ -277,10 +312,36 @@
    "Stop offering",
    "Edit",
    "Stop offering",
+   "Save weekend",
    "Add"
   ],
-  "inputs": 3,
+  "inputs": 10,
   "tableRows": 4
+ },
+ "admin:/settings/structure": {
+  "title": "Departments & designations",
+  "buttons": [
+   "Import",
+   "New department",
+   "Edit",
+   "Delete",
+   "Edit",
+   "Delete",
+   "Import",
+   "New designation",
+   "Edit",
+   "Delete"
+  ],
+  "inputs": 0,
+  "tableRows": 3
+ },
+ "admin:/settings/compensation": {
+  "title": "Pay components",
+  "buttons": [
+   "Add component"
+  ],
+  "inputs": 1,
+  "tableRows": 0
  },
  "admin:/settings/logins": {
   "title": "Staff logins",
@@ -297,7 +358,7 @@
    "Invite"
   ],
   "inputs": 0,
-  "tableRows": 12
+  "tableRows": 13
  },
  "admin:/settings/api-keys": {
   "title": "API Keys",
@@ -360,7 +421,7 @@
   "tableRows": 0
  },
  "hr:/dashboard": {
-  "title": "Good afternoon, Hira",
+  "title": "Good evening, Hira",
   "buttons": [],
   "inputs": 0,
   "tableRows": 0
@@ -381,11 +442,19 @@
    "Add Employee"
   ],
   "inputs": 1,
-  "tableRows": 12
+  "tableRows": 13
  },
  "hr:/recruitment": {
   "title": "Recruitment",
-  "buttons": [],
+  "buttons": [
+   "Applicant board",
+   "Add candidate",
+   "New job",
+   "Edit",
+   "Close job",
+   "Edit",
+   "Close job"
+  ],
   "inputs": 0,
   "tableRows": 0
  },
@@ -403,7 +472,11 @@
  },
  "hr:/onboarding": {
   "title": "Onboarding",
-  "buttons": [],
+  "buttons": [
+   "Start onboarding",
+   "New template",
+   "Complete Next Task"
+  ],
   "inputs": 0,
   "tableRows": 0
  },
@@ -489,20 +562,72 @@
   "title": "Performance",
   "buttons": [
    "Reviews & 360s",
-   "eNPS"
+   "eNPS",
+   "New cycle",
+   "Edit",
+   "Edit",
+   "Edit",
+   "New goal",
+   "Update progress",
+   "Edit",
+   "Update progress",
+   "Edit"
   ],
-  "inputs": 0,
+  "inputs": 2,
   "tableRows": 0
  },
  "hr:/performance/enps": {
   "title": "Employee Net Promoter Score",
-  "buttons": [],
+  "buttons": [
+   "New survey",
+   "Close",
+   "Edit",
+   "Delete",
+   "Close",
+   "Edit",
+   "Delete"
+  ],
   "inputs": 0,
   "tableRows": 0
  },
+ "hr:/surveys": {
+  "title": "Surveys",
+  "buttons": [
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "5",
+   "6",
+   "7",
+   "8",
+   "9",
+   "10",
+   "Submit answer",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "5",
+   "6",
+   "7",
+   "8",
+   "9",
+   "10",
+   "Submit answer"
+  ],
+  "inputs": 2,
+  "tableRows": 0
+ },
  "hr:/lms": {
-  "title": "Learning Management",
-  "buttons": [],
+  "title": "Learning",
+  "buttons": [
+   "New course",
+   "Enrol",
+   "Edit course"
+  ],
   "inputs": 0,
   "tableRows": 0
  },
@@ -510,7 +635,7 @@
   "title": "Reports & Analytics",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 49
+  "tableRows": 53
  },
  "hr:/ai": {
   "title": "Ask MatrixHR",
@@ -538,42 +663,17 @@
   "inputs": 0,
   "tableRows": 0
  },
- "hr:/settings/custom-fields": {
-  "title": "Custom Fields",
-  "buttons": [
-   "Add Field"
-  ],
-  "inputs": 0,
-  "tableRows": 1
- },
- "hr:/settings/workflows": {
-  "title": "Workflows",
-  "buttons": [
-   "Create Workflow"
-  ],
-  "inputs": 0,
-  "tableRows": 0
- },
  "hr:/settings/audit": {
   "title": "Audit Log",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 46
+  "tableRows": 50
  },
  "hr:/billing": {
   "title": "Billing",
-  "buttons": [
-   "Plan",
-   "AI credits",
-   "Monthly",
-   "Yearly (2 months free)",
-   "Starter$25.00 a monthUp to 25 employees2 admin users150 AI credits a month",
-   "Growth$69.00 a monthUp to 100 employees5 admin users500 AI credits a month",
-   "Business$149.00 a monthUp to 300 employees, then $0.50 each15 admin users1,500 AI credits a month",
-   "Continue to payment details"
-  ],
+  "buttons": [],
   "inputs": 0,
-  "tableRows": 1
+  "tableRows": 0
  },
  "hr:/marketplace": {
   "title": "Marketplace",
@@ -614,8 +714,33 @@
   "inputs": 3,
   "tableRows": 0
  },
+ "hr:/settings/structure": {
+  "title": "Departments & designations",
+  "buttons": [
+   "Import",
+   "New department",
+   "Edit",
+   "Delete",
+   "Edit",
+   "Delete",
+   "Import",
+   "New designation",
+   "Edit",
+   "Delete"
+  ],
+  "inputs": 0,
+  "tableRows": 3
+ },
+ "hr:/settings/compensation": {
+  "title": "Pay components",
+  "buttons": [
+   "Add component"
+  ],
+  "inputs": 1,
+  "tableRows": 0
+ },
  "manager:/dashboard": {
-  "title": "Good afternoon, Mansoor",
+  "title": "Good evening, Mansoor",
   "buttons": [],
   "inputs": 0,
   "tableRows": 0
@@ -716,16 +841,52 @@
   "title": "Performance",
   "buttons": [
    "Reviews & 360s",
-   "eNPS"
+   "eNPS",
+   "New goal",
+   "Update progress",
+   "Edit",
+   "Update progress",
+   "Edit"
   ],
-  "inputs": 0,
+  "inputs": 2,
+  "tableRows": 0
+ },
+ "manager:/surveys": {
+  "title": "Surveys",
+  "buttons": [
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "5",
+   "6",
+   "7",
+   "8",
+   "9",
+   "10",
+   "Submit answer",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "5",
+   "6",
+   "7",
+   "8",
+   "9",
+   "10",
+   "Submit answer"
+  ],
+  "inputs": 2,
   "tableRows": 0
  },
  "manager:/reports": {
   "title": "Reports & Analytics",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 49
+  "tableRows": 53
  },
  "manager:/ai": {
   "title": "Ask MatrixHR",
@@ -751,7 +912,7 @@
   "tableRows": 0
  },
  "employee:/dashboard": {
-  "title": "Good afternoon, Esha",
+  "title": "Good evening, Esha",
   "buttons": [],
   "inputs": 0,
   "tableRows": 0
@@ -831,15 +992,41 @@
   "title": "Performance",
   "buttons": [
    "Reviews & 360s",
-   "eNPS"
+   "eNPS",
+   "New goal",
+   "Update progress",
+   "Edit",
+   "Update progress",
+   "Edit"
   ],
-  "inputs": 0,
+  "inputs": 2,
+  "tableRows": 0
+ },
+ "employee:/surveys": {
+  "title": "Surveys",
+  "buttons": [
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "5",
+   "6",
+   "7",
+   "8",
+   "9",
+   "10",
+   "Submit answer"
+  ],
+  "inputs": 1,
   "tableRows": 0
  },
  "employee:/lms": {
-  "title": "Learning Management",
-  "buttons": [],
-  "inputs": 0,
+  "title": "Learning",
+  "buttons": [
+   "Save progress"
+  ],
+  "inputs": 1,
   "tableRows": 0
  },
  "employee:/ai": {
@@ -871,7 +1058,7 @@
    "New tenant"
   ],
   "inputs": 0,
-  "tableRows": 119
+  "tableRows": 13
  },
  "superadmin:/platform/billing": {
   "title": "Billing",
@@ -897,7 +1084,7 @@
   "title": "Audit log",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 100
+  "tableRows": 18
  },
  "superadmin:/platform/ai": {
   "title": "AI assistant",
@@ -909,7 +1096,7 @@
    "Grant"
   ],
   "inputs": 12,
-  "tableRows": 115
+  "tableRows": 9
  },
  "superadmin:/security": {
   "title": "Security",

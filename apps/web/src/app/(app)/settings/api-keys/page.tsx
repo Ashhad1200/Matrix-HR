@@ -1,5 +1,6 @@
 'use client';
 
+import { useBrand } from '@/lib/brand-context';
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,6 +19,7 @@ export default function ApiKeysPage() {
 }
 
 function ApiKeysPageInner() {
+  const brand = useBrand();
   const [keys, setKeys] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -58,7 +60,7 @@ function ApiKeysPageInner() {
         title="API Keys"
         backHref="/settings"
         backLabel="Settings"
-        description="Authenticate external apps against the MatrixHR REST API"
+        description={`Authenticate external apps against the ${brand.name} REST API`}
         actions={
           <Button onClick={() => { setCreated(null); setModalOpen(true); }}>
             <Plus className="mr-2 h-4 w-4" /> Generate Key

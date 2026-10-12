@@ -1,3 +1,5 @@
+import { brandName } from '../common/brand';
+import { formatMoney } from '@matrixhr/shared';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -122,7 +124,7 @@ export class BillingAdminService {
     });
 
     if (!result.already) await this.emailTenantAdmins(result.tenantId, `approved:${id}`, `Payment received: ${result.req.reference}`,
-      `Thank you. We have approved your payment ${result.req.reference}.\n${result.purpose === 'plan' ? `Your plan now runs until ${result.periodEndAt!.toISOString().slice(0, 10)}.` : `${result.creditsGranted!.toLocaleString('en-US')} AI credits were added.`}\nReceipt: ${result.receiptNumber}\nYou can print it from Billing in MatrixHR.\n`);
+      `Thank you. We have approved your payment ${result.req.reference}.\n${result.purpose === 'plan' ? `Your plan now runs until ${result.periodEndAt!.toISOString().slice(0, 10)}.` : `${result.creditsGranted!.toLocaleString('en-US')} AI credits were added.`}\nReceipt: ${result.receiptNumber}\nAmount received: ${formatMoney((result.req.approvedAmount ?? result.req.expectedAmount).toString(), result.req.currency)}\nYou can print it from Billing in ${brandName()}.\n`);
     return this.rows({ id }, 1).then((r) => r[0]);
   }
 
@@ -142,7 +144,7 @@ export class BillingAdminService {
       await tx.auditLog.create({ data: { tenantId: locked[0].tenantId, action: 'PAYMENT_REJECTED', entity: 'PaymentRequest', entityId: id, after: { reason: dto.reason } as any } });
       return locked[0].tenantId;
     });
-    await this.emailTenantAdmins(tenantId, `rejected:${id}`, 'We could not verify your payment', `We could not approve your payment request.\nReason: ${dto.reason.trim()}\nPlease start a new request from Billing in MatrixHR, or reply to this email.\n`);
+    await this.emailTenantAdmins(tenantId, `rejected:${id}`, 'We could not verify your payment', `We could not approve your payment request.\nReason: ${dto.reason.trim()}\nPlease start a new request from Billing in ${brandName()}, or reply to this email.\n`);
     return this.rows({ id }, 1).then((r) => r[0]);
   }
 
@@ -186,6 +188,7 @@ export class BillingAdminService {
       versions: p.versions.map((v) => ({
         id: v.id, version: v.version, isCurrent: v.isCurrent, offeredToNew: v.offeredToNew, currency: v.currency,
         priceMonthly: v.priceMonthly?.toString() ?? null, priceYearly: v.priceYearly?.toString() ?? null,
+        priceMonthlyPkr: v.priceMonthlyPkr?.toString() ?? null, priceYearlyPkr: v.priceYearlyPkr?.toString() ?? null, overagePerEmployeePkr: v.overagePerEmployeePkr?.toString() ?? null,
         legacyPricePkrMonthly: v.pricePkrMonthly?.toString() ?? null,
         aiCreditsMonthly: v.aiCreditsMonthly, maxEmployees: v.maxEmployees, maxAdminUsers: v.maxAdminUsers, overagePerEmployee: v.overagePerEmployee?.toString() ?? null,
         subscribers: count.get(v.id) ?? 0,
@@ -201,7 +204,7 @@ export class BillingAdminService {
     if (dto.priceYearly != null && dto.priceMonthly == null && !v.priceMonthly) throw new BadRequestException('Set a monthly price too');
     const { isActive, ...ver } = dto;
     const data = { ...ver, ...(ver.currency ? { currency: ver.currency.toUpperCase() } : {}) };
-    const before = { currency: v.currency, priceMonthly: v.priceMonthly?.toString(), priceYearly: v.priceYearly?.toString(), aiCreditsMonthly: v.aiCreditsMonthly, maxEmployees: v.maxEmployees, maxAdminUsers: v.maxAdminUsers, overagePerEmployee: v.overagePerEmployee?.toString(), offeredToNew: v.offeredToNew, isActive: plan.isActive };
+    const before = { currency: v.currency, priceMonthlyPkr: v.priceMonthlyPkr?.toString(), priceYearlyPkr: v.priceYearlyPkr?.toString(), overagePerEmployeePkr: v.overagePerEmployeePkr?.toString(), priceMonthly: v.priceMonthly?.toString(), priceYearly: v.priceYearly?.toString(), aiCreditsMonthly: v.aiCreditsMonthly, maxEmployees: v.maxEmployees, maxAdminUsers: v.maxAdminUsers, overagePerEmployee: v.overagePerEmployee?.toString(), offeredToNew: v.offeredToNew, isActive: plan.isActive };
     await this.prisma.$transaction([
       this.prisma.planVersion.update({ where: { id: v.id }, data }),
       ...(isActive != null ? [this.prisma.plan.update({ where: { id: plan.id }, data: { isActive } })] : []),
@@ -210,13 +213,13 @@ export class BillingAdminService {
     return (await this.plans()).find((p) => p.code === code);
   }
 
-  async packs() { return (await this.prisma.creditPack.findMany({ orderBy: { price: 'asc' } })).map((p) => ({ ...p, price: p.price.toString() })); }
+  async packs() { return (await this.prisma.creditPack.findMany({ orderBy: { price: 'asc' } })).map((p) => ({ ...p, price: p.price.toString(), pricePkr: p.pricePkr?.toString() ?? null })); }
   async editPack(op: string, code: string, dto: PackEditDto) {
     const before = await this.prisma.creditPack.findUnique({ where: { code } });
     if (!before) throw new NotFoundException('Pack not found');
     const p = await this.prisma.creditPack.update({ where: { code }, data: dto });
     await this.platformAudit(op, 'EDIT_CREDIT_PACK', 'CreditPack', p.id, { code, before: { name: before.name, credits: before.credits, price: before.price.toString(), isActive: before.isActive }, after: dto });
-    return { ...p, price: p.price.toString() };
+    return { ...p, price: p.price.toString(), pricePkr: p.pricePkr?.toString() ?? null };
   }
 
   // ── Manual renewal clock, credit grants, usage ───────────────────────────────────────────────────

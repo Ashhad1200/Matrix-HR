@@ -6,7 +6,7 @@ import { Roles, TenantId } from '../common/decorators';
 import { UserRole } from '@matrixhr/database';
 import { viewerOf } from '../common/data-scope';
 import { CurrentUser } from '../common/decorators';
-import { CreateCourseDto, EnrollDto, UpdateProgressDto } from './dto';
+import { CreateCourseDto, EnrollDto, UpdateProgressDto, UpdateCourseDto } from './dto';
 
 @Controller('lms')
 @UseGuards(JwtAuthGuard)
@@ -16,6 +16,19 @@ export class LmsController {
   @Get('courses')
   getCourses(@TenantId() tenantId: string) {
     return this.lms.getCourses(tenantId);
+  }
+
+  /** The signed-in person's own enrolments, with progress. */
+  @Get('my-enrollments')
+  myEnrollments(@TenantId() tenantId: string, @CurrentUser('employeeId') employeeId: string | null) {
+    return this.lms.myEnrollments(tenantId, employeeId);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.COMPANY_ADMIN, UserRole.HR_MANAGER)
+  @Patch('courses/:id')
+  updateCourse(@TenantId() tenantId: string, @Param('id') id: string, @Body() body: UpdateCourseDto) {
+    return this.lms.updateCourse(tenantId, id, body);
   }
 
   @UseGuards(RolesGuard)

@@ -4,6 +4,16 @@ import { Type } from 'class-transformer';
 const SUBSCRIPTION_STATUSES = ['trialing', 'active', 'past_due', 'suspended', 'cancelled', 'expired'];
 const STRONG_PASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
 
+export class SetTenantCurrencyDto {
+  @IsIn(['PKR', 'USD'])
+  currency!: 'PKR' | 'USD';
+
+  @IsString()
+  @MinLength(5)
+  @MaxLength(300)
+  reason!: string;
+}
+
 export class CreateTenantDto {
   @IsString()
   @MinLength(2)
@@ -27,6 +37,11 @@ export class CreateTenantDto {
   @MaxLength(72)
   @Matches(STRONG_PASSWORD, { message: 'Password must contain uppercase, lowercase, and number' })
   adminPassword?: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^[A-Za-z]{2}$/, { message: 'country must be a 2-letter country code' })
+  country?: string;
 
   @IsOptional()
   @IsString()
@@ -104,3 +119,4 @@ export class CreateOverrideDto {
   @IsDateString()
   effectiveTo?: string;
 }
+

@@ -119,18 +119,18 @@ test.describe('Leave setup + staff logins (UI, HR)', () => {
     const code = `zz${Date.now().toString(36)}`;
     await page.getByRole('button', { name: 'New leave type' }).click();
     // required fields: an empty submit is blocked by the browser
-    await page.getByRole('button', { name: 'Save' }).click();
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'New leave type' })).toBeVisible();
     await page.getByLabel('Name').fill(`${tag} UI leave`);
     await page.getByLabel('Short code').fill(code);
     await page.getByLabel('Days a year').fill('9');
-    await page.getByRole('button', { name: 'Save' }).click();
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByText(/Created\. \d+ (person|people) now have/)).toBeVisible();
     await expect(page.getByRole('row', { name: new RegExp(`${tag} UI leave`) })).toBeVisible();
     // edit: change the days, reload, still there
     await page.getByRole('row', { name: new RegExp(`${tag} UI leave`) }).getByRole('button', { name: 'Edit' }).click();
     await page.getByLabel('Days a year').fill('11');
-    await page.getByRole('button', { name: 'Save' }).click();
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByText(/Saved/)).toBeVisible();
     await page.reload({ waitUntil: 'networkidle' });
     const row = (await api('hr', '/leave/policies/all')).body.find((p: any) => p.code === code);
@@ -139,7 +139,7 @@ test.describe('Leave setup + staff logins (UI, HR)', () => {
     // invalid code is refused by the form
     await page.getByRole('button', { name: 'New leave type' }).click();
     await page.getByLabel('Name').fill('Bad code'); await page.getByLabel('Short code').fill('BAD CODE'); await page.getByLabel('Days a year').fill('1');
-    await page.getByRole('button', { name: 'Save' }).click();
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'New leave type' })).toBeVisible();
     await page.getByRole('button', { name: 'Cancel' }).click();
     // holiday add -> listed -> delete -> gone

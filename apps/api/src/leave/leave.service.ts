@@ -1,4 +1,5 @@
-import { Inject, Injectable, NotFoundException, BadRequestException, forwardRef, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, BadRequestException, ForbiddenException, forwardRef, OnModuleInit } from '@nestjs/common';
+import { Prisma } from '@matrixhr/database';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { WhatsAppService } from '../whatsapp/whatsapp.service';
@@ -6,7 +7,8 @@ import { WorkflowEngineService, WorkflowActor } from '../workflows/workflow-engi
 import { Viewer, scopedEmployeeIds, employeeIdFilter, assertInTenant } from '../common/data-scope';
 import { AuditService } from '../audit/audit.service';
 import { ensureBalances } from '../common/leave-balances';
-import { CreateLeaveRequestDto, CreateLeavePolicyDto, UpdateLeavePolicyDto, CreateHolidayDto, UpdateHolidayDto } from './dto';
+import { countWorkingDays, weekendDaysOf } from '../common/working-days';
+import { UpdateLeaveRequestDto, CreateLeaveRequestDto, CreateLeavePolicyDto, UpdateLeavePolicyDto, CreateHolidayDto, UpdateHolidayDto } from './dto';
 import { ConflictException } from '@nestjs/common';
 
 @Injectable()
@@ -24,6 +26,24 @@ export class LeaveService implements OnModuleInit {
       onApproved: (instance) => this.applyDecision(instance, 'APPROVED'),
       onRejected: (instance, reason) => this.applyDecision(instance, 'REJECTED', reason),
     });
+  }
+
+  /** Preview for the apply form: how many days a request would take, and the company's weekend. */
+  async previewDays(tenantId: string, startDate: string, endDate: string) {
+    const start = new Date(startDate); const end = new Date(endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) throw new BadRequestException('Dates must look like 2026-03-01');
+    return { days: await countWorkingDays(this.prisma, tenantId, start, end), weekendDays: await weekendDaysOf(this.prisma, tenantId) };
+  }
+
+  async getWeekend(tenantId: string) { return { weekendDays: await weekendDaysOf(this.prisma, tenantId) }; }
+
+  async setWeekend(tenantId: string, userId: string, days: number[]) {
+    const unique = Array.from(new Set(days));
+    if (unique.some((d) => !Number.isInteger(d) || d < 0 || d > 6)) throw new BadRequestException('Weekend days are numbers 0 (Sunday) to 6 (Saturday)');
+    if (unique.length > 6) throw new BadRequestException('At least one day of the week must be a working day');
+    await this.prisma.tenant.update({ where: { id: tenantId }, data: { weekendDays: unique } });
+    await this.audit.log({ tenantId, userId, action: 'LEAVE_WEEKEND_SET', entity: 'Tenant', entityId: tenantId, after: { weekendDays: unique } });
+    return { weekendDays: unique };
   }
 
   async getPolicies(tenantId: string) {
@@ -70,7 +90,10 @@ export class LeaveService implements OnModuleInit {
     const end = new Date(dto.endDate);
     if (end < start) throw new BadRequestException('End date must be after start date');
 
-    const days = dto.isHalfDay ? 0.5 : Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    // Working days only: weekends (set per company, default Saturday + Sunday) and public holidays are not deducted.
+    const workingDays = await countWorkingDays(this.prisma, tenantId, start, end);
+    if (workingDays === 0) throw new BadRequestException('Those dates are all weekends or public holidays, so there is nothing to take off your balance');
+    const days = dto.isHalfDay ? 0.5 : workingDays;
 
     // Make sure the balance exists first, otherwise the limit below would silently not apply.
     const year = start.getFullYear();
@@ -143,6 +166,69 @@ export class LeaveService implements OnModuleInit {
     }
 
     return request;
+  }
+
+  /** A request the caller may change: their own (HR/admin may cancel anyone's); only while PENDING. */
+  private async ownPending(tenantId: string, id: string, viewer: Viewer, allowHr: boolean) {
+    const r = await this.prisma.leaveRequest.findFirst({ where: { id, tenantId } });
+    if (!r) throw new NotFoundException('Leave request not found');
+    const own = !!viewer.employeeId && r.employeeId === viewer.employeeId;
+    if (!own && !(allowHr && ['HR_MANAGER', 'COMPANY_ADMIN'].includes(viewer.role))) throw new ForbiddenException('You can only change your own leave requests');
+    if (r.status !== 'PENDING') throw new BadRequestException(`This request is already ${r.status.toLowerCase()} and can no longer be changed`);
+    return r;
+  }
+
+  private async balanceFor(db: Prisma.TransactionClient | PrismaService, employeeId: string, policyId: string, year: number) {
+    return db.leaveBalance.findFirst({ where: { employeeId, policyId, year } });
+  }
+
+  /** Cancel a pending request: the days go back to the balance and the approval chain is closed. */
+  async cancelRequest(tenantId: string, viewer: Viewer, id: string) {
+    const r = await this.ownPending(tenantId, id, viewer, true);
+    await this.prisma.$transaction(async (tx) => {
+      // Claim the status flip first so two simultaneous cancels (or a cancel racing an approval) release the days once.
+      const flipped = await tx.leaveRequest.updateMany({ where: { id, tenantId, status: 'PENDING' }, data: { status: 'CANCELLED' } });
+      if (flipped.count !== 1) throw new BadRequestException('This request was just decided and can no longer be cancelled');
+      const bal = await this.balanceFor(tx, r.employeeId, r.policyId, r.startDate.getFullYear());
+      if (bal) await tx.leaveBalance.update({ where: { id: bal.id }, data: { pending: { decrement: Number(r.days) } } });
+      await tx.workflowInstance.updateMany({ where: { tenantId, entityType: 'LeaveRequest', entityId: id, status: 'pending' }, data: { status: 'cancelled', completedAt: new Date() } });
+    });
+    await this.audit.log({ tenantId, userId: viewer.userId, action: 'CANCEL', entity: 'LeaveRequest', entityId: id });
+    return this.prisma.leaveRequest.findUnique({ where: { id }, include: { policy: true } });
+  }
+
+  /** Edit a pending request (owner only). The balance is re-checked against the new dates; the approval chain is unchanged. */
+  async updateRequest(tenantId: string, viewer: Viewer, id: string, dto: UpdateLeaveRequestDto) {
+    const r = await this.ownPending(tenantId, id, viewer, false);
+    const policyId = dto.policyId ?? r.policyId;
+    await assertInTenant(this.prisma, tenantId, [{ model: 'leavePolicy', id: policyId, label: 'leave type' }]);
+    const start = dto.startDate ? new Date(dto.startDate) : r.startDate;
+    const end = dto.endDate ? new Date(dto.endDate) : r.endDate;
+    const isHalfDay = dto.isHalfDay ?? r.isHalfDay;
+    const workingDays = await countWorkingDays(this.prisma, tenantId, start, end);
+    if (workingDays === 0) throw new BadRequestException('Those dates are all weekends or public holidays, so there is nothing to take off your balance');
+    const days = isHalfDay ? 0.5 : workingDays;
+    const oldYear = r.startDate.getFullYear(); const newYear = start.getFullYear();
+    return this.prisma.$transaction(async (tx) => {
+      const now = new Date().getFullYear();
+      if (newYear >= now - 1 && newYear <= now + 1) await ensureBalances(tx as any, tenantId, newYear, [r.employeeId], [policyId]);
+      const oldBal = await this.balanceFor(tx, r.employeeId, r.policyId, oldYear);
+      const newBal = await this.balanceFor(tx, r.employeeId, policyId, newYear);
+      if (newBal) {
+        // available for the new request = what is free once THIS request's own pending days are released
+        const releasing = oldBal && oldBal.id === newBal.id ? Number(r.days) : 0;
+        const available = Number(newBal.entitled) + Number(newBal.carried) - Number(newBal.used) - Number(newBal.pending) + releasing;
+        if (days > available) throw new BadRequestException(`Insufficient leave balance. Available: ${available} days`);
+      }
+      if (oldBal) await tx.leaveBalance.update({ where: { id: oldBal.id }, data: { pending: { decrement: Number(r.days) } } });
+      if (newBal) await tx.leaveBalance.update({ where: { id: newBal.id }, data: { pending: { increment: days } } });
+      const moved = await tx.leaveRequest.updateMany({
+        where: { id, tenantId, status: 'PENDING' },
+        data: { policyId, startDate: start, endDate: end, isHalfDay, halfDayPeriod: isHalfDay ? (dto.halfDayPeriod ?? r.halfDayPeriod) : null, days, ...(dto.reason !== undefined ? { reason: dto.reason } : {}) },
+      });
+      if (moved.count !== 1) throw new BadRequestException('This request was just decided and can no longer be changed');
+      return tx.leaveRequest.findUnique({ where: { id }, include: { policy: true } });
+    });
   }
 
   private async instanceFor(tenantId: string, requestId: string) {

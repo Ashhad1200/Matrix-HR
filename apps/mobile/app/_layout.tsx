@@ -1,3 +1,4 @@
+import { brand } from '../lib/brand';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
@@ -6,7 +7,7 @@ export default function RootLayout() {
     <>
       <StatusBar style="auto" />
       <Stack>
-        <Stack.Screen name="index" options={{ title: 'MatrixHR' }} />
+        <Stack.Screen name="index" options={{ title: brand.name }} />
         <Stack.Screen name="login" options={{ title: 'Sign In' }} />
         <Stack.Screen name="clock-in" options={{ title: 'Clock In/Out' }} />
         <Stack.Screen name="leave" options={{ title: 'Leave' }} />

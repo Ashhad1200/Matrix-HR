@@ -1,11 +1,15 @@
 import { ImageResponse } from 'next/og';
+import { getBrand } from '@/lib/brand-server';
 
-export const alt = 'MatrixHR: everything HR does ends up on a payslip';
+export const dynamic = 'force-dynamic';
+
+export const alt = 'Everything HR does ends up on a payslip';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
 // Share card in the page's own language: the headline beside a payslip fragment.
 export default function OpengraphImage() {
+  const brand = getBrand();
   const row = (label: string, value: string, debit = false) => (
     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #d3ddd7', fontSize: 24 }}>
       <span>{label}</span>
@@ -23,7 +27,7 @@ export default function OpengraphImage() {
               <div style={{ width: 15, height: 15, borderRadius: 4, background: 'rgba(22,101,72,0.3)' }} />
               <div style={{ width: 15, height: 15, borderRadius: 4, background: 'rgba(22,101,72,0.6)' }} />
             </div>
-            MatrixHR
+            {brand.name}
           </div>
           <div style={{ fontSize: 78, fontWeight: 800, lineHeight: 0.98, letterSpacing: -3 }}>Everything HR does ends up on a payslip.</div>
           <div style={{ fontSize: 26, color: '#4a5e57' }}>HR and payroll for growing companies in Pakistan</div>

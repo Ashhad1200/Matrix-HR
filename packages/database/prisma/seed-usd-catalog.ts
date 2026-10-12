@@ -37,7 +37,7 @@ export async function seedUsdCatalog(prisma: PrismaClient, log: (m: string) => v
       prisma.planVersion.create({
         data: {
           planId: plan.id, version: next, isCurrent: true, offeredToNew: true, currency: 'USD',
-          priceMonthly: c.monthly, priceYearly: c.yearly, aiCreditsMonthly: c.credits, maxEmployees: c.maxEmployees, maxAdminUsers: c.maxAdminUsers,
+          priceMonthly: c.monthly, priceYearly: c.yearly, priceMonthlyPkr: c.monthlyPkr, priceYearlyPkr: c.yearlyPkr, overagePerEmployeePkr: c.overagePerEmployeePkr ?? undefined, aiCreditsMonthly: c.credits, maxEmployees: c.maxEmployees, maxAdminUsers: c.maxAdminUsers,
           overagePerEmployee: c.overage ?? undefined,
           entitlements: { create: [...new Set(c.features)].map((featureKey) => ({ featureKey, enabled: true })) },
         },

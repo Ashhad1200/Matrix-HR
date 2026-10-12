@@ -1,3 +1,4 @@
+import { brand } from '../lib/brand';
 import { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -26,7 +27,7 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.logo}>M</Text>
-      <Text style={styles.title}>Sign in to MatrixHR</Text>
+      <Text style={styles.title}>Sign in to {brand.name}</Text>
 
       <TextInput
         style={styles.input}

@@ -1,3 +1,4 @@
+import { brandName } from '../common/brand';
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { createHmac } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -91,7 +92,7 @@ export class WebhookDeliveryService implements OnModuleInit, OnModuleDestroy {
       data: {
         webhookId,
         event: 'webhook.test',
-        payload: { message: 'This is a test delivery from MatrixHR.' },
+        payload: { message: `This is a test delivery from ${brandName()}.` },
         status: 'pending',
         nextAttemptAt: new Date(),
       },

@@ -6,7 +6,7 @@ import { Roles, TenantId } from '../common/decorators';
 import { UserRole } from '@matrixhr/database';
 import { viewerOf } from '../common/data-scope';
 import { CurrentUser } from '../common/decorators';
-import { StartOnboardingDto } from './dto';
+import { StartOnboardingDto, CreateTemplateDto, UpdateTemplateDto } from './dto';
 
 @Controller('onboarding')
 @UseGuards(JwtAuthGuard)
@@ -16,6 +16,20 @@ export class OnboardingController {
   @Get('templates')
   getTemplates(@TenantId() tenantId: string) {
     return this.onboarding.getTemplates(tenantId);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN)
+  @Post('templates')
+  createTemplate(@TenantId() tenantId: string, @Body() body: CreateTemplateDto) {
+    return this.onboarding.createTemplate(tenantId, body);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN)
+  @Patch('templates/:id')
+  updateTemplate(@TenantId() tenantId: string, @Param('id') id: string, @Body() body: UpdateTemplateDto) {
+    return this.onboarding.updateTemplate(tenantId, id, body);
   }
 
   @Get('progress')

@@ -6,10 +6,11 @@ import { BillingAdminService } from './billing-admin.service';
 import { BillingController } from './billing.controller';
 import { BillingAdminController } from './billing-admin.controller';
 import { BillingWorker } from './billing.worker';
+import { PricingController } from './pricing.controller';
 
 @Module({
   imports: [AuditModule, CreditsModule],
-  controllers: [BillingController, BillingAdminController],
+  controllers: [BillingController, BillingAdminController, PricingController],
   providers: [BillingService, BillingAdminService, BillingWorker],
   exports: [BillingService, BillingAdminService],
 })

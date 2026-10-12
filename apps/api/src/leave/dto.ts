@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsBoolean, IsEnum, IsInt, IsNumber, IsDateString, Matches, Length, Max, Min } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsEnum, IsInt, IsNumber, IsDateString, IsArray, ArrayMaxSize, Matches, Length, Max, MaxLength, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateLeaveRequestDto {
@@ -62,4 +62,18 @@ export class UpdateHolidayDto {
   @IsOptional() @IsString() @Length(2, 100) name?: string;
   @IsOptional() @IsDateString() date?: string;
   @IsOptional() @IsBoolean() isOptional?: boolean;
+}
+
+/** Editing a pending request: every field optional, only what is sent changes. */
+export class UpdateLeaveRequestDto {
+  @IsOptional() @IsString() policyId?: string;
+  @IsOptional() @IsDateString() startDate?: string;
+  @IsOptional() @IsDateString() endDate?: string;
+  @IsOptional() @IsBoolean() isHalfDay?: boolean;
+  @IsOptional() @IsEnum(['morning', 'afternoon']) halfDayPeriod?: 'morning' | 'afternoon';
+  @IsOptional() @IsString() @MaxLength(500) reason?: string;
+}
+
+export class WeekendDto {
+  @IsArray() @ArrayMaxSize(7) @IsInt({ each: true }) @Min(0, { each: true }) @Max(6, { each: true }) days: number[];
 }

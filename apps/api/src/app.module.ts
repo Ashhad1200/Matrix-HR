@@ -19,6 +19,7 @@ import { AuditModule } from './audit/audit.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { MarketplaceModule } from './marketplace/marketplace.module';
 import { AiModule } from './ai/ai.module';
+import { BrandModule } from './brand/brand.module';
 import { ReportsModule } from './reports/reports.module';
 import { DevModule } from './dev/dev.module';
 import { ApprovalsModule } from './approvals/approvals.module';
@@ -58,6 +59,7 @@ import { CreditsModule } from './credits/credits.service';
     // Default 100 req/min per client; THROTTLE_LIMIT exists so test suites can exceed it locally.
     ThrottlerModule.forRoot([{ ttl: 60000, limit: Number(process.env.THROTTLE_LIMIT) || 100 }]),
     PrismaModule,
+    BrandModule,
     CredentialCipherModule,
     MailModule,
     HealthModule,

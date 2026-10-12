@@ -19,6 +19,38 @@ function Field({ id, label, hint, children }: { id: string; label: string; hint?
   return <div><label htmlFor={id} className="mb-1.5 block text-sm font-medium">{label}</label>{children}{hint && <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">{hint}</p>}</div>;
 }
 
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+/** Which days of the week are the company's weekend. Leave counts working days only, so these are never deducted. */
+function WeekendCard() {
+  const [days, setDays] = useState<number[] | null>(null);
+  const [msg, setMsg] = useState('');
+  const [err, setErr] = useState('');
+  useEffect(() => { api.leave.weekend().then((r) => setDays(r.weekendDays)).catch((e) => setErr(e.message)); }, []);
+  async function save() {
+    setErr(''); setMsg('');
+    try { const r = await api.leave.setWeekend(days ?? []); setDays(r.weekendDays); setMsg('Weekend saved. New leave requests skip these days.'); } catch (e: any) { setErr(e.message); }
+  }
+  return (
+    <Card>
+      <CardHeader><CardTitle>Weekend</CardTitle></CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-sm text-[hsl(var(--muted-foreground))]">Leave counts working days only. Days ticked here, and public holidays below, are not taken off anyone&rsquo;s balance.</p>
+        <div className="flex flex-wrap gap-3" role="group" aria-label="Weekend days">
+          {DAYS.map((name, i) => (
+            <label key={name} className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={!!days?.includes(i)} disabled={!days} onChange={(e) => setDays((d) => (e.target.checked ? [...(d ?? []), i] : (d ?? []).filter((x) => x !== i)))} /> {name}
+            </label>
+          ))}
+        </div>
+        {err && <p role="alert" className="text-sm text-rose-700">{err}</p>}
+        {msg && <p role="status" className="text-sm text-emerald-700">{msg}</p>}
+        <Button onClick={save} disabled={!days}>Save weekend</Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function LeaveSetupPage() {
   const year = new Date().getFullYear();
   const [policies, setPolicies] = useState<any[] | null>(null);
@@ -105,6 +137,8 @@ export default function LeaveSetupPage() {
           )}
         </CardContent>
       </Card>
+
+      <WeekendCard />
 
       <Card>
         <CardHeader><CardTitle>Holidays in {year}</CardTitle></CardHeader>

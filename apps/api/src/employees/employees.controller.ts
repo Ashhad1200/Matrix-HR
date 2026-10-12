@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Patch, Body, Param, Query, UseGuards,
+  Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards,
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -8,7 +8,7 @@ import { Roles, CurrentUser, TenantId } from '../common/decorators';
 import { UserRole } from '@matrixhr/database';
 import { viewerOf } from '../common/data-scope';
 import { CreateEmployeeDto, UpdateEmployeeDto, SelfUpdateEmployeeDto, ImportCsvDto } from './dto';
-import { CreateDepartmentDto, CreateDesignationDto, AddDocumentDto } from './structure-dto';
+import { CreateDepartmentDto, CreateDesignationDto, AddDocumentDto, UpdateDepartmentDto, UpdateDesignationDto, ImportDepartmentsDto, ImportDesignationsDto } from './structure-dto';
 
 @Controller('employees')
 @UseGuards(JwtAuthGuard)
@@ -45,8 +45,29 @@ export class EmployeesController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.COMPANY_ADMIN, UserRole.HR_MANAGER)
   @Post('departments')
-  createDepartment(@TenantId() tenantId: string, @Body() body: CreateDepartmentDto) {
-    return this.employees.createDepartment(tenantId, body);
+  createDepartment(@TenantId() tenantId: string, @CurrentUser('id') userId: string, @Body() body: CreateDepartmentDto) {
+    return this.employees.createDepartment(tenantId, body, userId);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.COMPANY_ADMIN, UserRole.HR_MANAGER)
+  @Post('departments/import')
+  importDepartments(@TenantId() tenantId: string, @CurrentUser('id') userId: string, @Body() body: ImportDepartmentsDto) {
+    return this.employees.importDepartments(tenantId, body.rows, userId);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.COMPANY_ADMIN, UserRole.HR_MANAGER)
+  @Patch('departments/:id')
+  updateDepartment(@TenantId() tenantId: string, @CurrentUser('id') userId: string, @Param('id') id: string, @Body() body: UpdateDepartmentDto) {
+    return this.employees.updateDepartment(tenantId, id, body, userId);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.COMPANY_ADMIN, UserRole.HR_MANAGER)
+  @Delete('departments/:id')
+  deleteDepartment(@TenantId() tenantId: string, @CurrentUser('id') userId: string, @Param('id') id: string) {
+    return this.employees.deleteDepartment(tenantId, id, userId);
   }
 
   @Get('team')
@@ -85,9 +106,31 @@ export class EmployeesController {
   @Post('designations')
   createDesignation(
     @TenantId() tenantId: string,
+    @CurrentUser('id') userId: string,
     @Body() body: CreateDesignationDto,
   ) {
-    return this.employees.createDesignation(tenantId, body);
+    return this.employees.createDesignation(tenantId, body, userId);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.COMPANY_ADMIN, UserRole.HR_MANAGER)
+  @Post('designations/import')
+  importDesignations(@TenantId() tenantId: string, @CurrentUser('id') userId: string, @Body() body: ImportDesignationsDto) {
+    return this.employees.importDesignations(tenantId, body.rows, userId);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.COMPANY_ADMIN, UserRole.HR_MANAGER)
+  @Patch('designations/:id')
+  updateDesignation(@TenantId() tenantId: string, @CurrentUser('id') userId: string, @Param('id') id: string, @Body() body: UpdateDesignationDto) {
+    return this.employees.updateDesignation(tenantId, id, body, userId);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.COMPANY_ADMIN, UserRole.HR_MANAGER)
+  @Delete('designations/:id')
+  deleteDesignation(@TenantId() tenantId: string, @CurrentUser('id') userId: string, @Param('id') id: string) {
+    return this.employees.deleteDesignation(tenantId, id, userId);
   }
 
   @UseGuards(RolesGuard)

@@ -5,12 +5,13 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { CurrentUser, Roles } from '../common/decorators';
 import { BillingAdminService } from './billing-admin.service';
+import { BillingEnabledGuard } from '../common/guards/billing-enabled.guard';
 import { AccountDto, ApproveDto, GrantCreditsDto, PackEditDto, PeriodDto, PlanEditDto, RejectDto, SettingsDto } from './dto';
 import { sendProof } from './billing.controller';
 
 /** Operator billing backoffice. Cross-tenant by nature, so it is SUPER_ADMIN only and deliberately not tenant-scoped. */
 @Controller('platform/billing')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(BillingEnabledGuard, JwtAuthGuard, RolesGuard)
 @Roles(UserRole.SUPER_ADMIN)
 export class BillingAdminController {
   constructor(private admin: BillingAdminService) {}

@@ -1,3 +1,5 @@
+import { brand, brandName } from '../common/brand';
+import { currencyForCountry, pickCurrency } from '@matrixhr/shared';
 import {
   Injectable,
   UnauthorizedException,
@@ -8,6 +10,9 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
+import { ForbiddenException } from '@nestjs/common';
+import { singleCompanyMode } from '../common/deployment';
+import { ensureBalances } from '../common/leave-balances';
 import { createHash, randomBytes, randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
@@ -36,7 +41,7 @@ export class AuthService {
 
   // Shared by public signup and platform-operator-initiated org creation, so a tenant gets the same
   // starting defaults (leave policies, a shift) regardless of who created it.
-  async provisionTenant(dto: { companyName: string; subdomain: string; email: string; passwordHash: string }) {
+  async provisionTenant(dto: { companyName: string; subdomain: string; email: string; passwordHash: string; firstName?: string; lastName?: string; country?: string }) {
     const existing = await this.prisma.tenant.findUnique({
       where: { subdomain: dto.subdomain },
     });
@@ -51,6 +56,8 @@ export class AuthService {
       data: {
         name: dto.companyName,
         subdomain: dto.subdomain,
+        country: dto.country ? dto.country.toUpperCase() : null,
+        billingCurrency: pickCurrency(currencyForCountry(dto.country), brand().currencies),
         users: {
           create: {
             email: dto.email,
@@ -78,14 +85,24 @@ export class AuthService {
       },
     });
 
+    // The owner is a person too: give them an employee profile so Time Clock, Timesheets, My profile, leave and 1-on-1s
+    // work for them instead of returning "no employee profile linked".
+    const owner = await this.prisma.employee.create({
+      data: { tenantId: tenant.id, employeeCode: 'E-001', firstName: dto.firstName?.trim() || 'Company', lastName: dto.lastName?.trim() || 'Owner', email: dto.email, status: 'ACTIVE' },
+    });
+    await this.prisma.user.update({ where: { id: tenant.users[0].id }, data: { employeeId: owner.id } });
+    tenant.users[0].employeeId = owner.id;
+    await ensureBalances(this.prisma, tenant.id, new Date().getFullYear(), [owner.id]);
+
     return tenant;
   }
 
   async signUp(dto: SignUpDto) {
+    if (singleCompanyMode() && (await this.prisma.tenant.count()) > 0) throw new ForbiddenException('Sign-up is closed on this installation. Ask your administrator for an invitation.');
     const passwordHash = await bcrypt.hash(dto.password, 12);
     const tenant = await this.provisionTenant({ ...dto, passwordHash });
-    // New public signups only. Operator-created tenants and every pre-existing tenant get no clock.
-    await this.billing.startTrial(tenant.id).catch((e) => this.logger.error(`trial start failed for ${tenant.id}: ${e.message}`));
+    // New public signups only. Operator-created tenants and every pre-existing tenant get no clock; a single-company install has no trial.
+    if (!singleCompanyMode()) await this.billing.startTrial(tenant.id).catch((e) => this.logger.error(`trial start failed for ${tenant.id}: ${e.message}`));
     const user = tenant.users[0];
     const tokens = await this.generateTokens(user.id, tenant.id, user.role, user.tokenVersion);
     // Without a session row the refresh token issued here could never be redeemed.
@@ -160,6 +177,7 @@ export class AuthService {
       await this.registerFailure(user);
       throw new UnauthorizedException('Invalid credentials');
     }
+    if (user.tenant.status === 'SUSPENDED') throw new ForbiddenException({ message: 'Account suspended. Please contact support.', code: 'ACCOUNT_SUSPENDED' });
     if (user.status !== 'ACTIVE' || user.tenant.status !== 'ACTIVE') {
       throw new UnauthorizedException('This account is disabled');
     }
@@ -253,7 +271,7 @@ export class AuthService {
     const base = (process.env.WEB_URL || 'http://localhost:3000').replace(/\/$/, '');
     await this.mail.send({
       to: user.email,
-      subject: 'Reset your MatrixHR password',
+      subject: `Reset your ${brandName()} password`,
       text: `Use this link to choose a new password. It works once and expires in 30 minutes.\n\n${base}/reset-password?token=${token}\n\nIf you didn't ask for this, you can ignore this email.`,
     });
     await this.audit.log({ tenantId: user.tenantId, userId: user.id, action: 'PASSWORD_RESET_REQUESTED', entity: 'User', entityId: user.id });
@@ -310,7 +328,7 @@ export class AuthService {
     const secret = generateSecret();
     // Stored encrypted, and inactive until the user proves their app works via mfaEnable.
     await this.prisma.user.update({ where: { id: userId }, data: { twoFaSecret: this.cipher.encrypt(secret) } });
-    return { secret, otpauthUrl: otpauthUrl(secret, user.email) };
+    return { secret, otpauthUrl: otpauthUrl(secret, user.email, brandName()) };
   }
 
   async mfaEnable(userId: string, code: string) {
@@ -366,6 +384,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { id: sub }, include: { tenant: true } });
     if (!user || !user.twoFaEnabled) throw new UnauthorizedException('Your sign-in expired — start again');
     if (user.lockedUntil && user.lockedUntil > new Date()) throw new UnauthorizedException('Account locked. Try again later.');
+    if (user.tenant.status === 'SUSPENDED') throw new ForbiddenException({ message: 'Account suspended. Please contact support.', code: 'ACCOUNT_SUSPENDED' });
     if (user.status !== 'ACTIVE' || user.tenant.status !== 'ACTIVE') throw new UnauthorizedException('This account is disabled');
 
     // A 6-digit code is guessable, so wrong codes count toward the same lockout as wrong passwords.
@@ -411,8 +430,10 @@ export class AuthService {
       where: { tenantId: user.tenantId, userId: user.id, read: false },
     });
 
+    const single = singleCompanyMode();
     const permissions = getPermissionsForRole(user.role);
-    const nav = permissions.nav.map((item) =>
+    const HIDDEN_WHEN_SINGLE = ['/billing', '/platform', '/platform/billing', '/platform/plans', '/platform/ai'];
+    const nav = permissions.nav.filter((i) => !(single && HIDDEN_WHEN_SINGLE.includes(i.href))).map((item) =>
       item.badge === 'pendingApprovals' && pendingApprovals > 0
         ? { ...item, badgeCount: pendingApprovals }
         : item,
@@ -422,7 +443,7 @@ export class AuthService {
       user.role === 'SUPER_ADMIN' ? null : await this.entitlements.resolve(user.tenantId);
     // Everyone in a tenant learns whether it is blocked (a lapsed employee needs a clear message); only roles that can
     // act on it get the banner details.
-    const billing = user.role === 'SUPER_ADMIN' ? null : await this.billing.state(user.tenantId);
+    const billing = user.role === 'SUPER_ADMIN' || single ? null : await this.billing.state(user.tenantId);
     const billingForRole = billing && (user.role === 'COMPANY_ADMIN' || user.role === 'HR_MANAGER') ? billing : billing ? { blocked: billing.blocked, state: billing.state, banner: null } : null;
 
     // Credential material (password hash, 2FA secret/recovery codes, reset/verify tokens, lockout
@@ -439,6 +460,8 @@ export class AuthService {
       badges: { pendingApprovals, unreadNotifications },
       entitlements,
       billing: billingForRole,
+      deployment: { singleCompany: single },
+      brand: (({ whiteLabel, name, logoUrl, faviconUrl, primaryColor, supportEmail, websiteUrl }) => ({ whiteLabel, name, logoUrl, faviconUrl, primaryColor, supportEmail, websiteUrl }))(brand()),
     };
   }
 

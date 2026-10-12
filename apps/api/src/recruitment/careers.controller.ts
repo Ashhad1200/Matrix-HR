@@ -1,3 +1,4 @@
+import { brandName } from '../common/brand';
 import { Controller, Get, Header, NotFoundException, Param, Query } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -50,7 +51,7 @@ export class CareersController {
 
     return `<?xml version="1.0" encoding="utf-8"?>
 <source>
-  <publisher>${company.name} via MatrixHR${board ? ` (${board})` : ''}</publisher>
+  <publisher>${company.name} via ${brandName()}${board ? ` (${board})` : ''}</publisher>
   <publisherurl>${webUrl}</publisherurl>
   <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
 ${items}

@@ -13,6 +13,21 @@ export class LmsService {
     });
   }
 
+  async myEnrollments(tenantId: string, employeeId: string | null) {
+    if (!employeeId) return [];
+    return this.prisma.courseEnrollment.findMany({
+      where: { employeeId, course: { tenantId } },
+      include: { course: { select: { id: true, title: true, isMandatory: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async updateCourse(tenantId: string, id: string, data: { title?: string; description?: string; isMandatory?: boolean; status?: 'PUBLISHED' | 'ARCHIVED' }) {
+    const c = await this.prisma.course.findFirst({ where: { id, tenantId } });
+    if (!c) throw new NotFoundException('Course not found');
+    return this.prisma.course.update({ where: { id }, data: { ...(data.title !== undefined ? { title: data.title } : {}), ...(data.description !== undefined ? { description: data.description } : {}), ...(data.isMandatory !== undefined ? { isMandatory: data.isMandatory } : {}), ...(data.status ? { status: data.status } : {}) } });
+  }
+
   async createCourse(tenantId: string, data: { title: string; description?: string; isMandatory?: boolean }) {
     return this.prisma.course.create({
       data: { tenantId, title: data.title, description: data.description, isMandatory: data.isMandatory ?? false, status: 'PUBLISHED' },

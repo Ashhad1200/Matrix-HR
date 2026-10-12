@@ -331,21 +331,121 @@ export class EmployeesService {
     });
   }
 
-  async createDepartment(tenantId: string, data: { name: string; parentId?: string }) {
+  private async assertNameFree(model: 'department' | 'designation', tenantId: string, name: string, exceptId?: string) {
+    const clash = await (this.prisma as any)[model].findFirst({ where: { tenantId, name: { equals: name.trim(), mode: 'insensitive' }, ...(exceptId ? { id: { not: exceptId } } : {}) }, select: { id: true } });
+    if (clash) throw new ConflictException(`A ${model} named "${name.trim()}" already exists`);
+  }
+
+  async createDepartment(tenantId: string, data: { name: string; parentId?: string }, userId?: string) {
     await assertInTenant(this.prisma, tenantId, [{ model: 'department', id: data.parentId, label: 'parent department' }]);
-    return this.prisma.department.create({ data: { tenantId, name: data.name, parentId: data.parentId } });
+    await this.assertNameFree('department', tenantId, data.name);
+    const d = await this.prisma.department.create({ data: { tenantId, name: data.name.trim(), parentId: data.parentId } });
+    await this.audit.log({ tenantId, userId, action: 'CREATE', entity: 'Department', entityId: d.id, after: { name: d.name, parentId: d.parentId } });
+    return d;
+  }
+
+  /** Rename or move a department. A department cannot become its own descendant. */
+  async updateDepartment(tenantId: string, id: string, data: { name?: string; parentId?: string | null }, userId?: string) {
+    const d = await this.prisma.department.findFirst({ where: { id, tenantId } });
+    if (!d) throw new NotFoundException('Department not found');
+    if (data.parentId) {
+      await assertInTenant(this.prisma, tenantId, [{ model: 'department', id: data.parentId, label: 'parent department' }]);
+      for (let cur: string | null = data.parentId, hops = 0; cur && hops < 50; hops++) {
+        if (cur === id) throw new BadRequestException('A department cannot sit under itself or one of its own sub-departments');
+        cur = (await this.prisma.department.findUnique({ where: { id: cur }, select: { parentId: true } }))?.parentId ?? null;
+      }
+    }
+    if (data.name !== undefined) await this.assertNameFree('department', tenantId, data.name, id);
+    const u = await this.prisma.department.update({ where: { id }, data: { ...(data.name !== undefined ? { name: data.name.trim() } : {}), ...(data.parentId !== undefined ? { parentId: data.parentId } : {}) } });
+    await this.audit.log({ tenantId, userId, action: 'UPDATE', entity: 'Department', entityId: id, before: { name: d.name, parentId: d.parentId }, after: { name: u.name, parentId: u.parentId } });
+    return u;
+  }
+
+  /** Refused while anything still points at it: people, sub-departments or job titles. */
+  async deleteDepartment(tenantId: string, id: string, userId?: string) {
+    const d = await this.prisma.department.findFirst({ where: { id, tenantId }, include: { _count: { select: { employees: true, children: true, designations: true } } } });
+    if (!d) throw new NotFoundException('Department not found');
+    const { employees, children, designations } = d._count;
+    if (employees || children || designations) {
+      const parts = [employees && `${employees} employee${employees === 1 ? '' : 's'}`, children && `${children} sub-department${children === 1 ? '' : 's'}`, designations && `${designations} job title${designations === 1 ? '' : 's'}`].filter(Boolean);
+      throw new ConflictException(`"${d.name}" is still in use by ${parts.join(', ')}. Move or remove them first.`);
+    }
+    await this.prisma.department.delete({ where: { id } });
+    await this.audit.log({ tenantId, userId, action: 'DELETE', entity: 'Department', entityId: id, before: { name: d.name } });
+    return { deleted: true };
+  }
+
+  /** Bulk create from a pasted list; existing names are skipped, never duplicated. Parents may appear earlier in the same list. */
+  async importDepartments(tenantId: string, rows: { name: string; parent?: string }[], userId?: string) {
+    const existing = new Map((await this.prisma.department.findMany({ where: { tenantId }, select: { id: true, name: true } })).map((d) => [d.name.toLowerCase(), d.id]));
+    const created: string[] = []; const skipped: string[] = []; const errors: string[] = [];
+    for (const [i, r] of rows.entries()) {
+      const name = r.name.trim(); const key = name.toLowerCase();
+      if (existing.has(key)) { skipped.push(name); continue; }
+      let parentId: string | undefined;
+      if (r.parent?.trim()) {
+        parentId = existing.get(r.parent.trim().toLowerCase());
+        if (!parentId) { errors.push(`Row ${i + 1} (${name}): parent "${r.parent.trim()}" does not exist`); continue; }
+      }
+      const d = await this.prisma.department.create({ data: { tenantId, name, parentId } });
+      existing.set(key, d.id); created.push(name);
+    }
+    await this.audit.log({ tenantId, userId, action: 'IMPORT', entity: 'Department', after: { created: created.length, skipped: skipped.length, errors: errors.length } });
+    return { created: created.length, skipped: skipped.length, errors };
   }
 
   async getDesignations(tenantId: string) {
     return this.prisma.designation.findMany({
       where: { tenantId },
+      include: { _count: { select: { employees: true } } },
       orderBy: { name: 'asc' },
     });
   }
 
-  async createDesignation(tenantId: string, data: { name: string; grade?: string; departmentId?: string }) {
+  async createDesignation(tenantId: string, data: { name: string; grade?: string; departmentId?: string }, userId?: string) {
     await assertInTenant(this.prisma, tenantId, [{ model: 'department', id: data.departmentId }]);
-    return this.prisma.designation.create({ data: { tenantId, name: data.name, grade: data.grade, departmentId: data.departmentId } });
+    await this.assertNameFree('designation', tenantId, data.name);
+    const d = await this.prisma.designation.create({ data: { tenantId, name: data.name.trim(), grade: data.grade, departmentId: data.departmentId } });
+    await this.audit.log({ tenantId, userId, action: 'CREATE', entity: 'Designation', entityId: d.id, after: { name: d.name, grade: d.grade, departmentId: d.departmentId } });
+    return d;
+  }
+
+  async updateDesignation(tenantId: string, id: string, data: { name?: string; grade?: string | null; departmentId?: string | null }, userId?: string) {
+    const d = await this.prisma.designation.findFirst({ where: { id, tenantId } });
+    if (!d) throw new NotFoundException('Job title not found');
+    await assertInTenant(this.prisma, tenantId, [{ model: 'department', id: data.departmentId ?? undefined }]);
+    if (data.name !== undefined) await this.assertNameFree('designation', tenantId, data.name, id);
+    const u = await this.prisma.designation.update({ where: { id }, data: { ...(data.name !== undefined ? { name: data.name.trim() } : {}), ...(data.grade !== undefined ? { grade: data.grade } : {}), ...(data.departmentId !== undefined ? { departmentId: data.departmentId } : {}) } });
+    await this.audit.log({ tenantId, userId, action: 'UPDATE', entity: 'Designation', entityId: id, before: { name: d.name, grade: d.grade, departmentId: d.departmentId }, after: { name: u.name, grade: u.grade, departmentId: u.departmentId } });
+    return u;
+  }
+
+  async deleteDesignation(tenantId: string, id: string, userId?: string) {
+    const d = await this.prisma.designation.findFirst({ where: { id, tenantId }, include: { _count: { select: { employees: true } } } });
+    if (!d) throw new NotFoundException('Job title not found');
+    if (d._count.employees) throw new ConflictException(`"${d.name}" is still held by ${d._count.employees} employee${d._count.employees === 1 ? '' : 's'}. Change their job title first.`);
+    await this.prisma.designation.delete({ where: { id } });
+    await this.audit.log({ tenantId, userId, action: 'DELETE', entity: 'Designation', entityId: id, before: { name: d.name } });
+    return { deleted: true };
+  }
+
+  async importDesignations(tenantId: string, rows: { name: string; grade?: string; department?: string }[], userId?: string) {
+    const have = new Set((await this.prisma.designation.findMany({ where: { tenantId }, select: { name: true } })).map((d) => d.name.toLowerCase()));
+    const depts = new Map((await this.prisma.department.findMany({ where: { tenantId }, select: { id: true, name: true } })).map((d) => [d.name.toLowerCase(), d.id]));
+    const created: string[] = []; const skipped: string[] = []; const errors: string[] = [];
+    for (const [i, r] of rows.entries()) {
+      const name = r.name.trim();
+      if (have.has(name.toLowerCase())) { skipped.push(name); continue; }
+      let departmentId: string | undefined;
+      if (r.department?.trim()) {
+        departmentId = depts.get(r.department.trim().toLowerCase());
+        if (!departmentId) { errors.push(`Row ${i + 1} (${name}): department "${r.department.trim()}" does not exist`); continue; }
+      }
+      await this.prisma.designation.create({ data: { tenantId, name, grade: r.grade?.trim() || undefined, departmentId } });
+      have.add(name.toLowerCase()); created.push(name);
+    }
+    await this.audit.log({ tenantId, userId, action: 'IMPORT', entity: 'Designation', after: { created: created.length, skipped: skipped.length, errors: errors.length } });
+    return { created: created.length, skipped: skipped.length, errors };
   }
 
   async addDocument(tenantId: string, employeeId: string, data: {

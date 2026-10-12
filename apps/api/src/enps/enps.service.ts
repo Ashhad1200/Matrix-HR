@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEnpsSurveyDto, UpdateEnpsSurveyDto, EnpsRespondDto } from './dto';
 
@@ -114,21 +114,32 @@ export class EnpsService {
     return this.prisma.enpsSurvey.delete({ where: { id } });
   }
 
-  /** The survey must belong to the responder's own company; a survey id from another company reads as not found. */
-  async respond(tenantId: string, surveyId: string, dto: EnpsRespondDto) {
+  async activeFor(tenantId: string, employeeId: string | null) {
+    const surveys = await this.prisma.enpsSurvey.findMany({
+      where: { tenantId, status: 'active', OR: [{ closesAt: null }, { closesAt: { gt: new Date() } }] },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, title: true, question: true, closesAt: true },
+    });
+    const done = employeeId ? await this.prisma.enpsParticipation.findMany({ where: { employeeId, surveyId: { in: surveys.map((x) => x.id) } }, select: { surveyId: true } }) : [];
+    const answered = new Set(done.map((d) => d.surveyId));
+    return surveys.map((x) => ({ ...x, answered: answered.has(x.id) }));
+  }
+
+  /**
+   * One answer per employee per survey. WHO answered is stored separately from WHAT they answered (EnpsParticipation has
+   * no score), so results stay anonymous. The participation row is claimed first with ON CONFLICT DO NOTHING, in the same
+   * transaction as the answer, so two simultaneous submits cannot both count.
+   */
+  async respond(tenantId: string, employeeId: string | null, surveyId: string, dto: EnpsRespondDto) {
     const survey = await this.prisma.enpsSurvey.findFirst({ where: { id: surveyId, tenantId } });
     if (!survey) throw new NotFoundException('Survey not found');
     if (survey.status !== 'active') throw new BadRequestException('Survey is not accepting responses');
-    if (survey.closesAt && survey.closesAt < new Date()) {
-      throw new BadRequestException('Survey has closed');
-    }
-
-    return this.prisma.enpsResponse.create({
-      data: {
-        surveyId,
-        score: dto.score,
-        comment: dto.comment,
-      },
+    if (survey.closesAt && survey.closesAt < new Date()) throw new BadRequestException('Survey has closed');
+    if (!employeeId) throw new ForbiddenException('Your login is not linked to an employee profile, so it cannot answer surveys');
+    return this.prisma.$transaction(async (tx) => {
+      const claimed = await tx.$executeRaw`INSERT INTO "EnpsParticipation" ("surveyId","employeeId") VALUES (${surveyId}, ${employeeId}) ON CONFLICT DO NOTHING`;
+      if (claimed !== 1) throw new ConflictException('You have already answered this survey');
+      return tx.enpsResponse.create({ data: { surveyId, score: dto.score, comment: dto.comment } });
     });
   }
 }
