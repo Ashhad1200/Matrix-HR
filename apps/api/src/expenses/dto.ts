@@ -1,10 +1,9 @@
 import { Type } from 'class-transformer';
 import {
-  ArrayMaxSize, ArrayMinSize, IsBoolean, IsDateString, IsIn, IsNumber, IsOptional, IsString, Max, MaxLength, Min, ValidateNested,
-} from 'class-validator';
+  ArrayMaxSize, ArrayMinSize, IsBoolean, IsDateString, IsIn, IsNumber, IsOptional, IsString, Max, MaxLength, Min, ValidateNested,, MinLength } from 'class-validator';
 
 export class CreateCategoryDto {
-  @IsString() @MaxLength(80) name: string;
+  @IsString() @MinLength(1) @MaxLength(80) name: string;
   @IsOptional() @IsNumber() @Min(0) maxAmountPerItem?: number;
   @IsOptional() @IsBoolean() requiresReceipt?: boolean;
 }
@@ -26,7 +25,7 @@ export class ExpenseItemDto {
 }
 
 export class CreateClaimDto {
-  @IsString() @MaxLength(200) title: string;
+  @IsString() @MinLength(1) @MaxLength(200) title: string;
   @IsOptional() @IsString() @MaxLength(2000) description?: string;
   @ValidateNested({ each: true }) @Type(() => ExpenseItemDto) @ArrayMinSize(1) @ArrayMaxSize(50)
   items: ExpenseItemDto[];

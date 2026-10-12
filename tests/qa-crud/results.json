@@ -1,0 +1,771 @@
+{
+  "config": {
+    "argv": [
+      "/opt/node22/bin/node",
+      "/home/user/Matrix-HR/node_modules/.pnpm/@playwright+test@1.63.0/node_modules/@playwright/test/cli.js",
+      "test",
+      "--config=tests/qa-crud/playwright.config.ts",
+      "specs/02"
+    ],
+    "configFile": "/home/user/Matrix-HR/tests/qa-crud/playwright.config.ts",
+    "rootDir": "/home/user/Matrix-HR/tests/qa-crud/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": "/home/user/Matrix-HR/tests/qa-crud/global-setup.ts",
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/user/Matrix-HR/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/home/user/Matrix-HR/tests/qa-crud/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "/home/user/Matrix-HR/tests/qa-crud/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "02-time.spec.ts",
+      "file": "02-time.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Leave policy + holiday CRUD",
+          "file": "02-time.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "policy: create / read / update / deactivate persists; validation",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 164,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-12T14:07:09.632Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f28b404263190aaa647c-16ce6b21344d126badcd",
+              "file": "02-time.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "policy: new policy gives every active employee a balance",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 21,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-12T14:07:09.843Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f28b404263190aaa647c-fe040660364deb4c8dd4",
+              "file": "02-time.spec.ts",
+              "line": 24,
+              "column": 7
+            },
+            {
+              "title": "holiday: create / list / update / delete",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 126,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-12T14:07:09.887Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f28b404263190aaa647c-e838a44e8bb74b5ed1b0",
+              "file": "02-time.spec.ts",
+              "line": 28,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Leave request lifecycle",
+          "file": "02-time.spec.ts",
+          "line": 42,
+          "column": 6,
+          "specs": [
+            {
+              "title": "employee requests: balance shows pending, validation holds",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 104,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m0\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m0\u001b[39m\n    at /home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts:51:60",
+                        "location": {
+                          "file": "/home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts",
+                          "column": 60,
+                          "line": 51
+                        },
+                        "snippet": "  49 |     reqId = r.body.id;\n  50 |     const after = await bal('employee');\n> 51 |     expect(Number(after.pending) - Number(before.pending)).toBe(2);\n     |                                                            ^\n  52 |     expect((await api('employee', '/leave/requests', 'POST', { policyId, startDate: day(5), endDate: day(1) })).status, 'end before start').toBe(400);\n  53 |     expect((await api('employee', '/leave/requests', 'POST', { policyId: 'nope', startDate: day(1), endDate: day(2) })).status).toBeLessThan(500);\n  54 |     const over = await api('employee', '/leave/requests', 'POST', { policyId, startDate: day(20), endDate: day(80) });"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts",
+                            "column": 60,
+                            "line": 51
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m0\u001b[39m\n\n  49 |     reqId = r.body.id;\n  50 |     const after = await bal('employee');\n> 51 |     expect(Number(after.pending) - Number(before.pending)).toBe(2);\n     |                                                            ^\n  52 |     expect((await api('employee', '/leave/requests', 'POST', { policyId, startDate: day(5), endDate: day(1) })).status, 'end before start').toBe(400);\n  53 |     expect((await api('employee', '/leave/requests', 'POST', { policyId: 'nope', startDate: day(1), endDate: day(2) })).status).toBeLessThan(500);\n  54 |     const over = await api('employee', '/leave/requests', 'POST', { policyId, startDate: day(20), endDate: day(80) });\n    at /home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts:51:60"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-12T14:07:10.025Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/user/Matrix-HR/test-results/02-time-Leave-request-life-01752-ws-pending-validation-holds-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/user/Matrix-HR/test-results/02-time-Leave-request-life-01752-ws-pending-validation-holds-chromium/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts",
+                        "column": 60,
+                        "line": 51
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "f28b404263190aaa647c-15e6cb3ca06bcf2a99d1",
+              "file": "02-time.spec.ts",
+              "line": 45,
+              "column": 7
+            },
+            {
+              "title": "request is visible to employee and manager, hidden from other employee",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 46,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32m\"\"\u001b[39m\nReceived array: \u001b[31m[\"cmv5bt62q00pi7dcat9yalogk\"]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32m\"\"\u001b[39m\nReceived array: \u001b[31m[\"cmv5bt62q00pi7dcat9yalogk\"]\u001b[39m\n    at /home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts:58:83",
+                        "location": {
+                          "file": "/home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts",
+                          "column": 83,
+                          "line": 58
+                        },
+                        "snippet": "  56 |   });\n  57 |   test('request is visible to employee and manager, hidden from other employee', async () => {\n> 58 |     expect((await api('employee', '/leave/requests')).body.map((x: any) => x.id)).toContain(reqId);\n     |                                                                                   ^\n  59 |     expect((await api('manager', '/leave/requests')).body.map((x: any) => x.id)).toContain(reqId);\n  60 |     expect((await api('employee2', '/leave/requests')).body.map((x: any) => x.id)).not.toContain(reqId);\n  61 |   });"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts",
+                            "column": 83,
+                            "line": 58
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32m\"\"\u001b[39m\nReceived array: \u001b[31m[\"cmv5bt62q00pi7dcat9yalogk\"]\u001b[39m\n\n  56 |   });\n  57 |   test('request is visible to employee and manager, hidden from other employee', async () => {\n> 58 |     expect((await api('employee', '/leave/requests')).body.map((x: any) => x.id)).toContain(reqId);\n     |                                                                                   ^\n  59 |     expect((await api('manager', '/leave/requests')).body.map((x: any) => x.id)).toContain(reqId);\n  60 |     expect((await api('employee2', '/leave/requests')).body.map((x: any) => x.id)).not.toContain(reqId);\n  61 |   });\n    at /home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts:58:83"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-12T14:07:10.775Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/user/Matrix-HR/test-results/02-time-Leave-request-life-a6c06--hidden-from-other-employee-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/user/Matrix-HR/test-results/02-time-Leave-request-life-a6c06--hidden-from-other-employee-chromium/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts",
+                        "column": 83,
+                        "line": 58
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "f28b404263190aaa647c-a794d0c9b87e0a50f518",
+              "file": "02-time.spec.ts",
+              "line": 57,
+              "column": 7
+            },
+            {
+              "title": "only the right people can decide; approval moves pending → used",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 40,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m403\u001b[39m\nReceived: \u001b[31m404\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m403\u001b[39m\nReceived: \u001b[31m404\u001b[39m\n    at /home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts:63:89",
+                        "location": {
+                          "file": "/home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts",
+                          "column": 89,
+                          "line": 63
+                        },
+                        "snippet": "  61 |   });\n  62 |   test('only the right people can decide; approval moves pending → used', async () => {\n> 63 |     expect((await api('employee', `/leave/requests/${reqId}/approve`, 'PATCH')).status).toBe(403);\n     |                                                                                         ^\n  64 |     expect((await api('employee2', `/leave/requests/${reqId}/approve`, 'PATCH')).status).toBe(403);\n  65 |     const before = await bal('employee');\n  66 |     const a = await api('manager', `/leave/requests/${reqId}/approve`, 'PATCH');"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts",
+                            "column": 89,
+                            "line": 63
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m403\u001b[39m\nReceived: \u001b[31m404\u001b[39m\n\n  61 |   });\n  62 |   test('only the right people can decide; approval moves pending → used', async () => {\n> 63 |     expect((await api('employee', `/leave/requests/${reqId}/approve`, 'PATCH')).status).toBe(403);\n     |                                                                                         ^\n  64 |     expect((await api('employee2', `/leave/requests/${reqId}/approve`, 'PATCH')).status).toBe(403);\n  65 |     const before = await bal('employee');\n  66 |     const a = await api('manager', `/leave/requests/${reqId}/approve`, 'PATCH');\n    at /home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts:63:89"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-12T14:07:11.513Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/user/Matrix-HR/test-results/02-time-Leave-request-life-61296-proval-moves-pending-→-used-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/user/Matrix-HR/test-results/02-time-Leave-request-life-61296-proval-moves-pending-→-used-chromium/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts",
+                        "column": 89,
+                        "line": 63
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "f28b404263190aaa647c-d38614c102b74a148a90",
+              "file": "02-time.spec.ts",
+              "line": 62,
+              "column": 7
+            },
+            {
+              "title": "reject restores the balance",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 92,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m300\u001b[39m\nReceived:   \u001b[31m404\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m300\u001b[39m\nReceived:   \u001b[31m404\u001b[39m\n    at /home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts:78:116",
+                        "location": {
+                          "file": "/home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts",
+                          "column": 116,
+                          "line": 78
+                        },
+                        "snippet": "  76 |     const r = await api('employee', '/leave/requests', 'POST', { policyId, startDate: day(30), endDate: day(30) });\n  77 |     const before = await bal('employee');\n> 78 |     expect((await api('hr', `/leave/requests/${r.body.id}/reject`, 'PATCH', { reason: 'ZZ test reject' })).status).toBeLessThan(300);\n     |                                                                                                                    ^\n  79 |     const after = await bal('employee');\n  80 |     expect(Number(before.pending) - Number(after.pending)).toBe(1);\n  81 |     expect(Number(after.used)).toBe(Number(before.used));"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts",
+                            "column": 116,
+                            "line": 78
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m300\u001b[39m\nReceived:   \u001b[31m404\u001b[39m\n\n  76 |     const r = await api('employee', '/leave/requests', 'POST', { policyId, startDate: day(30), endDate: day(30) });\n  77 |     const before = await bal('employee');\n> 78 |     expect((await api('hr', `/leave/requests/${r.body.id}/reject`, 'PATCH', { reason: 'ZZ test reject' })).status).toBeLessThan(300);\n     |                                                                                                                    ^\n  79 |     const after = await bal('employee');\n  80 |     expect(Number(before.pending) - Number(after.pending)).toBe(1);\n  81 |     expect(Number(after.used)).toBe(Number(before.used));\n    at /home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts:78:116"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-12T14:07:12.271Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/user/Matrix-HR/test-results/02-time-Leave-request-lifecycle-reject-restores-the-balance-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/user/Matrix-HR/test-results/02-time-Leave-request-lifecycle-reject-restores-the-balance-chromium/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts",
+                        "column": 116,
+                        "line": 78
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "f28b404263190aaa647c-1da84f3ed3ac0b500182",
+              "file": "02-time.spec.ts",
+              "line": 75,
+              "column": 7
+            },
+            {
+              "title": "a manager cannot decide a request from someone who is not their report",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 74,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-12T14:07:13.017Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f28b404263190aaa647c-387532715867ae8e98f5",
+              "file": "02-time.spec.ts",
+              "line": 83,
+              "column": 7
+            },
+            {
+              "title": "there is no cancel/delete of a leave request",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 17,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-12T14:07:13.153Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f28b404263190aaa647c-aaa16f8a40d2e5ea45b5",
+              "file": "02-time.spec.ts",
+              "line": 88,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Timesheets",
+          "file": "02-time.spec.ts",
+          "line": 94,
+          "column": 6,
+          "specs": [
+            {
+              "title": "project CRUD (HR) and employee entry CRUD",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 173,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-12T14:07:13.187Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f28b404263190aaa647c-e617fa9ba49f546d2e62",
+              "file": "02-time.spec.ts",
+              "line": 96,
+              "column": 7
+            },
+            {
+              "title": "another employee cannot edit or delete someone else's entry",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 34,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-12T14:07:13.376Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f28b404263190aaa647c-0610ca333a9dab4d67ab",
+              "file": "02-time.spec.ts",
+              "line": 115,
+              "column": 7
+            },
+            {
+              "title": "submit → manager approve; employee cannot approve; manager scope",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 83,
+                      "error": {
+                        "message": "Error: manager approved a non-report timesheet entry: 200\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32m200\u001b[39m\nReceived array: \u001b[31m[403, 404]\u001b[39m",
+                        "stack": "Error: manager approved a non-report timesheet entry: 200\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32m200\u001b[39m\nReceived array: \u001b[31m[403, 404]\u001b[39m\n    at /home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts:127:86",
+                        "location": {
+                          "file": "/home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts",
+                          "column": 86,
+                          "line": 127
+                        },
+                        "snippet": "  125 |     await api('employee2', '/timesheets/submit', 'POST', { weekStart: day(98) });\n  126 |     const a = await api('manager', `/timesheets/entries/${e2.body.id}/approve`, 'PATCH');\n> 127 |     expect([403, 404], 'manager approved a non-report timesheet entry: ' + a.status).toContain(a.status);\n      |                                                                                      ^\n  128 |     expect((await api('manager', `/timesheets/entries/${entryId}/approve`, 'PATCH')).status).toBeLessThan(300);\n  129 |   });\n  130 |   test('delete entry then project; project in use is refused or handled', async () => {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts",
+                            "column": 86,
+                            "line": 127
+                          },
+                          "message": "Error: manager approved a non-report timesheet entry: 200\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32m200\u001b[39m\nReceived array: \u001b[31m[403, 404]\u001b[39m\n\n  125 |     await api('employee2', '/timesheets/submit', 'POST', { weekStart: day(98) });\n  126 |     const a = await api('manager', `/timesheets/entries/${e2.body.id}/approve`, 'PATCH');\n> 127 |     expect([403, 404], 'manager approved a non-report timesheet entry: ' + a.status).toContain(a.status);\n      |                                                                                      ^\n  128 |     expect((await api('manager', `/timesheets/entries/${entryId}/approve`, 'PATCH')).status).toBeLessThan(300);\n  129 |   });\n  130 |   test('delete entry then project; project in use is refused or handled', async () => {\n    at /home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts:127:86"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-12T14:07:13.423Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/user/Matrix-HR/test-results/02-time-Timesheets-submit--c4bd9-annot-approve-manager-scope-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/user/Matrix-HR/test-results/02-time-Timesheets-submit--c4bd9-annot-approve-manager-scope-chromium/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/user/Matrix-HR/tests/qa-crud/specs/02-time.spec.ts",
+                        "column": 86,
+                        "line": 127
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "f28b404263190aaa647c-46200259f64ec89d93e7",
+              "file": "02-time.spec.ts",
+              "line": 119,
+              "column": 7
+            },
+            {
+              "title": "delete entry then project; project in use is refused or handled",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 70,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-12T14:07:14.125Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f28b404263190aaa647c-1410ed74d18e78c8fd5e",
+              "file": "02-time.spec.ts",
+              "line": 130,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Attendance",
+          "file": "02-time.spec.ts",
+          "line": 140,
+          "column": 6,
+          "specs": [
+            {
+              "title": "clock in/out cycle, double clock-in guarded, logs list, dashboard scoped",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 150,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-12T14:07:14.265Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f28b404263190aaa647c-2101ea3d303d77331100",
+              "file": "02-time.spec.ts",
+              "line": 141,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-12T14:07:05.977Z",
+    "duration": 8513.335000000001,
+    "expected": 9,
+    "skipped": 0,
+    "unexpected": 5,
+    "flaky": 0
+  }
+}

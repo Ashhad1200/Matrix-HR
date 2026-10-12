@@ -1,4 +1,4 @@
-import { IsOptional, IsNumber, IsString, IsDateString, MaxLength } from 'class-validator';
+import { IsOptional, IsNumber, IsString, IsDateString, MaxLength, MinLength } from 'class-validator';
 
 export class ClockInDto {
   @IsOptional()
@@ -12,7 +12,7 @@ export class ClockInDto {
 
 export class RegularizationDto {
   @IsDateString() date: string;
-  @IsString() @MaxLength(500) reason: string;
+  @IsString() @MinLength(1) @MaxLength(500) reason: string;
   @IsOptional() @IsDateString() requestedClockIn?: string;
   @IsOptional() @IsDateString() requestedClockOut?: string;
 }

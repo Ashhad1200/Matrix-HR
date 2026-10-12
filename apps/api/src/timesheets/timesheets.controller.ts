@@ -96,13 +96,13 @@ export class TimesheetsController {
 
   @Patch('entries/:id/approve')
   @Roles(UserRole.MANAGER, UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN)
-  approve(@TenantId() tenantId: string, @Param('id') id: string) {
-    return this.timesheets.setEntryStatus(tenantId, id, 'approved');
+  approve(@TenantId() tenantId: string, @CurrentUser() user: { role: UserRole; employeeId?: string }, @Param('id') id: string) {
+    return this.timesheets.setEntryStatus(tenantId, id, 'approved', user);
   }
 
   @Patch('entries/:id/reject')
   @Roles(UserRole.MANAGER, UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN)
-  reject(@TenantId() tenantId: string, @Param('id') id: string) {
-    return this.timesheets.setEntryStatus(tenantId, id, 'rejected');
+  reject(@TenantId() tenantId: string, @CurrentUser() user: { role: UserRole; employeeId?: string }, @Param('id') id: string) {
+    return this.timesheets.setEntryStatus(tenantId, id, 'rejected', user);
   }
 }

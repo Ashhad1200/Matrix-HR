@@ -133,9 +133,16 @@ export class TimesheetsService {
     });
   }
 
-  async setEntryStatus(tenantId: string, id: string, status: 'approved' | 'rejected') {
-    const entry = await this.prisma.timeEntry.findFirst({ where: { id, tenantId } });
-    if (!entry) throw new NotFoundException('Time entry not found');
+  /**
+   * Only a submitted entry can be decided, never your own, and a manager may decide only their direct reports'
+   * (HR and admins any in the tenant). Out-of-scope entries read as "not found".
+   */
+  async setEntryStatus(tenantId: string, id: string, status: 'approved' | 'rejected', actor: { role: UserRole; employeeId?: string | null }) {
+    const isAdmin = actor.role === UserRole.HR_MANAGER || actor.role === UserRole.COMPANY_ADMIN;
+    const entry = await this.prisma.timeEntry.findFirst({ where: { id, tenantId }, include: { employee: { select: { managerId: true } } } });
+    if (!entry || (!isAdmin && entry.employee?.managerId !== actor.employeeId)) throw new NotFoundException('Time entry not found');
+    if (entry.employeeId === actor.employeeId) throw new ForbiddenException('You cannot approve your own timesheet');
+    if (entry.status !== 'submitted') throw new BadRequestException('Only a submitted timesheet entry can be approved or rejected');
     return this.prisma.timeEntry.update({ where: { id }, data: { status } });
   }
 

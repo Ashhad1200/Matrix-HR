@@ -1,7 +1,7 @@
-import { IsBoolean, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
 
 export class CreateCourseDto {
-  @IsString() @MaxLength(200) title: string;
+  @IsString() @MinLength(1) @MaxLength(200) title: string;
   @IsOptional() @IsString() @MaxLength(4000) description?: string;
   @IsOptional() @IsBoolean() isMandatory?: boolean;
 }

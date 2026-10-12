@@ -1,7 +1,7 @@
-import { IsDateString, IsIn, IsInt, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { IsDateString, IsIn, IsInt, IsNumber, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
 
 export class CreateCycleDto {
-  @IsString() @MaxLength(120) name: string;
+  @IsString() @MinLength(1) @MaxLength(120) name: string;
   @IsOptional() @IsIn(['quarterly', 'annual', 'half-yearly', 'monthly']) type?: string;
   @IsDateString() startDate: string;
   @IsDateString() endDate: string;
@@ -10,7 +10,7 @@ export class CreateCycleDto {
 export class CreateGoalDto {
   /** Non-HR callers may only set goals for themselves (or, for managers, their reports). */
   @IsOptional() @IsString() employeeId?: string;
-  @IsString() @MaxLength(200) title: string;
+  @IsString() @MinLength(1) @MaxLength(200) title: string;
   @IsOptional() @IsString() @MaxLength(2000) description?: string;
   @IsOptional() @IsDateString() dueDate?: string;
   @IsOptional() @IsString() cycleId?: string;
