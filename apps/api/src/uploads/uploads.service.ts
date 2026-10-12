@@ -6,7 +6,8 @@ import {
   PutObjectCommand,
   HeadBucketCommand,
   CreateBucketCommand,
-  PutBucketPolicyCommand,
+  DeleteBucketPolicyCommand,
+  GetObjectCommand,
 } from '@aws-sdk/client-s3';
 
 @Injectable()
@@ -34,37 +35,30 @@ export class UploadsService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    // ponytail: public-read bucket policy is a dev-appropriate simplification, not a
-    // production one — Phase 6 (per ENGINEERING_ROADMAP.md) should move to presigned
-    // per-object URLs or a CDN-fronted bucket so documents aren't world-readable by URL guess.
     try {
       await this.client.send(new HeadBucketCommand({ Bucket: this.bucket }));
     } catch {
       await this.client.send(new CreateBucketCommand({ Bucket: this.bucket })).catch(() => {});
     }
+    // Files are private. Earlier versions made the bucket public-read; remove that policy so nothing is reachable by URL
+    // guessing. Existing documents keep working because they are now served through short-lived signed links (FilesService).
     try {
-      await this.client.send(
-        new PutBucketPolicyCommand({
-          Bucket: this.bucket,
-          Policy: JSON.stringify({
-            Version: '2012-10-17',
-            Statement: [
-              {
-                Effect: 'Allow',
-                Principal: '*',
-                Action: ['s3:GetObject'],
-                Resource: [`arn:aws:s3:::${this.bucket}/*`],
-              },
-            ],
-          }),
-        }),
-      );
+      await this.client.send(new DeleteBucketPolicyCommand({ Bucket: this.bucket }));
     } catch (err) {
-      this.logger.warn(`Could not set bucket policy (non-fatal in dev): ${err}`);
+      this.logger.warn(`Could not remove a public bucket policy (fine if none exists): ${err}`);
     }
   }
 
-  async uploadFile(tenantId: string, file: Express.Multer.File): Promise<{ url: string; key: string }> {
+  get bucketName() { return this.bucket; }
+  get publicBase() { return this.publicEndpoint; }
+
+  /** Streams an object's bytes (used by the signed-link endpoint). */
+  async getObject(key: string) {
+    const out = await this.client.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }));
+    return { body: out.Body as NodeJS.ReadableStream, contentType: out.ContentType, length: out.ContentLength };
+  }
+
+  async uploadFile(tenantId: string, file: Express.Multer.File): Promise<{ ref: string; key: string }> {
     const ext = file.originalname.includes('.') ? file.originalname.split('.').pop() : undefined;
     const key = `${tenantId}/${randomUUID()}${ext ? `.${ext}` : ''}`;
 
@@ -77,11 +71,11 @@ export class UploadsService implements OnModuleInit {
       }),
     );
 
-    return { url: `${this.publicEndpoint}/${this.bucket}/${key}`, key };
+    return { ref: `s3:${key}`, key };
   }
 
   /** For server-generated documents (payslips, reports) rather than user uploads. */
-  async uploadBuffer(tenantId: string, buffer: Buffer, filename: string, contentType: string): Promise<{ url: string; key: string }> {
+  async uploadBuffer(tenantId: string, buffer: Buffer, filename: string, contentType: string): Promise<{ ref: string; key: string }> {
     const ext = filename.includes('.') ? filename.split('.').pop() : undefined;
     const key = `${tenantId}/${randomUUID()}${ext ? `.${ext}` : ''}`;
 
@@ -94,6 +88,20 @@ export class UploadsService implements OnModuleInit {
       }),
     );
 
-    return { url: `${this.publicEndpoint}/${this.bucket}/${key}`, key };
+    return { ref: `s3:${key}`, key };
+  }
+}
+
+/** A stored file reference: "s3:<key>", or a legacy public URL from before files were private. */
+export function keyFromRef(ref: string, bucket: string, publicEndpoint?: string): string | null {
+  if (ref.startsWith('s3:')) return ref.slice(3);
+  try {
+    const u = new URL(ref);
+    const marker = `/${bucket}/`;
+    const i = u.pathname.indexOf(marker);
+    if (i !== 0 && !(publicEndpoint && ref.startsWith(publicEndpoint))) return null;
+    return i >= 0 ? decodeURIComponent(u.pathname.slice(i + marker.length)) : null;
+  } catch {
+    return null;
   }
 }

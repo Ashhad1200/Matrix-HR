@@ -4,7 +4,10 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { WhatsAppService } from '../whatsapp/whatsapp.service';
 import { WorkflowEngineService, WorkflowActor } from '../workflows/workflow-engine.service';
 import { Viewer, scopedEmployeeIds, employeeIdFilter, assertInTenant } from '../common/data-scope';
-import { CreateLeaveRequestDto } from './dto';
+import { AuditService } from '../audit/audit.service';
+import { ensureBalances } from '../common/leave-balances';
+import { CreateLeaveRequestDto, CreateLeavePolicyDto, UpdateLeavePolicyDto, CreateHolidayDto, UpdateHolidayDto } from './dto';
+import { ConflictException } from '@nestjs/common';
 
 @Injectable()
 export class LeaveService implements OnModuleInit {
@@ -13,6 +16,7 @@ export class LeaveService implements OnModuleInit {
     private notifications: NotificationsService,
     @Inject(forwardRef(() => WhatsAppService)) private whatsapp: WhatsAppService,
     private workflow: WorkflowEngineService,
+    private audit: AuditService,
   ) {}
 
   onModuleInit() {
@@ -34,6 +38,8 @@ export class LeaveService implements OnModuleInit {
       return [];
     }
     const year = new Date().getFullYear();
+    // Balances are created on demand, so an employee (or a policy added later) never shows an empty list.
+    await ensureBalances(this.prisma, tenantId, year, [employeeId]);
     return this.prisma.leaveBalance.findMany({
       where: { tenantId, employeeId, year },
       include: { policy: true },
@@ -66,8 +72,12 @@ export class LeaveService implements OnModuleInit {
 
     const days = dto.isHalfDay ? 0.5 : Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
+    // Make sure the balance exists first, otherwise the limit below would silently not apply.
+    const year = start.getFullYear();
+    const thisYear = new Date().getFullYear();
+    if (year >= thisYear - 1 && year <= thisYear + 1) await ensureBalances(this.prisma, tenantId, year, [employeeId], [dto.policyId]);
     const balance = await this.prisma.leaveBalance.findFirst({
-      where: { employeeId, policyId: dto.policyId, year: start.getFullYear() },
+      where: { employeeId, policyId: dto.policyId, year },
     });
 
     if (balance) {
@@ -246,5 +256,74 @@ export class LeaveService implements OnModuleInit {
       },
       orderBy: { date: 'asc' },
     });
+  }
+
+  // ── Leave setup (HR / admin) ─────────────────────────────────────────────────────────────────────
+  async listAllPolicies(tenantId: string) {
+    return this.prisma.leavePolicy.findMany({ where: { tenantId }, orderBy: [{ isActive: 'desc' }, { name: 'asc' }] });
+  }
+
+  async createPolicy(tenantId: string, userId: string, dto: CreateLeavePolicyDto) {
+    const dup = await this.prisma.leavePolicy.findUnique({ where: { tenantId_code: { tenantId, code: dto.code } } });
+    if (dup) throw new ConflictException('A leave type with that code already exists');
+    const policy = await this.prisma.leavePolicy.create({
+      data: {
+        tenantId, name: dto.name, code: dto.code, daysPerYear: dto.daysPerYear, accrualType: dto.accrualType ?? 'yearly',
+        carryForwardMax: dto.carryForwardMax, allowHalfDay: dto.allowHalfDay ?? true, allowNegative: dto.allowNegative ?? false,
+        genderRestriction: dto.genderRestriction, eligibilityMonths: dto.eligibilityMonths ?? 0,
+      },
+    });
+    // Everyone who is already employed gets their balance for this leave type straight away.
+    const created = await ensureBalances(this.prisma, tenantId, new Date().getFullYear(), undefined, [policy.id]);
+    await this.audit.log({ tenantId, userId, action: 'CREATE', entity: 'LeavePolicy', entityId: policy.id, after: { ...dto, balancesCreated: created } });
+    return { ...policy, balancesCreated: created };
+  }
+
+  async updatePolicy(tenantId: string, userId: string, id: string, dto: UpdateLeavePolicyDto) {
+    const before = await this.prisma.leavePolicy.findFirst({ where: { id, tenantId } });
+    if (!before) throw new NotFoundException('Leave type not found');
+    const policy = await this.prisma.leavePolicy.update({ where: { id }, data: dto as any });
+    const year = new Date().getFullYear();
+    let adjusted = 0;
+    if (dto.daysPerYear != null && dto.daysPerYear !== Number(before.daysPerYear)) {
+      // A changed yearly entitlement applies to this year's balances too; what people already used is untouched.
+      adjusted = (await this.prisma.leaveBalance.updateMany({ where: { tenantId, policyId: id, year }, data: { entitled: dto.daysPerYear } })).count;
+    }
+    if (dto.isActive === true && !before.isActive) await ensureBalances(this.prisma, tenantId, year, undefined, [id]);
+    await this.audit.log({ tenantId, userId, action: 'UPDATE', entity: 'LeavePolicy', entityId: id, before: { daysPerYear: Number(before.daysPerYear), carryForwardMax: before.carryForwardMax == null ? null : Number(before.carryForwardMax), isActive: before.isActive }, after: { ...dto, balancesAdjusted: adjusted } });
+    return { ...policy, balancesAdjusted: adjusted };
+  }
+
+  /** Backfills missing balances for everyone (for example for employees who existed before leave setup). */
+  async rebuildBalances(tenantId: string, userId: string, year?: number) {
+    const y = year ?? new Date().getFullYear();
+    const created = await ensureBalances(this.prisma, tenantId, y);
+    await this.audit.log({ tenantId, userId, action: 'REBUILD', entity: 'LeaveBalance', after: { year: y, created } });
+    return { year: y, created };
+  }
+
+  async createHoliday(tenantId: string, userId: string, dto: CreateHolidayDto) {
+    const date = new Date(dto.date);
+    const dup = await this.prisma.holiday.findFirst({ where: { tenantId, date, name: dto.name } });
+    if (dup) throw new ConflictException('That holiday is already on the calendar');
+    const h = await this.prisma.holiday.create({ data: { tenantId, name: dto.name, date, isOptional: dto.isOptional ?? false, country: dto.country ?? 'PK' } });
+    await this.audit.log({ tenantId, userId, action: 'CREATE', entity: 'Holiday', entityId: h.id, after: dto });
+    return h;
+  }
+
+  async updateHoliday(tenantId: string, userId: string, id: string, dto: UpdateHolidayDto) {
+    const found = await this.prisma.holiday.findFirst({ where: { id, tenantId } });
+    if (!found) throw new NotFoundException('Holiday not found');
+    const h = await this.prisma.holiday.update({ where: { id }, data: { ...dto, ...(dto.date ? { date: new Date(dto.date) } : {}) } });
+    await this.audit.log({ tenantId, userId, action: 'UPDATE', entity: 'Holiday', entityId: id, before: { name: found.name, date: found.date }, after: dto });
+    return h;
+  }
+
+  async deleteHoliday(tenantId: string, userId: string, id: string) {
+    const found = await this.prisma.holiday.findFirst({ where: { id, tenantId } });
+    if (!found) throw new NotFoundException('Holiday not found');
+    await this.prisma.holiday.delete({ where: { id } });
+    await this.audit.log({ tenantId, userId, action: 'DELETE', entity: 'Holiday', entityId: id, before: { name: found.name, date: found.date } });
+    return { deleted: true };
   }
 }

@@ -14,7 +14,9 @@ export class CreateDesignationDto {
 export class AddDocumentDto {
   @IsString() @MaxLength(60) type: string;
   @IsString() @MaxLength(200) name: string;
-  // Must be an http(s) URL — a stored "javascript:" link would run when someone clicks it.
-  @IsUrl({ require_protocol: true, require_tld: false, protocols: ['http', 'https'] }) fileUrl: string;
+  /** Key returned by POST /uploads for this tenant. */
+  @IsOptional() @IsString() @MaxLength(300) fileKey?: string;
+  /** Legacy: a URL into our own bucket. Anything else is refused by the service. */
+  @IsOptional() @IsUrl({ require_protocol: true, require_tld: false, protocols: ['http', 'https'] }) fileUrl?: string;
   @IsOptional() @IsDateString() expiryDate?: string;
 }

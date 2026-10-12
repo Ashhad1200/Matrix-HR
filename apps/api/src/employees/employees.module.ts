@@ -1,3 +1,4 @@
+import { UploadsModule } from '../uploads/uploads.module';
 import { Module } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { EmployeesController } from './employees.controller';
@@ -7,7 +8,7 @@ import { OnboardingModule } from '../onboarding/onboarding.module';
 import { EntitlementsModule } from '../entitlements/entitlements.module';
 
 @Module({
-  imports: [AuditModule, WebhooksModule, OnboardingModule, EntitlementsModule],
+  imports: [AuditModule, WebhooksModule, OnboardingModule, EntitlementsModule, UploadsModule],
   controllers: [EmployeesController],
   providers: [EmployeesService],
   exports: [EmployeesService],

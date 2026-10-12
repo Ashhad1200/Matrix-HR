@@ -1,10 +1,13 @@
-import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Viewer, isHrPlus, assertInTenant } from '../common/data-scope';
 import { AuditService } from '../audit/audit.service';
 import { WebhooksService } from '../webhooks/webhooks.service';
 import { OnboardingService } from '../onboarding/onboarding.service';
 import { EntitlementsService } from '../entitlements/entitlements.service';
+import { FilesService } from '../uploads/files.service';
+import { ensureBalances } from '../common/leave-balances';
+import { assertEmployeeRoom } from '../common/plan-limits';
 import { CreateEmployeeDto, UpdateEmployeeDto, SelfUpdateEmployeeDto } from './dto';
 
 // What a colleague may see of another colleague: enough for a people directory, no pay, ID or bank data.
@@ -23,6 +26,7 @@ export class EmployeesService {
     private webhooks: WebhooksService,
     private onboarding: OnboardingService,
     private entitlements: EntitlementsService,
+    private files: FilesService,
   ) {}
 
   async findAll(tenantId: string, filters?: {
@@ -101,16 +105,8 @@ export class EmployeesService {
     if (clash) throw new ConflictException('Biometric PIN is already assigned to another employee');
   }
 
-  /**
-   * A plan can cap active employees (Starter 25, Growth 100). Plans with an overage price (Business) are never blocked: the
-   * extra employees are billed. Tenants on legacy plan versions have no cap, so existing customers are unaffected.
-   */
-  private async assertWithinPlanLimit(tenantId: string) {
-    const sub = await this.prisma.subscription.findUnique({ where: { tenantId }, select: { planVersion: { select: { maxEmployees: true, overagePerEmployee: true } } } });
-    const max = sub?.planVersion.maxEmployees;
-    if (!max || sub.planVersion.overagePerEmployee != null) return;
-    const active = await this.prisma.employee.count({ where: { tenantId, status: 'ACTIVE' } });
-    if (active >= max) throw new ForbiddenException(`Your plan allows up to ${max} active employees. Upgrade from Billing to add more.`);
+  private assertWithinPlanLimit(tenantId: string) {
+    return assertEmployeeRoom(this.prisma, tenantId);
   }
 
   async create(tenantId: string, userId: string, dto: CreateEmployeeDto) {
@@ -151,6 +147,8 @@ export class EmployeesService {
       tenantId, userId, action: 'CREATE', entity: 'Employee', entityId: employee.id, after: employee,
     });
     await this.entitlements.recordUsage(tenantId, 'employee.created');
+    // Leave balances for this year, for every active leave type. Never fails the hire: they are also created on first use.
+    await ensureBalances(this.prisma, tenantId, new Date().getFullYear(), [employee.id]).catch(() => undefined);
 
     return employee;
   }
@@ -259,7 +257,7 @@ export class EmployeesService {
   async getMyPayslips(tenantId: string, employeeId: string) {
     if (!employeeId) throw new ForbiddenException('No employee profile linked to this account');
 
-    return this.prisma.payrollItem.findMany({
+    const items = await this.prisma.payrollItem.findMany({
       where: {
         employeeId,
         payrollRun: { tenantId, status: { in: ['APPROVED', 'PROCESSED', 'LOCKED'] } },
@@ -269,6 +267,27 @@ export class EmployeesService {
       },
       orderBy: { payrollRun: { period: 'desc' } },
     });
+    // The stored file reference is internal; the client asks for a short-lived signed link per payslip instead.
+    return items.map(({ payslipUrl, ...rest }) => ({ ...rest, hasPayslip: !!payslipUrl }));
+  }
+
+  /** A signed link to the caller's OWN payslip only (never someone else's, whatever id is passed). */
+  async getMyPayslipLink(tenantId: string, employeeId: string, itemId: string) {
+    if (!employeeId) throw new ForbiddenException('No employee profile linked to this account');
+    const item = await this.prisma.payrollItem.findFirst({
+      where: { id: itemId, employeeId, payrollRun: { tenantId, status: { in: ['APPROVED', 'PROCESSED', 'LOCKED'] } } },
+      include: { payrollRun: { select: { period: true } } },
+    });
+    if (!item?.payslipUrl) throw new NotFoundException('Payslip not found');
+    return this.files.linkFor(tenantId, item.payslipUrl, { name: `payslip-${item.payrollRun.period}.pdf` });
+  }
+
+  /** Signed link to one employee document: HR+ for anyone, an employee only for their own. */
+  async getDocumentLink(tenantId: string, employeeId: string, docId: string, viewer: Viewer) {
+    if (!isHrPlus(viewer.role) && viewer.employeeId !== employeeId) throw new ForbiddenException('You can only open your own documents');
+    const doc = await this.prisma.employeeDocument.findFirst({ where: { id: docId, employeeId, tenantId } });
+    if (!doc) throw new NotFoundException('Document not found');
+    return this.files.linkFor(tenantId, doc.fileUrl, { name: doc.name });
   }
 
   async getOrgChart(tenantId: string) {
@@ -330,16 +349,20 @@ export class EmployeesService {
   }
 
   async addDocument(tenantId: string, employeeId: string, data: {
-    type: string; name: string; fileUrl: string; expiryDate?: string;
+    type: string; name: string; fileKey?: string; fileUrl?: string; expiryDate?: string;
   }, viewer: Viewer) {
     if (!isHrPlus(viewer.role) && viewer.employeeId !== employeeId) {
       throw new ForbiddenException('You can only add documents to your own profile');
     }
     await this.findOne(tenantId, employeeId);
+    // The file must be one this tenant uploaded: an arbitrary URL (or another tenant's object key) is refused.
+    const ref = data.fileKey ? `s3:${data.fileKey}` : data.fileUrl;
+    if (!ref) throw new BadRequestException('Attach a file');
+    this.files.linkFor(tenantId, ref); // throws NotFound unless it resolves to this tenant's own object
     return this.prisma.employeeDocument.create({
       data: {
         tenantId, employeeId,
-        type: data.type, name: data.name, fileUrl: data.fileUrl,
+        type: data.type, name: data.name, fileUrl: ref,
         expiryDate: data.expiryDate ? new Date(data.expiryDate) : undefined,
       },
     });

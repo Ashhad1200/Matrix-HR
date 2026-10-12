@@ -369,7 +369,7 @@ run('billing (database)', () => {
 
   describe('employee cap', () => {
     it('blocks adding past Starter/Growth caps, never blocks Business or a legacy plan', async () => {
-      const svc = new EmployeesService(prisma, audit, null as any, null as any, null as any);
+      const svc = new EmployeesService(prisma, audit, null as any, null as any, null as any, null as any);
       const assert = (id: string) => (svc as any).assertWithinPlanLimit(id);
       const s = await mkTenant('capped', 25);
       await subscribe(s.id, 'starter', null);

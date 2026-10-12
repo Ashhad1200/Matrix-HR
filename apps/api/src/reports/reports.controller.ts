@@ -26,6 +26,8 @@ export class ReportsController {
     return this.reports.attendanceSummary(tenantId, month || new Date().toISOString().slice(0, 7));
   }
 
+  // Salary totals: HR and admins only. Managers may read the other reports but not what the company pays.
+  @Roles(UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN)
   @Get('payroll-cost')
   payrollCost(@TenantId() tenantId: string) {
     return this.reports.payrollCostAnalysis(tenantId);
