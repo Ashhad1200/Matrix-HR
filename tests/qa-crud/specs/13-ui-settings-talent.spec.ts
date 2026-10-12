@@ -50,7 +50,7 @@ test.describe('Settings (UI)', () => {
     await page.getByRole('button', { name: 'Create webhook' }).click();
     await expect(page.getByText(/not allowed|private|internal|public/i).first()).toBeVisible();
     page.on('dialog', (d) => d.accept());
-    await page.getByRole('row', { name: /93\.184\.216\.34/ }).getByRole('button', { name: 'Delete' }).click();
+    await page.getByRole('row', { name: /93\.184\.216\.34/ }).getByRole('button', { name: 'Delete', exact: true }).first().click();
     await expect.poll(async () => JSON.stringify((await api('hr', '/webhooks')).body)).not.toContain(mine.id);
     await ctx.close();
   });

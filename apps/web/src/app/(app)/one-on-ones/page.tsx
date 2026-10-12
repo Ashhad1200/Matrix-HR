@@ -34,7 +34,7 @@ export default function OneOnOnesPage() {
   const [form, setForm] = useState({ employeeId: '', scheduledAt: '', points: '' });
 
   const load = useCallback(() => {
-    Promise.all([api.oneOnOnes.list(), api.employees.team().catch(() => [])])
+    Promise.all([api.oneOnOnes.list(), user?.employeeId ? api.employees.team().catch(() => []) : Promise.resolve([])])
       .then(([m, t]) => {
         setMeetings(Array.isArray(m) ? m : []);
         setTeam(Array.isArray(t) ? t : (t as any)?.data ?? []);
@@ -42,7 +42,7 @@ export default function OneOnOnesPage() {
       })
       .catch((err) => setError(err.message || 'Failed to load 1-on-1s'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user?.employeeId]);
 
   useEffect(load, [load]);
 

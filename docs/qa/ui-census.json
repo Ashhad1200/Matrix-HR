@@ -1,4 +1,566 @@
 {
+ "admin:/dashboard": {
+  "title": "Good afternoon, zz-admin-a-mv5gdm5p",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/one-on-ones": {
+  "title": "1-on-1s",
+  "buttons": [
+   "Schedule 1-on-1",
+   "Schedule 1-on-1"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/employees": {
+  "title": "Employees",
+  "buttons": [
+   "Org Chart",
+   "Add Employee"
+  ],
+  "inputs": 1,
+  "tableRows": 4
+ },
+ "admin:/recruitment": {
+  "title": "Recruitment",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/recruitment/kanban": {
+  "title": "ATS Board",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/recruitment/preboarding": {
+  "title": "Pre-boarding",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/onboarding": {
+  "title": "Onboarding",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/offboarding": {
+  "title": "Offboarding",
+  "buttons": [
+   "Start offboarding"
+  ],
+  "inputs": 5,
+  "tableRows": 0
+ },
+ "admin:/leave": {
+  "title": "Leave Management",
+  "buttons": [
+   "Apply for Leave"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/attendance": {
+  "title": "Attendance",
+  "buttons": [
+   "Clock In",
+   "Clock Out"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/timesheets": {
+  "title": "Timesheets",
+  "buttons": [
+   "New Project",
+   "Log Hours",
+   "My Week",
+   "Approvals",
+   "Previous week",
+   "Next week",
+   "Submit Week"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/payroll": {
+  "title": "Payroll",
+  "buttons": [
+   "Run Payroll"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/expenses": {
+  "title": "Expenses & reimbursements",
+  "buttons": [
+   "Add item",
+   "Save draft",
+   "Add category"
+  ],
+  "inputs": 11,
+  "tableRows": 0
+ },
+ "admin:/loans": {
+  "title": "Loans & advances",
+  "buttons": [
+   "Submit request"
+  ],
+  "inputs": 6,
+  "tableRows": 0
+ },
+ "admin:/performance": {
+  "title": "Performance",
+  "buttons": [
+   "Reviews & 360s",
+   "eNPS"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/performance/enps": {
+  "title": "Employee Net Promoter Score",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/lms": {
+  "title": "Learning Management",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/reports": {
+  "title": "Reports & Analytics",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 12
+ },
+ "admin:/ai": {
+  "title": "Ask MatrixHR",
+  "buttons": [
+   "Turn off",
+   "New chat",
+   "What is my leave balance?",
+   "Which public holidays are coming up?",
+   "How do I invite an employee to log in?",
+   "Attach a file",
+   "Send"
+  ],
+  "inputs": 2,
+  "tableRows": 0
+ },
+ "admin:/whatsapp": {
+  "title": "WhatsApp Integration",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/settings": {
+  "title": "Settings",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/settings/custom-fields": {
+  "title": "Custom Fields",
+  "buttons": [
+   "Add Field"
+  ],
+  "inputs": 0,
+  "tableRows": 1
+ },
+ "admin:/settings/workflows": {
+  "title": "Workflows",
+  "buttons": [
+   "Create Workflow"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/settings/audit": {
+  "title": "Audit Log",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 11
+ },
+ "admin:/billing": {
+  "title": "Billing",
+  "buttons": [
+   "Plan",
+   "AI credits",
+   "Monthly",
+   "Yearly (2 months free)",
+   "Starter$25.00 a monthUp to 25 employees2 admin users150 AI credits a month",
+   "Growth$69.00 a monthUp to 100 employees5 admin users500 AI credits a month",
+   "Business$149.00 a monthUp to 300 employees, then $0.50 each15 admin users1,500 AI credits a month",
+   "Continue to payment details"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/marketplace": {
+  "title": "Marketplace",
+  "buttons": [
+   "All",
+   "accounting",
+   "benefits",
+   "hardware",
+   "identity",
+   "learning",
+   "lifestyle",
+   "local",
+   "payroll",
+   "productivity",
+   "recruitment",
+   "screening",
+   "Connect",
+   "Connect"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/extensions": {
+  "title": "Extensions",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/security": {
+  "title": "Security",
+  "buttons": [
+   "Change password",
+   "Set up",
+   "Opt in to WhatsApp messages"
+  ],
+  "inputs": 3,
+  "tableRows": 0
+ },
+ "admin:/employees/org-chart": {
+  "title": "Organization Chart",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/settings/leave": {
+  "title": "Leave setup",
+  "buttons": [
+   "Create missing balances",
+   "New leave type",
+   "Edit",
+   "Stop offering",
+   "Edit",
+   "Stop offering",
+   "Edit",
+   "Stop offering",
+   "Add"
+  ],
+  "inputs": 3,
+  "tableRows": 3
+ },
+ "admin:/settings/logins": {
+  "title": "Staff logins",
+  "buttons": [
+   "Everyone",
+   "No login yet"
+  ],
+  "inputs": 0,
+  "tableRows": 4
+ },
+ "admin:/settings/api-keys": {
+  "title": "API Keys",
+  "buttons": [
+   "Generate Key",
+   "Generate Key"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "admin:/settings/webhooks": {
+  "title": "Webhooks",
+  "buttons": [
+   "Create webhook"
+  ],
+  "inputs": 6,
+  "tableRows": 0
+ },
+ "admin:/settings/devices": {
+  "title": "Biometric devices",
+  "buttons": [
+   "Register device"
+  ],
+  "inputs": 3,
+  "tableRows": 0
+ },
+ "admin:/settings/sso": {
+  "title": "Single Sign-On",
+  "buttons": [
+   "Save"
+  ],
+  "inputs": 5,
+  "tableRows": 0
+ },
+ "admin:/settings/eor": {
+  "title": "Global Hiring (EOR)",
+  "buttons": [
+   "Get Quote"
+  ],
+  "inputs": 4,
+  "tableRows": 148
+ },
+ "admin:/performance/reviews": {
+  "title": "Reviews & 360 Feedback",
+  "buttons": [
+   "New Review",
+   "Review Forms",
+   "360 Peer Feedback"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/dashboard": {
+  "title": "Good afternoon, Hira",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/one-on-ones": {
+  "title": "1-on-1s",
+  "buttons": [
+   "Schedule 1-on-1",
+   "Schedule 1-on-1"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/employees": {
+  "title": "Employees",
+  "buttons": [
+   "Org Chart",
+   "Add Employee"
+  ],
+  "inputs": 1,
+  "tableRows": 4
+ },
+ "hr:/recruitment": {
+  "title": "Recruitment",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/recruitment/kanban": {
+  "title": "ATS Board",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/recruitment/preboarding": {
+  "title": "Pre-boarding",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/onboarding": {
+  "title": "Onboarding",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/offboarding": {
+  "title": "Offboarding",
+  "buttons": [
+   "Start offboarding"
+  ],
+  "inputs": 5,
+  "tableRows": 0
+ },
+ "hr:/leave": {
+  "title": "Leave Management",
+  "buttons": [
+   "Apply for Leave"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/attendance": {
+  "title": "Attendance",
+  "buttons": [
+   "Clock In",
+   "Clock Out"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/timesheets": {
+  "title": "Timesheets",
+  "buttons": [
+   "New Project",
+   "Log Hours",
+   "My Week",
+   "Approvals",
+   "Previous week",
+   "Next week",
+   "Submit Week"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/payroll": {
+  "title": "Payroll",
+  "buttons": [
+   "Run Payroll"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/expenses": {
+  "title": "Expenses & reimbursements",
+  "buttons": [
+   "Add item",
+   "Save draft",
+   "Add category"
+  ],
+  "inputs": 11,
+  "tableRows": 0
+ },
+ "hr:/loans": {
+  "title": "Loans & advances",
+  "buttons": [
+   "Submit request"
+  ],
+  "inputs": 6,
+  "tableRows": 0
+ },
+ "hr:/performance": {
+  "title": "Performance",
+  "buttons": [
+   "Reviews & 360s",
+   "eNPS"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/performance/enps": {
+  "title": "Employee Net Promoter Score",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/lms": {
+  "title": "Learning Management",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/reports": {
+  "title": "Reports & Analytics",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 12
+ },
+ "hr:/ai": {
+  "title": "Ask MatrixHR",
+  "buttons": [
+   "Turn off",
+   "New chat",
+   "What is my leave balance?",
+   "Which public holidays are coming up?",
+   "How do I invite an employee to log in?",
+   "Attach a file",
+   "Send"
+  ],
+  "inputs": 2,
+  "tableRows": 0
+ },
+ "hr:/whatsapp": {
+  "title": "WhatsApp Integration",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/settings": {
+  "title": "Settings",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/settings/custom-fields": {
+  "title": "Custom Fields",
+  "buttons": [
+   "Add Field"
+  ],
+  "inputs": 0,
+  "tableRows": 1
+ },
+ "hr:/settings/workflows": {
+  "title": "Workflows",
+  "buttons": [
+   "Create Workflow"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/settings/audit": {
+  "title": "Audit Log",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 12
+ },
+ "hr:/billing": {
+  "title": "Billing",
+  "buttons": [
+   "Plan",
+   "AI credits",
+   "Monthly",
+   "Yearly (2 months free)",
+   "Starter$25.00 a monthUp to 25 employees2 admin users150 AI credits a month",
+   "Growth$69.00 a monthUp to 100 employees5 admin users500 AI credits a month",
+   "Business$149.00 a monthUp to 300 employees, then $0.50 each15 admin users1,500 AI credits a month",
+   "Continue to payment details"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/marketplace": {
+  "title": "Marketplace",
+  "buttons": [
+   "All",
+   "accounting",
+   "benefits",
+   "hardware",
+   "identity",
+   "learning",
+   "lifestyle",
+   "local",
+   "payroll",
+   "productivity",
+   "recruitment",
+   "screening",
+   "Connect",
+   "Connect"
+  ],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/extensions": {
+  "title": "Extensions",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/security": {
+  "title": "Security",
+  "buttons": [
+   "Change password",
+   "Set up",
+   "Opt in to WhatsApp messages"
+  ],
+  "inputs": 3,
+  "tableRows": 0
+ },
  "manager:/dashboard": {
   "title": "Good afternoon, Mansoor",
   "buttons": [],
@@ -250,7 +812,7 @@
    "New tenant"
   ],
   "inputs": 0,
-  "tableRows": 90
+  "tableRows": 116
  },
  "superadmin:/platform/billing": {
   "title": "Billing",
@@ -276,7 +838,7 @@
   "title": "Audit log",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 58
+  "tableRows": 87
  },
  "superadmin:/platform/ai": {
   "title": "AI assistant",
@@ -288,7 +850,7 @@
    "Grant"
   ],
   "inputs": 12,
-  "tableRows": 88
+  "tableRows": 113
  },
  "superadmin:/security": {
   "title": "Security",

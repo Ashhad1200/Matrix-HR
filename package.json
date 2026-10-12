@@ -36,7 +36,8 @@
     "test:bamboo": "pnpm exec tsx scripts/bamboo-comparison-test.ts",
     "test:ui": "node scripts/ui-test.mjs",
     "test:e2e": "node scripts/run-e2e.js test --config=e2e/playwright.config.ts",
-    "test:e2e:report": "node scripts/run-e2e.js show-report e2e/report"
+    "test:e2e:report": "node scripts/run-e2e.js show-report e2e/report",
+    "test:qa": "node scripts/run-e2e.js test --config=tests/qa-crud/playwright.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

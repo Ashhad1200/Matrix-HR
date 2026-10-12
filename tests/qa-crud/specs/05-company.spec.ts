@@ -107,7 +107,12 @@ test('notifications: own only, mark read', async () => {
   expect(n.status).toBe(200);
   const items = Array.isArray(n.body) ? n.body : n.body.items ?? [];
   if (items.length) {
-    expect([403, 404]).toContain((await api('employee2', `/notifications/${items[0].id}/read`, 'PATCH')).status);
+    const unread = items.find((x: any) => !x.read);
+    if (unread) {
+      await api('employee2', `/notifications/${unread.id}/read`, 'PATCH'); // not theirs: must change nothing
+      const after = (await api('employee', '/notifications')).body;
+      expect((Array.isArray(after) ? after : after.items).find((x: any) => x.id === unread.id).read, 'another user marked my notification read').toBe(false);
+    }
     expect((await api('employee', `/notifications/${items[0].id}/read`, 'PATCH')).status).toBeLessThan(300);
   }
 });

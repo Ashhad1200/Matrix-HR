@@ -46,7 +46,8 @@ export default function TimesheetsPage() {
   const load = useCallback(() => {
     setLoading(true);
     Promise.all([
-      api.timesheets.entries(weekStart),
+      // A login with no employee profile (e.g. the company owner created at signup) has no timesheet of its own.
+      user?.employeeId ? api.timesheets.entries(weekStart) : Promise.resolve({ weekStart, entries: [], totalHours: 0 }),
       api.timesheets.projects(),
       canApprove ? api.timesheets.pending() : Promise.resolve([]),
     ])
@@ -58,7 +59,7 @@ export default function TimesheetsPage() {
       })
       .catch((err) => setError(err.message || 'Failed to load timesheets'))
       .finally(() => setLoading(false));
-  }, [weekStart, canApprove]);
+  }, [weekStart, canApprove, user?.employeeId]);
 
   useEffect(load, [load]);
 

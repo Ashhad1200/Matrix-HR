@@ -21,7 +21,8 @@ for (const who of ROLES) {
     test.setTimeout(1_500_000);
     const issues: string[] = [];
     const errs: string[] = [];
-    page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text().slice(0, 160)); });
+    // Next prefetches linked routes; our own rapid page.goto() cancels those requests, which logs 'Failed to fetch RSC payload'. That is test noise, not an app error.
+    page.on('console', (m) => { if (m.type() === 'error' && !/Failed to fetch RSC payload/.test(m.text())) errs.push(m.text().slice(0, 160)); });
     page.on('pageerror', (e) => errs.push('pageerror ' + e.message.slice(0, 160)));
     const bad: string[] = [];
     page.on('response', (r) => { const u = r.url(); if (u.includes('/api/v1') && r.status() >= 400 && r.status() !== 401) bad.push(`${r.status()} ${r.request().method()} ${u.split('/api/v1')[1].slice(0, 70)}`); });
