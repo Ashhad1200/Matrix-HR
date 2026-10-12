@@ -402,6 +402,22 @@ export const api = {
   },
   ai: {
     ask: (question: string) => request<any>('/ai/ask', { method: 'POST', body: JSON.stringify({ question }) }),
+    status: () => request<any>('/ai/status'),
+    chat: (message: string, conversationId?: string, file?: File | null) =>
+      file ? uploadWithFields<any>('/ai/chat', file, { message, conversationId }) : request<any>('/ai/chat', { method: 'POST', body: JSON.stringify({ message, conversationId }) }),
+    conversations: () => request<any[]>('/ai/conversations'),
+    conversation: (id: string) => request<any>(`/ai/conversations/${id}`),
+    deleteConversation: (id: string) => request<any>(`/ai/conversations/${id}`, { method: 'DELETE' }),
+    confirm: (id: string) => request<any>(`/ai/actions/${id}/confirm`, { method: 'POST' }),
+    cancel: (id: string) => request<any>(`/ai/actions/${id}/cancel`, { method: 'POST' }),
+    tenant: () => request<{ aiEnabled: boolean }>('/ai/tenant'),
+    setTenant: (enabled: boolean) => request<any>('/ai/tenant', { method: 'PUT', body: JSON.stringify({ enabled }) }),
+  },
+  platformAi: {
+    settings: () => request<any>('/platform/ai/settings'),
+    save: (data: Record<string, unknown>) => request<any>('/platform/ai/settings', { method: 'PUT', body: JSON.stringify(data) }),
+    usage: () => request<any>('/platform/billing/ai-usage'),
+    grant: (tenantId: string, data: { credits: number; reason: string; idempotencyKey: string }) => request<any>(`/platform/billing/tenants/${tenantId}/credits`, { method: 'POST', body: JSON.stringify(data) }),
   },
   marketplace: {
     integrations: () => request<any>('/marketplace/integrations'),
