@@ -25,9 +25,10 @@ export class OneOnOnesController {
   create(
     @TenantId() tenantId: string,
     @CurrentUser('employeeId') employeeId: string,
+    @CurrentUser('role') role: UserRole,
     @Body() dto: CreateOneOnOneDto,
   ) {
-    return this.oneOnOnes.create(tenantId, employeeId, dto);
+    return this.oneOnOnes.create(tenantId, employeeId, dto, role);
   }
 
   @Patch(':id')

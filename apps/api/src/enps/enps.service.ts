@@ -114,8 +114,9 @@ export class EnpsService {
     return this.prisma.enpsSurvey.delete({ where: { id } });
   }
 
-  async respond(surveyId: string, dto: EnpsRespondDto) {
-    const survey = await this.prisma.enpsSurvey.findUnique({ where: { id: surveyId } });
+  /** The survey must belong to the responder's own company; a survey id from another company reads as not found. */
+  async respond(tenantId: string, surveyId: string, dto: EnpsRespondDto) {
+    const survey = await this.prisma.enpsSurvey.findFirst({ where: { id: surveyId, tenantId } });
     if (!survey) throw new NotFoundException('Survey not found');
     if (survey.status !== 'active') throw new BadRequestException('Survey is not accepting responses');
     if (survey.closesAt && survey.closesAt < new Date()) {

@@ -52,8 +52,10 @@ export class EnpsController {
     return this.enps.remove(tenantId, id);
   }
 
+  // Any signed-in employee of the SAME company may answer. It was unguarded: anyone on the internet could post scores.
+  @UseGuards(JwtAuthGuard)
   @Post(':id/respond')
-  respond(@Param('id') id: string, @Body() dto: EnpsRespondDto) {
-    return this.enps.respond(id, dto);
+  respond(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: EnpsRespondDto) {
+    return this.enps.respond(tenantId, id, dto);
   }
 }

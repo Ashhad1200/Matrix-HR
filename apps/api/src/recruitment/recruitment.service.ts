@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InvitesService } from '../invites/invites.service';
 import { ensureBalances } from '../common/leave-balances';
 import { assertEmployeeRoom } from '../common/plan-limits';
@@ -47,6 +47,9 @@ export class RecruitmentService {
   }
 
   async updateApplicationStatus(tenantId: string, id: string, status: string) {
+    const allowed = ['APPLIED', 'SCREENING', 'SHORTLISTED', 'INTERVIEW', 'ASSESSMENT', 'OFFER', 'REJECTED'];
+    if (status === 'HIRED') throw new BadRequestException('Use the Hire action to hire a candidate');
+    if (!allowed.includes(status)) throw new BadRequestException(`Status must be one of ${allowed.join(', ')}`);
     const app = await this.prisma.jobApplication.findFirst({ where: { id, tenantId } });
     if (!app) throw new NotFoundException('Application not found');
     return this.prisma.jobApplication.update({ where: { id }, data: { status: status as any } });

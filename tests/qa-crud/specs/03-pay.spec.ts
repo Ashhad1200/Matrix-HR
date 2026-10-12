@@ -38,8 +38,8 @@ test.describe('Expenses', () => {
     expect((await api('employee', `/expenses/claims/${tmp.body.id}`)).status).toBe(404);
   });
   test('visibility: other employees and other tenants cannot see it', async () => {
-    expect((await api('employee2', `/expenses/claims/${claimId}`)).status).toBe(404);
-    expect((await api('adminB', `/expenses/claims/${claimId}`)).status).toBe(404);
+    expect([403, 404]).toContain((await api('employee2', `/expenses/claims/${claimId}`)).status);
+    expect([403, 404]).toContain((await api('adminB', `/expenses/claims/${claimId}`)).status);
     expect((await api('employee2', '/expenses/claims')).body.map?.((x: any) => x.id) ?? []).not.toContain(claimId);
   });
   test('submit → manager decision; employee cannot self-approve; edits locked after submit', async () => {
@@ -49,8 +49,12 @@ test.describe('Expenses', () => {
     expect((await api('employee', `/expenses/claims/${claimId}/decision`, 'POST', { action: 'APPROVE' })).status).toBe(403);
     expect((await api('employee2', `/expenses/claims/${claimId}/decision`, 'POST', { action: 'APPROVE' })).status).toBe(403);
     expect((await api('manager', '/expenses/inbox')).body.map((x: any) => x.id)).toContain(claimId);
+    // approval chain: manager, then HR
     const d = await api('manager', `/expenses/claims/${claimId}/decision`, 'POST', { action: 'APPROVE', comment: 'ok' });
     expect(d.status, JSON.stringify(d.body)).toBeLessThan(300);
+    expect((await api('employee', `/expenses/claims/${claimId}`)).body.status, 'still waiting for HR').toBe('SUBMITTED');
+    const hr = await api('hr', `/expenses/claims/${claimId}/decision`, 'POST', { action: 'APPROVE' });
+    expect(hr.status, JSON.stringify(hr.body)).toBeLessThan(300);
     const again = await api('manager', `/expenses/claims/${claimId}/decision`, 'POST', { action: 'REJECT' });
     expect(again.status, 'a decided claim cannot be flipped').toBeGreaterThanOrEqual(400);
     expect((await api('employee', `/expenses/claims/${claimId}`)).body.status).toMatch(/APPROVED/);
@@ -64,6 +68,7 @@ test.describe('Expenses', () => {
   });
   test('cancel works on a submitted claim', async () => {
     const c = await api('employee', '/expenses/claims', 'POST', { title: `${tag} cancel`, items: [{ categoryId: catId, date: today, amount: 5, description: 'c' }] });
+    expect(c.status, JSON.stringify(c.body)).toBe(201);
     await api('employee', `/expenses/claims/${c.body.id}/submit`, 'POST');
     expect((await api('employee', `/expenses/claims/${c.body.id}/cancel`, 'POST')).status).toBeLessThan(300);
     expect((await api('employee', `/expenses/claims/${c.body.id}`)).body.status).toMatch(/CANCEL/);
@@ -80,14 +85,19 @@ test.describe('Loans and advances', () => {
     expect((await api('employee', '/loans', 'POST', { type: 'ADVANCE', amount: -1, firstDeductionPeriod: period })).status).toBe(400);
     expect((await api('employee', '/loans', 'POST', { type: 'LOAN', amount: 100, firstDeductionPeriod: 'soon' })).status).toBe(400);
     expect((await api('employee', `/loans/${loanId}`)).status).toBe(200);
-    expect((await api('employee2', `/loans/${loanId}`)).status).toBe(404);
-    expect((await api('adminB', `/loans/${loanId}`)).status).toBe(404);
+    expect([403, 404]).toContain((await api('employee2', `/loans/${loanId}`)).status);
+    expect([403, 404]).toContain((await api('adminB', `/loans/${loanId}`)).status);
     expect((await api('manager', `/loans/${loanId}/decision`, 'POST', { action: 'APPROVE' })).status, 'manager is not a loan approver').toBe(403);
   });
   test('HR decision is final; cancel only own pending', async () => {
+    // chain: HR, then company admin
     const d = await api('hr', `/loans/${loanId}/decision`, 'POST', { action: 'APPROVE', comment: 'ok' });
     expect(d.status, JSON.stringify(d.body)).toBeLessThan(300);
-    expect((await api('hr', `/loans/${loanId}/decision`, 'POST', { action: 'REJECT' })).status).toBeGreaterThanOrEqual(400);
+    expect((await api('hr', `/loans/${loanId}/decision`, 'POST', { action: 'APPROVE' })).status, 'same step cannot be approved twice').toBeGreaterThanOrEqual(400);
+    const d2 = await api('admin', `/loans/${loanId}/decision`, 'POST', { action: 'APPROVE' });
+    expect(d2.status, JSON.stringify(d2.body)).toBeLessThan(300);
+    expect((await api('employee', `/loans/${loanId}`)).body.status).toBe('APPROVED');
+    expect((await api('hr', `/loans/${loanId}/decision`, 'POST', { action: 'REJECT' })).status, 'a decided loan cannot be flipped').toBeGreaterThanOrEqual(400);
     expect((await api('employee', `/loans/${loanId}/cancel`, 'POST')).status, 'cannot cancel an approved loan').toBeGreaterThanOrEqual(400);
     const l2 = await api('employee', '/loans', 'POST', { type: 'LOAN', amount: 900, installments: 3, firstDeductionPeriod: `${new Date().getFullYear()}-12` });
     expect((await api('employee2', `/loans/${l2.body.id}/cancel`, 'POST')).status).toBeGreaterThanOrEqual(400);

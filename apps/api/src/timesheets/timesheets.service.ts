@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException, BadRequestException 
 import { PrismaService } from '../prisma/prisma.service';
 import { UserRole } from '@matrixhr/database';
 import { CreateProjectDto, CreateTimeEntryDto, UpdateTimeEntryDto } from './dto';
+import { assertInTenant } from '../common/data-scope';
 
 @Injectable()
 export class TimesheetsService {
@@ -64,6 +65,7 @@ export class TimesheetsService {
 
   async createEntry(tenantId: string, employeeId: string | null, dto: CreateTimeEntryDto) {
     if (!employeeId) throw new ForbiddenException('No employee profile linked');
+    await assertInTenant(this.prisma, tenantId, [{ model: 'project', id: dto.projectId, label: 'project' }]);
     return this.prisma.timeEntry.create({
       data: {
         tenantId,
@@ -82,6 +84,7 @@ export class TimesheetsService {
     if (!entry) throw new NotFoundException('Time entry not found');
     if (entry.employeeId !== employeeId) throw new ForbiddenException('Not your entry');
     if (entry.status === 'approved') throw new BadRequestException('Approved entries are locked');
+    await assertInTenant(this.prisma, tenantId, [{ model: 'project', id: dto.projectId, label: 'project' }]);
 
     return this.prisma.timeEntry.update({
       where: { id },

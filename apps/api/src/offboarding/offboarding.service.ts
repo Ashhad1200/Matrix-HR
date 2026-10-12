@@ -5,6 +5,7 @@ import {
   NotFoundException,
   OnModuleInit,
 } from '@nestjs/common';
+import { assertInTenant } from '../common/data-scope';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -141,6 +142,7 @@ export class OffboardingService implements OnModuleInit {
     let employeeId = actor.employeeId;
     let type = dto.type;
     if (privileged && dto.employeeId) {
+      await assertInTenant(this.prisma, tenantId, [{ model: 'employee', id: dto.employeeId, label: 'employee' }]);
       employeeId = dto.employeeId;
     } else if (!privileged) {
       // Non-HR users can only resign on their own behalf.

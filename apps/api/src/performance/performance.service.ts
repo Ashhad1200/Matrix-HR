@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Viewer, isHrPlus, scopedEmployeeIds, employeeIdFilter, assertInTenant } from '../common/data-scope';
 
@@ -16,6 +16,7 @@ export class PerformanceService {
   async createCycle(tenantId: string, data: {
     name: string; type?: string; startDate: string; endDate: string;
   }) {
+    if (new Date(data.endDate) <= new Date(data.startDate)) throw new BadRequestException('The end date must be after the start date');
     return this.prisma.reviewCycle.create({
       data: {
         tenantId,
