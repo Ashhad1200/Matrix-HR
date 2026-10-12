@@ -10,3 +10,4 @@ B8 | Minor | Peer review rating unbounded (9 accepted) | FIXED
 B9 | BLOCKER (security) | POST /enps/surveys/:id/respond had no auth guard: anyone on the internet could post eNPS scores into any company's survey (tenant not checked) | FIXED (guard + tenant check)
 OPEN-1 | Decision | eNPS responses carry no respondent id, so one user can vote repeatedly (needs an additive table to dedupe while staying anonymous)
 B10 | Minor | Custom field key accepted any text (spaces, symbols), no length limits | FIXED
+B11 | Major (ops) | Operator 'Suspend' only switched off plan-gated features: the company kept full access (Tenant.status was never set; no UI/API could set it). Suspending now blocks the tenant and un-suspending restores it | FIXED (behaviour change, see Decisions)
