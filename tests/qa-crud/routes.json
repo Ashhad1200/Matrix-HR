@@ -827,6 +827,13 @@
  },
  {
   "method": "GET",
+  "path": "/enps/surveys/active",
+  "auth": true,
+  "roles": [],
+  "file": "enps/enps.controller.ts"
+ },
+ {
+  "method": "GET",
   "path": "/enps/surveys/summary",
   "auth": true,
   "roles": [
@@ -1243,6 +1250,41 @@
  {
   "method": "GET",
   "path": "/leave/holidays",
+  "auth": true,
+  "roles": [],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/leave/working-days",
+  "auth": true,
+  "roles": [],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/leave/weekend",
+  "auth": true,
+  "roles": [],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "PUT",
+  "path": "/leave/weekend",
+  "auth": true,
+  "roles": [],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/leave/requests/:id/cancel",
+  "auth": true,
+  "roles": [],
+  "file": "leave/leave.controller.ts"
+ },
+ {
+  "method": "PATCH",
+  "path": "/leave/requests/:id",
   "auth": true,
   "roles": [],
   "file": "leave/leave.controller.ts"

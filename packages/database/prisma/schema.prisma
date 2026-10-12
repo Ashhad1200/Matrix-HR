@@ -182,6 +182,7 @@ model Tenant {
   subscription       Subscription?
   usageEvents        UsageEvent[]
   aiEnabled          Boolean      @default(true)
+  weekendDays        Int[]        @default([6, 0]) // 0 = Sunday ... 6 = Saturday; leave does not count these days
   paymentRequests    PaymentRequest[]
   aiConversations    AiConversation[]
   aiCreditAccount    AiCreditAccount?
@@ -1282,8 +1283,21 @@ model EnpsSurvey {
 
   tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   responses EnpsResponse[]
+  participations EnpsParticipation[]
 
   @@index([tenantId])
+}
+
+// One row per (survey, employee) so a person can answer once. It carries NO score and is not linked to the response,
+// which keeps answers anonymous.
+model EnpsParticipation {
+  surveyId   String
+  employeeId String
+  createdAt  DateTime @default(now())
+
+  survey EnpsSurvey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  @@id([surveyId, employeeId])
 }
 
 model EnpsResponse {

@@ -95,6 +95,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
     const message = Array.isArray(err.message) ? err.message.join(', ') : err.message;
+    // The operator suspended this company: tell the shell so it can show the suspended screen instead of a raw error.
+    if (err.code === 'ACCOUNT_SUSPENDED' && typeof window !== 'undefined') window.dispatchEvent(new Event('matrixhr:suspended'));
     throw new ApiError(res.status, message || 'Request failed', err.code);
   }
 

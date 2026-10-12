@@ -23,6 +23,13 @@ export class SignUpDto {
   @MaxLength(63)
   @Matches(/^[a-z0-9-]+$/)
   subdomain: string;
+
+  /** The owner's own name, for their employee profile (defaults to "Company Owner"). */
+  @IsOptional() @IsString() @MinLength(1) @MaxLength(60)
+  firstName?: string;
+
+  @IsOptional() @IsString() @MinLength(1) @MaxLength(60)
+  lastName?: string;
 }
 
 export class LoginDto {

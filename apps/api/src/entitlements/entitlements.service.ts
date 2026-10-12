@@ -16,11 +16,21 @@ const UNSUBSCRIBED_DEFAULT: ResolvedEntitlements = {
   features: {},
 };
 
+/** Customers who buy the source run one company with no plans or billing: every module is on. */
+export const singleCompanyMode = () => process.env.SINGLE_COMPANY_MODE === 'true';
+
 @Injectable()
 export class EntitlementsService {
   constructor(private prisma: PrismaService) {}
 
+  /** Every feature key any plan knows about, i.e. "every module". */
+  private async allFeatures(): Promise<Record<string, { enabled: boolean; limit: number | null }>> {
+    const keys = await this.prisma.planEntitlement.findMany({ select: { featureKey: true }, distinct: ['featureKey'] });
+    return Object.fromEntries(keys.map((k) => [k.featureKey, { enabled: true, limit: null }]));
+  }
+
   async resolve(tenantId: string): Promise<ResolvedEntitlements> {
+    if (singleCompanyMode()) return { planCode: 'single-company', status: 'active', features: await this.allFeatures() };
     const subscription = await this.prisma.subscription.findUnique({
       where: { tenantId },
       include: {
@@ -47,11 +57,18 @@ export class EntitlementsService {
       };
     }
 
+    // A free trial includes every module for its whole length (what the website promises); limits then follow the plan again.
+    if (subscription.status === 'trialing') {
+      const all = await this.allFeatures();
+      for (const [k, v] of Object.entries(all)) if (!features[k]?.enabled) features[k] = v;
+    }
+
     return { planCode: subscription.planVersion.plan.code, status: subscription.status, features };
   }
 
   async hasFeature(tenantId: string, featureKey: string): Promise<boolean> {
     const { status, features } = await this.resolve(tenantId);
+    if (singleCompanyMode()) return features[featureKey]?.enabled ?? true;
     if (status !== 'active' && status !== 'trialing') return false;
     return features[featureKey]?.enabled ?? false;
   }

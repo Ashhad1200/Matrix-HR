@@ -21,6 +21,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       include: { tenant: true, employee: true },
     });
 
+    if (user && user.status === 'ACTIVE' && user.tenant.status === 'SUSPENDED') {
+      throw new ForbiddenException({ message: 'Account suspended. Please contact support.', code: 'ACCOUNT_SUSPENDED' });
+    }
     if (!user || user.status !== 'ACTIVE' || user.tenant.status !== 'ACTIVE') {
       throw new UnauthorizedException();
     }

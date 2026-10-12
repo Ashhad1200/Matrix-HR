@@ -2,7 +2,7 @@ import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@n
 import { EnpsService } from './enps.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles, TenantId } from '../common/decorators';
+import { CurrentUser, Roles, TenantId } from '../common/decorators';
 import { UserRole } from '@matrixhr/database';
 import { CreateEnpsSurveyDto, UpdateEnpsSurveyDto, EnpsRespondDto } from './dto';
 
@@ -15,6 +15,13 @@ export class EnpsController {
   @Get()
   findAll(@TenantId() tenantId: string) {
     return this.enps.findAll(tenantId);
+  }
+
+  /** Surveys open for answers, for every signed-in employee, with whether this person already answered. */
+  @UseGuards(JwtAuthGuard)
+  @Get('active')
+  active(@TenantId() tenantId: string, @CurrentUser('employeeId') employeeId: string | null) {
+    return this.enps.activeFor(tenantId, employeeId);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -55,7 +62,7 @@ export class EnpsController {
   // Any signed-in employee of the SAME company may answer. It was unguarded: anyone on the internet could post scores.
   @UseGuards(JwtAuthGuard)
   @Post(':id/respond')
-  respond(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: EnpsRespondDto) {
-    return this.enps.respond(tenantId, id, dto);
+  respond(@TenantId() tenantId: string, @CurrentUser('employeeId') employeeId: string | null, @Param('id') id: string, @Body() dto: EnpsRespondDto) {
+    return this.enps.respond(tenantId, employeeId, id, dto);
   }
 }

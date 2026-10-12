@@ -8,6 +8,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
+import { ForbiddenException } from '@nestjs/common';
+import { ensureBalances } from '../common/leave-balances';
 import { createHash, randomBytes, randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
@@ -36,7 +38,7 @@ export class AuthService {
 
   // Shared by public signup and platform-operator-initiated org creation, so a tenant gets the same
   // starting defaults (leave policies, a shift) regardless of who created it.
-  async provisionTenant(dto: { companyName: string; subdomain: string; email: string; passwordHash: string }) {
+  async provisionTenant(dto: { companyName: string; subdomain: string; email: string; passwordHash: string; firstName?: string; lastName?: string }) {
     const existing = await this.prisma.tenant.findUnique({
       where: { subdomain: dto.subdomain },
     });
@@ -77,6 +79,15 @@ export class AuthService {
         workingHours: 8,
       },
     });
+
+    // The owner is a person too: give them an employee profile so Time Clock, Timesheets, My profile, leave and 1-on-1s
+    // work for them instead of returning "no employee profile linked".
+    const owner = await this.prisma.employee.create({
+      data: { tenantId: tenant.id, employeeCode: 'E-001', firstName: dto.firstName?.trim() || 'Company', lastName: dto.lastName?.trim() || 'Owner', email: dto.email, status: 'ACTIVE' },
+    });
+    await this.prisma.user.update({ where: { id: tenant.users[0].id }, data: { employeeId: owner.id } });
+    tenant.users[0].employeeId = owner.id;
+    await ensureBalances(this.prisma, tenant.id, new Date().getFullYear(), [owner.id]);
 
     return tenant;
   }
@@ -160,6 +171,7 @@ export class AuthService {
       await this.registerFailure(user);
       throw new UnauthorizedException('Invalid credentials');
     }
+    if (user.tenant.status === 'SUSPENDED') throw new ForbiddenException({ message: 'Account suspended. Please contact support.', code: 'ACCOUNT_SUSPENDED' });
     if (user.status !== 'ACTIVE' || user.tenant.status !== 'ACTIVE') {
       throw new UnauthorizedException('This account is disabled');
     }
@@ -366,6 +378,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { id: sub }, include: { tenant: true } });
     if (!user || !user.twoFaEnabled) throw new UnauthorizedException('Your sign-in expired — start again');
     if (user.lockedUntil && user.lockedUntil > new Date()) throw new UnauthorizedException('Account locked. Try again later.');
+    if (user.tenant.status === 'SUSPENDED') throw new ForbiddenException({ message: 'Account suspended. Please contact support.', code: 'ACCOUNT_SUSPENDED' });
     if (user.status !== 'ACTIVE' || user.tenant.status !== 'ACTIVE') throw new UnauthorizedException('This account is disabled');
 
     // A 6-digit code is guessable, so wrong codes count toward the same lockout as wrong passwords.

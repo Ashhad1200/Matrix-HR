@@ -1,10 +1,10 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { LeaveService } from './leave.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles, CurrentUser, TenantId } from '../common/decorators';
 import { UserRole } from '@matrixhr/database';
-import { CreateLeaveRequestDto, CreateLeavePolicyDto, UpdateLeavePolicyDto, CreateHolidayDto, UpdateHolidayDto } from './dto';
+import { UpdateLeaveRequestDto, WeekendDto, CreateLeaveRequestDto, CreateLeavePolicyDto, UpdateLeavePolicyDto, CreateHolidayDto, UpdateHolidayDto } from './dto';
 import { viewerOf } from '../common/data-scope';
 
 @Controller('leave')
@@ -41,6 +41,24 @@ export class LeaveController {
   getHolidays(@TenantId() tenantId: string, @Query('year') year?: string) {
     return this.leave.getHolidays(tenantId, year ? parseInt(year) : undefined);
   }
+
+  /** How many days these dates would take off the balance (weekends and public holidays excluded). */
+  @Get('working-days')
+  workingDays(@TenantId() tenantId: string, @Query('start') start: string, @Query('end') end: string) {
+    return this.leave.previewDays(tenantId, start, end);
+  }
+
+  @Get('weekend')
+  weekend(@TenantId() tenantId: string) { return this.leave.getWeekend(tenantId); }
+
+  @Put('weekend') @UseGuards(RolesGuard) @Roles(UserRole.HR_MANAGER, UserRole.COMPANY_ADMIN)
+  setWeekend(@TenantId() tenantId: string, @CurrentUser('id') userId: string, @Body() dto: WeekendDto) { return this.leave.setWeekend(tenantId, userId, dto.days); }
+
+  @Post('requests/:id/cancel')
+  cancelRequest(@TenantId() tenantId: string, @CurrentUser() user: any, @Param('id') id: string) { return this.leave.cancelRequest(tenantId, viewerOf(user), id); }
+
+  @Patch('requests/:id')
+  updateRequest(@TenantId() tenantId: string, @CurrentUser() user: any, @Param('id') id: string, @Body() dto: UpdateLeaveRequestDto) { return this.leave.updateRequest(tenantId, viewerOf(user), id, dto); }
 
   @Post('requests')
   createRequest(
