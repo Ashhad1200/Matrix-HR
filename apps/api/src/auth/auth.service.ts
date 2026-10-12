@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ConflictException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -13,6 +14,7 @@ import { AuditService } from '../audit/audit.service';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import { CredentialCipherService } from '../crypto/credential-cipher.service';
 import { MailService } from '../mail/mail.service';
+import { BillingService } from '../billing/billing.service';
 import { base32Encode, generateSecret, otpauthUrl, verifyTotp } from './totp';
 import { DEFAULT_LEAVE_POLICIES, getPermissionsForRole } from '@matrixhr/shared';
 import { SignUpDto, LoginDto } from './dto';
@@ -27,7 +29,10 @@ export class AuthService {
     private entitlements: EntitlementsService,
     private cipher: CredentialCipherService,
     private mail: MailService,
+    private billing: BillingService,
   ) {}
+
+  private readonly logger = new Logger(AuthService.name);
 
   // Shared by public signup and platform-operator-initiated org creation, so a tenant gets the same
   // starting defaults (leave policies, a shift) regardless of who created it.
@@ -79,6 +84,8 @@ export class AuthService {
   async signUp(dto: SignUpDto) {
     const passwordHash = await bcrypt.hash(dto.password, 12);
     const tenant = await this.provisionTenant({ ...dto, passwordHash });
+    // New public signups only. Operator-created tenants and every pre-existing tenant get no clock.
+    await this.billing.startTrial(tenant.id).catch((e) => this.logger.error(`trial start failed for ${tenant.id}: ${e.message}`));
     const user = tenant.users[0];
     const tokens = await this.generateTokens(user.id, tenant.id, user.role, user.tokenVersion);
     // Without a session row the refresh token issued here could never be redeemed.
@@ -413,6 +420,10 @@ export class AuthService {
 
     const entitlements =
       user.role === 'SUPER_ADMIN' ? null : await this.entitlements.resolve(user.tenantId);
+    // Everyone in a tenant learns whether it is blocked (a lapsed employee needs a clear message); only roles that can
+    // act on it get the banner details.
+    const billing = user.role === 'SUPER_ADMIN' ? null : await this.billing.state(user.tenantId);
+    const billingForRole = billing && (user.role === 'COMPANY_ADMIN' || user.role === 'HR_MANAGER') ? billing : billing ? { blocked: billing.blocked, state: billing.state, banner: null } : null;
 
     // Credential material (password hash, 2FA secret/recovery codes, reset/verify tokens, lockout
     // counters) must never be serialised to a client — only the facts the UI needs.
@@ -427,6 +438,7 @@ export class AuthService {
       permissions: { ...permissions, nav },
       badges: { pendingApprovals, unreadNotifications },
       entitlements,
+      billing: billingForRole,
     };
   }
 

@@ -19,6 +19,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let status = 500;
     let message: string | string[] = 'Internal server error';
     let error = 'Internal Server Error';
+    let code: string | undefined;
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
@@ -29,6 +30,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const b = body as Record<string, any>;
         message = b.message ?? exception.message;
         error = b.error ?? error;
+        // Optional machine-readable discriminator (e.g. BILLING_LAPSED) so the web app can route on it.
+        if (typeof b.code === 'string' && /^[A-Z_]{3,40}$/.test(b.code)) code = b.code;
       }
       // Nest surfaces the body parser's raw JSON.parse text ("Unexpected token } in JSON at position 9").
       if (status === 400 && typeof message === 'string' && /JSON/.test(message)) message = 'Malformed request body';
@@ -61,6 +64,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
       );
     }
 
-    res.status(status).json({ statusCode: status, message, error, ...(requestId ? { requestId } : {}) });
+    res.status(status).json({ statusCode: status, message, error, ...(code ? { code } : {}), ...(requestId ? { requestId } : {}) });
   }
 }

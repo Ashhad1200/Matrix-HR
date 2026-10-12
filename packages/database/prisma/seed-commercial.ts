@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
-const FEATURES: { key: string; name: string }[] = [
+export const FEATURES: { key: string; name: string }[] = [
   { key: 'employees.core', name: 'Employee Records' },
   { key: 'leave.manage', name: 'Leave Management' },
   { key: 'attendance.manage', name: 'Attendance & Time Clock' },
@@ -27,9 +27,9 @@ const FEATURES: { key: string; name: string }[] = [
   { key: 'loans.manage', name: 'Loans & Salary Advances' },
 ];
 
-const STARTER = ['employees.core', 'leave.manage', 'attendance.manage', 'self_service.basic', 'timesheets.manage'];
-const GROWTH = [...STARTER, 'payroll.run', 'recruitment.manage', 'onboarding.manage', 'whatsapp.send', 'attendance.biometric', 'accounting.export', 'expenses.manage', 'loans.manage'];
-const PRO = [...GROWTH, 'performance.manage', 'lms.manage', 'reports.advanced', 'api.access', 'custom_fields.manage', 'workflows.manage'];
+export const STARTER = ['employees.core', 'leave.manage', 'attendance.manage', 'self_service.basic', 'timesheets.manage'];
+export const GROWTH = [...STARTER, 'payroll.run', 'recruitment.manage', 'onboarding.manage', 'whatsapp.send', 'attendance.biometric', 'accounting.export', 'expenses.manage', 'loans.manage'];
+export const PRO = [...GROWTH, 'performance.manage', 'lms.manage', 'reports.advanced', 'api.access', 'custom_fields.manage', 'workflows.manage'];
 const ENTERPRISE = [...PRO, 'ai.ask', 'sso.saml', 'marketplace.connect', 'extensions.manage', 'eor.quote'];
 
 const PLANS: { code: string; name: string; pricePkrMonthly: number | null; includedEmployees: number; perEmployeePricePkr: number | null; features: string[] }[] = [

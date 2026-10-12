@@ -101,12 +101,25 @@ export class EmployeesService {
     if (clash) throw new ConflictException('Biometric PIN is already assigned to another employee');
   }
 
+  /**
+   * A plan can cap active employees (Starter 25, Growth 100). Plans with an overage price (Business) are never blocked: the
+   * extra employees are billed. Tenants on legacy plan versions have no cap, so existing customers are unaffected.
+   */
+  private async assertWithinPlanLimit(tenantId: string) {
+    const sub = await this.prisma.subscription.findUnique({ where: { tenantId }, select: { planVersion: { select: { maxEmployees: true, overagePerEmployee: true } } } });
+    const max = sub?.planVersion.maxEmployees;
+    if (!max || sub.planVersion.overagePerEmployee != null) return;
+    const active = await this.prisma.employee.count({ where: { tenantId, status: 'ACTIVE' } });
+    if (active >= max) throw new ForbiddenException(`Your plan allows up to ${max} active employees. Upgrade from Billing to add more.`);
+  }
+
   async create(tenantId: string, userId: string, dto: CreateEmployeeDto) {
     const existing = await this.prisma.employee.findUnique({
       where: { tenantId_employeeCode: { tenantId, employeeCode: dto.employeeCode } },
     });
     if (existing) throw new ConflictException('Employee code already exists');
     await this.assertBiometricPinFree(tenantId, dto.biometricPin);
+    await this.assertWithinPlanLimit(tenantId);
     await assertInTenant(this.prisma, tenantId, [
       { model: 'employee', id: dto.managerId, label: 'manager' },
       { model: 'department', id: dto.departmentId },
