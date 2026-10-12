@@ -21,7 +21,7 @@
 - **AI assistant**: prompts, app guide and nav label follow the brand ("AI assistant"). No credit limits in single-company mode.
 
 ## Migrations
-Two new migrations: **`2_hr_modules`** and **`3_currency`**. It is additive and idempotent (`ADD COLUMN IF NOT EXISTS "Tenant"."weekendDays"` defaulting to Saturday + Sunday, and `CREATE TABLE IF NOT EXISTS "EnpsParticipation"`). No drops, renames or type changes, so existing rows are untouched and it is safe to apply twice. `scripts/migration-rehearsal.sh` passed on 5 production-like databases (applied twice each, row fingerprints unchanged). 
+Two new migrations, both additive and idempotent. **`2_hr_modules`** (`ADD COLUMN IF NOT EXISTS "Tenant"."weekendDays"` defaulting to Saturday + Sunday, and `CREATE TABLE IF NOT EXISTS "EnpsParticipation"`): no drops, renames or type changes, existing rows untouched, safe to apply twice.
 **`3_currency`** (also additive and idempotent): `ADD COLUMN IF NOT EXISTS` for `PlanVersion.priceMonthlyPkr / priceYearlyPkr / overagePerEmployeePkr`, `CreditPack.pricePkr`, `Tenant.billingCurrency` (default `USD`) and `Tenant.country`. It also fills the starting PKR prices on the current plan versions and credit packs where they are still empty (never overwriting a price an operator set), and marks companies already on a PKR plan as PKR. No drops, renames or type changes. The rehearsal (`scripts/migration-rehearsal.sh`, 4 migrations) passes on all five production-like databases.
 
 ## Two billing currencies (PKR and USD)
@@ -36,19 +36,18 @@ Two new migrations: **`2_hr_modules`** and **`3_currency`**. It is additive and 
 ## New environment variables (all optional; leave unset on the main TREEVOXA production)
 | Variable | Where | Meaning |
 |---|---|---|
-| `SINGLE_COMPANY_MODE` | API | `true` for a one-company source install. Never on a multi-tenant server. |
+| `SINGLE_COMPANY_MODE` | API (and web) | `true` for a one-company source install. Never on a multi-tenant server. |
 | `WL_PRODUCT_NAME` | API + web | Turns white-label on. |
 | `WL_LOGO_URL`, `WL_FAVICON_URL`, `WL_PRIMARY_COLOR` (`#RRGGBB`), `WL_SUPPORT_EMAIL`, `WL_EMAIL_FROM_NAME`, `WL_WEBSITE_URL`, `WL_LEGAL_TEXT` | API + web | Brand details (see `docs/DEPLOYMENT.md`). |
 | `WL_APP_ID` | mobile build | Bundle id for a white-label app build. |
 | `WL_CURRENCIES` | API + web | `PKR,USD` (default) or one currency. |
 | `GEOIP_LOOKUP` / `GEOIP_URL` | web | `off` disables the visitor geo-IP lookup; `GEOIP_URL` uses your own service (`{ip}` placeholder). |
 | `API_INTERNAL_URL` | web | How the web container reaches the API for the public price list (falls back to `NEXT_PUBLIC_API_URL`). |
-| `SINGLE_COMPANY_MODE` | web too | Also set on the web container so the marketing pricing is hidden. |
 
-Both are listed in `.env.example` and passed through `docker-compose.yml`.
+All are listed in `.env.example` and passed through `docker-compose.yml`.
 
 ## API changes
-- **New public routes `GET /api/v1/brand` and `GET /api/v1/pricing`** (price list in both currencies; 404 on single-company installs): name, logo, colour, support email, website. Contains nothing secret; the sign-in page needs it before login.
+- **New public routes `GET /api/v1/brand` and `GET /api/v1/pricing`** (`/brand`: name, logo, colour, support email, website, currencies; `/pricing`: the price list in both currencies, 404 on single-company installs). Neither contains anything secret; the sign-in and marketing pages need them before login.
 - New: `PATCH /platform/tenants/:id/currency` (operator only, audited), `country` on sign-up, `PATCH/DELETE /employees/departments/:id`, `POST /employees/departments/import`, the same for `designations`, `PATCH /payroll/compensation-items/:id`, `PUT/DELETE /platform/tenants/:id/logo` (operator only).
 - `GET /auth/me` now also returns `deployment` and `brand`.
 - Dependency: `expo-constants` added to the mobile app (lockfile updated).
