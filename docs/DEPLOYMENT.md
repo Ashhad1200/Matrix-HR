@@ -87,3 +87,8 @@ stateless — sessions live in the database — so none is needed).
 | 7 | Database indexes | **Done (targeted)** | Reviewed against real query patterns; added indexes for login-by-email, manager→reports, per-user review/payslip/enrolment lookups, audit log paging, child-table FKs. Re-check with `EXPLAIN` on real data volumes. |
 | 8 | Logging & monitoring | **Logging done; alerting is yours to wire** | Structured JSON access logs with request ids, `/health` + `/health/ready`. See `docs/OPERATIONS.md` for the alerts to create — this repo cannot create them. |
 | 9 | Rollback strategy | **Runbook written, infra not provisioned** | §3 above. Migration baseline verified. Not rehearsed on a live cluster. |
+
+
+## Single-company installation (source-code customers)
+
+Set `SINGLE_COMPANY_MODE=true` on the API. Effects: every module is enabled with no plan; the Billing and platform screens, free trial, lapse/grace gate, payment routes (404) and AI credits (unlimited; the company supplies its own provider key) are off; public sign-up works only until the first company exists. The first sign-up creates the company and its owner (with an employee profile); everyone else joins through Settings > Staff logins. Do not set this flag on a multi-tenant deployment.

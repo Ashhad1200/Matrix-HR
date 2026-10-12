@@ -42,7 +42,8 @@ verify_new() {
   for t in PaymentRequest PaymentProof Receipt AiCreditLedger EmailOutbox ExpenseClaim LoanRequest; do
     [ "$(q "$db" "select to_regclass('public.\"$t\"') is not null")" = t ] || bad "$db: missing table $t"
   done
-  [ "$(q "$db" "select count(*) from _prisma_migrations where finished_at is not null")" = 2 ] || bad "$db: expected 2 applied migrations"
+  WANT=$(ls $DBPKG/prisma/migrations | grep -cE '^[0-9]+_')
+  [ "$(q "$db" "select count(*) from _prisma_migrations where finished_at is not null")" = "$WANT" ] || bad "$db: expected $WANT applied migrations"
 }
 
 run() { # name, builder-fn

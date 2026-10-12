@@ -36,8 +36,9 @@ export default function PerformancePage() {
 
   async function saveCycle(e: React.FormEvent) {
     e.preventDefault();
-    const { id, ...data } = cycleForm;
-    if (await action.run(() => (id ? api.performance.updateCycle(id, data) : api.performance.createCycle(data)))) { setCycleForm(null); load(); }
+    const { id, status, ...data } = cycleForm;
+    // New cycles start active; status is only editable afterwards.
+    if (await action.run(() => (id ? api.performance.updateCycle(id, { ...data, status }) : api.performance.createCycle(data)))) { setCycleForm(null); load(); }
   }
   async function saveGoal(e: React.FormEvent) {
     e.preventDefault();

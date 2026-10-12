@@ -30,8 +30,9 @@ export default function RecruitmentPage() {
 
   async function saveJob(e: React.FormEvent) {
     e.preventDefault();
-    const { id, ...data } = jobForm;
-    const ok = await action.run(() => (id ? api.recruitment.updateJob(id, data) : api.recruitment.createJob(data)));
+    const { id, status, ...data } = jobForm;
+    // A new posting is created open; the status field only exists when editing.
+    const ok = await action.run(() => (id ? api.recruitment.updateJob(id, { ...data, status }) : api.recruitment.createJob(data)));
     if (ok) { setJobForm(null); load(); }
   }
   async function toggleStatus(j: any) {
@@ -117,7 +118,7 @@ export default function RecruitmentPage() {
             <Field id="job-dept" label="Department (optional)"><Input id="job-dept" maxLength={120} value={jobForm.department} onChange={(e) => setJobForm({ ...jobForm, department: e.target.value })} /></Field>
             <Field id="job-desc" label="Description"><textarea id="job-desc" rows={4} className={TEXTAREA_CLASS} value={jobForm.description} onChange={(e) => setJobForm({ ...jobForm, description: e.target.value })} /></Field>
             <Field id="job-req" label="Requirements"><textarea id="job-req" rows={3} className={TEXTAREA_CLASS} value={jobForm.requirements} onChange={(e) => setJobForm({ ...jobForm, requirements: e.target.value })} /></Field>
-            <Field id="job-status" label="Status"><select id="job-status" className={SELECT_CLASS} value={jobForm.status} onChange={(e) => setJobForm({ ...jobForm, status: e.target.value })}><option value="open">Open</option><option value="draft">Draft</option><option value="closed">Closed</option></select></Field>
+            {jobForm.id && <Field id="job-status" label="Status"><select id="job-status" className={SELECT_CLASS} value={jobForm.status} onChange={(e) => setJobForm({ ...jobForm, status: e.target.value })}><option value="open">Open</option><option value="draft">Draft</option><option value="closed">Closed</option></select></Field>}
             <ErrorAlert message={action.error} />
             <div className="flex justify-end gap-2"><Button type="button" variant="ghost" onClick={() => setJobForm(null)}>Cancel</Button><Button type="submit">Save job</Button></div>
           </form>

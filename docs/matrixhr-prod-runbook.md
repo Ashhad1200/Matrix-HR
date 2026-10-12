@@ -40,14 +40,18 @@ It must print "additive only" and the script must pass. The migration was rehear
 ```bash
 DATABASE_URL="$DB" pnpm --filter @matrixhr/database exec prisma migrate deploy      # run it twice; the second run must say "No pending migrations"
 DATABASE_URL="$DB" pnpm --filter @matrixhr/database exec tsx prisma/seed-usd-catalog.ts   # adds USD Starter/Growth/Business + credit packs, create-if-missing, touches nothing existing
-psql "$DB" -Atc "select count(*) from information_schema.tables where table_schema='public'"   # expect 93 (the 72 + 21 new tables incl. the 4 expense/loan ones)
+psql "$DB" -Atc "select count(*) from information_schema.tables where table_schema='public'"   # expect 94 (the 72 + 22 new tables incl. the 4 expense/loan ones; `EnpsParticipation` comes from migration `2_hr_modules`)
 ```
 Existing tenants are untouched: no period end, so they **never lapse or see banners** until you set a renewal date in the backoffice (step 9).
+
+Migration `2_hr_modules` adds `Tenant.weekendDays` (existing companies get Saturday + Sunday) and the `EnpsParticipation` table. It is additive and idempotent like the first one; `scripts/migration-rehearsal.sh` rehearses all migrations.
+Behaviour changes to tell customers about: leave now counts **working days** (weekends and public holidays are not deducted; set the weekend in Settings > Leave); the operator's **Suspend** now blocks the company; a free trial has every module.
 
 ## 5. Environment (Coolify), set before deploying
 Required for the new features (names only here; values come from the owner's secret store):
 `SMTP_HOST` `SMTP_PORT` `SMTP_USER` `SMTP_PASS` `SMTP_FROM` (+ optional `SMTP_REPLY_TO`) for invites, receipts and reminders; `TRUST_PROXY=1`;
 `CREDENTIAL_KEY` (already required; AI provider keys are encrypted with it); `FILE_SIGNING_KEY` (signs private file links; falls back to the JWT secret) and `API_URL` (the public API origin, used inside file links).
+**Single-company installs** (a customer who buys the source) set `SINGLE_COMPANY_MODE=true`: every module on, no plans/trial/billing/credits screens, no lapse gate, sign-up closed once the company exists. Never set it on the multi-tenant production.
 Do **not** set AI provider keys here: the owner pastes them in the backoffice (step 9). `AI_*_BASE_URL` must be unset in production.
 
 ## 6. Merge and deploy
