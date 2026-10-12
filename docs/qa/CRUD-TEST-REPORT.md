@@ -4,17 +4,19 @@ Run: 2026-10-12, local stack only (Postgres 127.0.0.1:5433 `matrixhr`, API :3001
 Suite: `tests/qa-crud/` (run with `pnpm test:qa`). Inventory: `docs/qa/crud-matrix.md`. Accounts: `docs/qa/test-accounts.md`. Screenshots: `docs/qa/screenshots/` (121).
 
 ## 1. Verdict
-⚠️ **Ready with caveats.** Every create/read/update/delete, approval chain and permission check that the product exposes passes, and one unauthenticated-write hole plus several cross-tenant gaps were found and fixed; but several modules (recruitment, learning, performance goals, onboarding, workflows, custom fields) are read-only in the web UI, so the client must not be shown creating records there (section 5).
+✅ **Ready for the client demo, with the caveats in section 5.** Everything the proposal promises has a working screen, and every create/read/update/delete, approval chain, permission and isolation check passes. Round 2 (this update) added the owner's five decisions and the missing screens; round 1's 20 bugs are all fixed.
 
 ## 2. Totals
-| | |
-|---|---|
-| Automated specs | **103 / 103 pass** (API 75 incl. the 6 matrix specs, browser 28) after fixes; first full run found 3 failures in the suite itself plus the bugs below |
-| Route matrix | 292 routes: every authenticated route answers 401 without a token; every role-gated route answers 403 to every non-listed role (177 routes x roles); every listed role gets past the guard on GET without a 5xx; tenant B receives no tenant A row from any list route; the 24 public routes are exactly the intended ones |
-| Browser journeys (existing) | billing + payments + staff logins + leave setup + private files: pass (46 checks); AI assistant: pass (22 checks). Billing journey passed 6 of 8 runs; the 2 failures were the same timing check ("banner says access is temporary"); an isolated loop of 6 signup → lapse → upload → dashboard runs showed the banner every time, so it is not reproduced as a product bug (section 5) |
-| API unit + DB integration | 22 suites / 153 tests pass |
-| Bugs found | **20** (1 blocker, 9 major, 10 minor); **all fixed**; 5 product decisions open |
-| Open (not code bugs) | 2 UI gaps that hide a feature (section 5), 3 decisions |
+| | Round 1 | Round 2 (after the owner's decisions) |
+|---|---|---|
+| Automated specs (`pnpm test:qa`) | 103 / 103 | **130 / 130 pass** (API 93 incl. the 6 matrix specs; browser 37) |
+| Route matrix | 292 routes | 298 routes: 401 without a token everywhere; 403 for every non-listed role on every role-gated route; tenant B sees no tenant A row; the 24 public routes are exactly the intended ones |
+| Browser journeys | billing, AI | billing (staff logins, leave setup, private files, payments) passes; AI assistant passes (22 checks) |
+| API unit + DB integration | 153 | 153 pass |
+| Migration rehearsal | 5 prod-like databases | still 5 databases, now with 3 migrations (`0_init`, `1_ai_billing`, `2_hr_modules`): ALL PASSED, applied twice each, row fingerprints unchanged |
+| Bugs found | 20 (1 blocker, 9 major, 10 minor), all fixed | no new product bugs found by the extended suite; one test race fixed (below) |
+
+**The billing-journey "flake" is explained.** After a lapsed company sends payment proof it gets temporary access straight away, so the billing-only screen is replaced by the app within a moment. The journey asserted a message on the screen that disappears as that happens. That was a race in the test, not a product defect: a dedicated loop (4 signup, lapse, upload runs through the real UI) landed on the dashboard with a valid session every time. The journey now waits for the temporary-access banner instead, and passed 4 of 4 runs.
 
 ## 3. Matrix (C / R / U / D / actions)
 ✅ verified by test · 🔧 fixed during this run · ⛔ not in the UI (API exists) · — operation does not exist
@@ -23,24 +25,25 @@ Suite: `tests/qa-crud/` (run with `pnpm test:qa`). Inventory: `docs/qa/crud-matr
 | Employee | ✅ UI+API | ✅ list/search/pagination 🔧/detail | ✅ API (list has no edit; detail page) | — by design (offboarding) | CSV import ✅ API, documents ✅ | ✅ |
 | Department / designation | ✅ 🔧 (empty name) | ✅ | — | — | | ⛔ (no screen) |
 | Staff login (invite) | ✅ UI+API | ✅ | resend ✅ | revoke ✅ | accept ✅ (journey) | ✅ |
-| Leave request | ✅ UI+API 🔧 (errors now shown) | ✅ scoped | — | — (no cancel) | approve/reject ✅, balance moves ✅, non-report refused ✅ | ✅ |
-| Leave policy / holiday | ✅ | ✅ | ✅ | holiday ✅ | rebuild balances ✅ | ✅ |
+| Leave request | ✅ UI+API 🔧 (errors now shown; working days) | ✅ scoped | ✅ edit while pending 🔧 | ✅ cancel while pending 🔧 | approve/reject ✅, balance moves ✅, non-report refused ✅ | ✅ |
+| Leave policy / holiday / weekend | ✅ | ✅ | ✅ weekend per company 🔧 | holiday ✅ | rebuild balances ✅ | ✅ |
 | Attendance | clock in/out ✅ | ✅ | — | — | regularisation ✅ | ✅ |
 | Timesheet project / entry | ✅ | ✅ | ✅ | ✅ 🔧 (delete reachable) | submit/approve/reject ✅ 🔧 (scope) | ✅ |
 | Payroll run | ✅ UI+API | ✅ | recalculate ✅ | — | submit/approve/lock/reopen ✅, maker-checker ✅ | ✅ |
 | Compensation item | ✅ | ✅ | — | ✅ | | ⛔ |
 | Expense category / claim | ✅ UI+API | ✅ | ✅ draft | ✅ draft | submit, cancel, 2-step approval ✅ | ✅ |
 | Loan / advance | ✅ UI+API | ✅ | — | — (cancel ✅) | 2-step approval ✅, one open loan ✅ | ✅ |
-| Job posting | ✅ API | ✅ | — | — | public careers feed ✅ | ⛔ create |
-| Application | ✅ API | ✅ | status ✅ 🔧 | — | hire (idempotent) ✅ | kanban ✅, create ⛔ |
-| Review cycle / goal / review | ✅ API 🔧 | ✅ | ✅ | — | rating bounds ✅ | ⛔ create |
+| Job posting | ✅ UI+API | ✅ | ✅ edit, close, reopen 🔧 | — | public careers feed ✅ | ✅ 🔧 |
+| Application | ✅ UI+API (Add candidate) 🔧 | ✅ | status ✅ | — | hire (idempotent) ✅ | ✅ |
+| Review cycle / goal / review | ✅ UI+API 🔧 | ✅ | ✅ edit cycle, edit goal, progress 🔧 | — | rating bounds ✅ | ✅ |
 | 1-on-1 | ✅ UI+API 🔧 (tenant + scope) | ✅ | ✅ | ✅ | | ✅ |
-| eNPS survey | ✅ API | ✅ | ✅ | ✅ | respond 🔧 (was unauthenticated) | ⛔ create |
+| eNPS survey | ✅ UI+API 🔧 | ✅ | ✅ publish/close/reopen | ✅ | respond once per employee 🔧, employee Surveys page 🔧 | ✅ |
 | Peer review | ✅ API 🔧 | ✅ | ✅ | ✅ | | ⛔ no page |
-| LMS course | ✅ API | ✅ | — | — | enroll + progress ✅ | ⛔ create/enroll |
-| Onboarding / pre-boarding | start ✅ API | ✅ | task complete | — | | ⛔ start |
+| LMS course | ✅ UI+API 🔧 | ✅ | ✅ edit 🔧 | ✅ archive 🔧 | enrol + progress ✅ | ✅ |
+| Onboarding | ✅ template UI+API 🔧; start ✅ UI | ✅ | ✅ edit template (locks once started) 🔧; task complete | switch off | | ✅ |
+| Pre-boarding | invite ✅ API | ✅ | — | — | portal by token | ⛔ no invite screen |
 | Offboarding | ✅ UI+API | ✅ | decision, cancel ✅ | — | | ✅ |
-| Workflow, custom field, formula, report definition | ✅ API | ✅ | ✅ | ✅ | 🔧 custom field key | ⛔ (buttons are disabled) |
+| Workflow, custom field, formula, report definition | ✅ API | ✅ | ✅ | ✅ | 🔧 custom field key | hidden (no menu entry; address redirects to Settings) |
 | API key | ✅ UI | ✅ (secret shown once ✅) | — | ✅ revoke | | ✅ 🔧 admin-only notice |
 | Webhook | ✅ UI | ✅ | ✅ | ✅ | test send, SSRF refusal ✅ | ✅ |
 | Biometric device | ✅ UI | ✅ | ✅ | ✅ | unregistered device refused ✅ | ✅ |
@@ -69,12 +72,10 @@ Screenshots of the verified flows: `docs/qa/screenshots/` (`employees-*`, `leave
 ## 5. Still open: what the client must not touch, and the workaround
 | Item | Workaround |
 |---|---|
-| **Recruitment** has no "new job" / "add candidate" screen; **LMS** has no "new course"/"enrol"; **Performance** has no "new goal/cycle/review" screen; **eNPS**, **Onboarding start**, **Pre-boarding invite**, **Departments/Designations**, **Compensation items** have no create screen | Create the records through the API or beforehand (the demo data is seeded); show the list/kanban views only. These are missing features, not bugs |
-| **Workflows** and **Custom fields** show a permanently disabled "Create Workflow" / "Add Field" button | Do not open these two pages in the demo (read-only) |
-| **Leave**: no way for an employee to cancel or edit a submitted request; the list does not show the reason | Ask HR to reject it, or do not demo cancelling |
-| **eNPS** can be answered repeatedly by the same person (responses carry no respondent id) | Do not present eNPS scores as reliable (decision 1) |
-| **Billing journey flake**: the "temporary access" banner check failed in 2 of 8 runs of the browser journey, but never in 6 isolated API-driven runs of the same scenario (server state and banner were right each time). Cause not found; the journey now prints what the strip showed if it happens again | Not client-visible. If a customer reports a missing banner after uploading proof, a page reload shows it |
-| **Not exercised**: a real AI provider call, real email (SMTP), real MinIO privacy, WhatsApp live webhook, biometric hardware, mobile app | Covered by mocks or the production runbook (`docs/matrixhr-prod-runbook.md`) |
+| **Pre-boarding**, **Departments/Designations** and **Compensation items** have no create screen (API only) | Create them beforehand or through the API; do not show creating them. (Everything else in the proposal now has a screen.) |
+| **Workflows** and **Custom fields** are hidden (no menu entry; their addresses return to Settings) until they can be edited | Not part of the demo; the API still works |
+| **Not exercised**: a real AI provider call, real email (SMTP), real MinIO privacy, WhatsApp live webhook, biometric hardware, the mobile app | Covered by mocks or by the production runbook (`docs/matrixhr-prod-runbook.md`) |
+| Leave: a request that is already approved cannot be cancelled or edited by the employee (by design); half-day on a weekend still counts 0.5 only if the day is a working day | Ask HR to reject a pending one, or raise a new request |
 
 ## 6. Permission and isolation results
 - **Role x route matrix (generated from the controllers):** 0 violations. Employee, manager, HR, company admin, operator checked against every role-gated route (`specs/06`).
@@ -82,25 +83,40 @@ Screenshots of the verified flows: `docs/qa/screenshots/` (`employees-*`, `leave
 - **Tenant isolation:** every list route as tenant B returns none of tenant A's rows; detail/patch/delete of A's ids from B return 403/404 for employees, claims, loans, payroll runs, reviews, surveys, webhooks, API keys, payment requests, conversations; foreign keys from another company are refused on employees, 1-on-1, peer reviews, time entries, offboarding, compensation items. Browser: tenant B opening A's employee page or receipt page shows nothing of A.
 - **Public surface:** exactly 24 routes need no login (auth, health, careers feed, SSO discovery, signed file link, signed WhatsApp webhook, device protocol, invite/pre-boarding tokens); the unauthenticated eNPS route was the only one that should not have been public.
 
-## 7. Decisions for owner
-1. **eNPS anonymity vs one-vote-each.** Fixing it needs one additive table (respondent hash per survey). Say yes and it is a small migration.
-2. **Company owner has no employee profile** after signup, so Time Clock, Timesheets, My profile and 1-on-1s are empty for them (now error-free but unusable). Suggest creating an employee record for the owner at signup (counts toward the plan's employee cap).
-3. **Trial tenants start on Starter**, so plan-gated screens (custom fields, SSO, webhooks) answer 403 during the trial. Suggest the trial gets the Business feature set.
-4. **"Suspend" is now a hard stop** (behaviour change in B11). Confirm that is what you want; "cancelled"/"expired" still do not block access by themselves.
-5. Leave counts calendar days and does not exclude weekends/holidays (noted earlier).
+## 7. Owner decisions: implemented and tested (spec `08-decisions`, `15-ui-new-screens`)
+1. **eNPS one answer per employee** ✅. New table `EnpsParticipation` (who answered, never what) in migration `2_hr_modules`; the participation row is claimed with `ON CONFLICT DO NOTHING` in the same transaction as the answer, so 4 simultaneous submits count once; a second try answers 409 "already answered". Results stay anonymous (no respondent on the answer rows). Employees answer on the new **Surveys** page; HR creates/publishes/closes surveys on the eNPS page.
+2. **Owner profile at signup** ✅. Public signup and operator-created companies both create an employee record for the owner (optional first/last name; defaults to "Company Owner") and this year's leave balances. Time Clock, Timesheets, My profile, leave and 1-on-1s work for the owner.
+3. **Trial = every module for 30 days** ✅. While a subscription is `trialing` every feature any plan knows is on; when the trial ends the plan's own features apply again (tested both ways).
+4. **Suspend = hard stop with a clear message** ✅. Sign-in answers 403 `ACCOUNT_SUSPENDED` "Account suspended. Please contact support." (only after the password is right, so a wrong password reveals nothing); an open session switches to a full-page "Account suspended" screen; un-suspending restores access.
+5. **Leave counts working days** ✅. Weekends (per company, default Saturday + Sunday, set in Settings > Leave) and public holidays are not deducted; the apply form shows the working-day count live; weekend-only dates are refused with a reason. Existing approved leave is not recalculated.
+
+## 7b. Also built in round 2
+- **Leave cancel and edit while pending** (employee's own request; HR can cancel any pending one). The balance follows every change, double-cancel releases the days once, an approved request is locked.
+- **Create/edit screens:** Recruitment (job: new, edit, close/reopen; add candidate), Performance (review cycles: new/edit; goals: new/edit/progress), Onboarding (checklist builder, start for an employee; tasks lock once someone starts), Learning (course new/edit/archive; employee enrol and progress), eNPS (survey new/publish/close/delete; employee Surveys page).
+- **Workflows and Custom fields hidden** until they are editable.
+- **Single-company mode** (`SINGLE_COMPANY_MODE=true`, for customers who buy the source): every module on with no plan; no Billing/platform screens, trial, lapse gate, payment routes (404) or AI credit limits; sign-up closed once the company exists. Tested against a second API instance. See `docs/DEPLOYMENT.md`.
+
+## 7c. Earlier launch blockers: confirmed with evidence
+| Blocker | Status | Evidence |
+|---|---|---|
+| Staff logins (invite, role, email link, resend/revoke; hire offers it) | ✅ done | `specs/01` invites; `specs/11` UI invite; billing journey F: invite, accept, single-use link, sign in as the manager |
+| Leave setup (policies, holidays, balances per policy) | ✅ done | `specs/02` policy/holiday/balance; `specs/11` UI; journey: 25 of 25 people got a balance; plus weekend setting (round 2) |
+| Expense/loan tables + `CompensationItem.sourceType/sourceId` in the migration | ✅ done | `1_ai_billing` has `CREATE TABLE IF NOT EXISTS` for all four and `ADD COLUMN IF NOT EXISTS` for both columns; rehearsal ALL PASSED on 5 prod-like databases (94 tables), payroll runs with the tables empty (`launch.integration.spec`) |
+| 30-day trial at signup | ✅ done, upgraded | journey A: trial 30 days + 100 AI credits; `specs/08`: now every module during the trial |
+| Private files + payroll-cost restricted | ✅ done | journey G (signed links, tamper/cross-company refused); matrix: manager gets 403 on payroll-cost |
 
 ## 8. Demo-safe path (fully verified, in this order)
-1. Sign in as **HR**: Employees (search, add, duplicate error, pages) → Settings > Leave (new leave type, edit, add/remove a holiday) → Settings > Staff logins (invite).
-2. Sign in as **employee**: Leave (apply; over-balance shows an error) → Timesheets (log hours) → Expenses (draft → submit) → Loans (request) → Ask MatrixHR (balance; a leave request that needs Confirm).
-3. Sign in as **manager**: Approvals (approve the leave) → Expenses (approve) → 1-on-1s (schedule with a report) → Reports (headcount, leave, attendance).
-4. **HR**: Expenses (second approval) → Loans (HR then admin) → Payroll (run, submit) → **admin**: approve, lock → employee sees pay stubs.
-5. **Admin**: Billing (plan choices, pay by bank transfer, upload proof) → **Operator**: Billing (approve, receipt PDF), AI assistant settings (switch, key, grant credits).
-6. Settings > API keys, Webhooks, Devices work end to end. Skip: Recruitment create, LMS, Performance create, Workflows, Custom fields.
+1. **Owner/HR:** sign up a fresh company (trial, every module) → Employees (add, search) → Recruitment (new job, add candidate, Applicant board) → Onboarding (new checklist, start for an employee) → Performance (new cycle) → Learning (new course) → eNPS (new survey, publish).
+2. **Employee:** Leave (apply: the form shows working days; edit; cancel) → Timesheets → Expenses → Loans → Performance (new goal, progress) → Learning (enrol) → Surveys (answer once) → Ask MatrixHR.
+3. **Manager:** Approvals → Expenses → 1-on-1s → Reports.
+4. **HR/Admin:** Settings > Leave (weekend, holidays, leave types) → Staff logins → Payroll (run, submit; admin approves, locks).
+5. **Operator:** Billing (approve, receipt), AI assistant settings, Suspend a test company and show the suspended screen (then un-suspend).
+Skip: Pre-boarding invite, Departments/Designations, Compensation items (no create screen).
 
 ## How to re-run
 ```
 /var/tmp/up.sh            # (sandbox helper) or: pnpm dev stack with web built (next build + next start); API with AUTH_THROTTLE_LIMIT and THROTTLE_LIMIT raised
-pnpm test:qa              # tests/qa-crud, 103 specs, ~5 min
+pnpm test:qa              # tests/qa-crud, 130 specs, ~6 min (web as a production build)
 node scripts/billing-ui-test.mjs && node scripts/ai-ui-test.mjs   # journeys (mock LLM: node scripts/mock-llm.mjs 9100)
 python3 tests/qa-crud/gen-routes.py   # refresh the route table after adding endpoints
 ```

@@ -1,6 +1,6 @@
 {
  "admin:/dashboard": {
-  "title": "Good afternoon, Company",
+  "title": "Good evening, Company",
   "buttons": [],
   "inputs": 0,
   "tableRows": 0
@@ -1026,34 +1026,16 @@
    "New tenant"
   ],
   "inputs": 0,
-  "tableRows": 165
+  "tableRows": 218
  },
  "superadmin:/platform/billing": {
   "title": "Billing",
   "buttons": [
-   "To check (6)",
+   "To check (0)",
    "History",
    "Payment accounts",
    "Plans and packs",
-   "Settings",
-   "View proof",
-   "Approve",
-   "Reject",
-   "View proof",
-   "Approve",
-   "Reject",
-   "View proof",
-   "Approve",
-   "Reject",
-   "View proof",
-   "Approve",
-   "Reject",
-   "View proof",
-   "Approve",
-   "Reject",
-   "View proof",
-   "Approve",
-   "Reject"
+   "Settings"
   ],
   "inputs": 0,
   "tableRows": 0
@@ -1070,7 +1052,7 @@
   "title": "Audit log",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 148
+  "tableRows": 200
  },
  "superadmin:/platform/ai": {
   "title": "AI assistant",
@@ -1082,7 +1064,7 @@
    "Grant"
   ],
   "inputs": 12,
-  "tableRows": 158
+  "tableRows": 209
  },
  "superadmin:/security": {
   "title": "Security",
