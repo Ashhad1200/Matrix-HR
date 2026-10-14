@@ -65,6 +65,8 @@ const ALL_NAV: Record<string, NavItem> = {
   extensions: { href: '/extensions', label: 'Extensions', icon: 'Puzzle' },
   timesheets: { href: '/timesheets', label: 'Timesheets', icon: 'Timer' },
   oneOnOnes: { href: '/one-on-ones', label: '1-on-1s', icon: 'MessagesSquare' },
+  monitoring: { href: '/monitoring', label: 'Activity Monitor', icon: 'Activity' },
+  myActivity: { href: '/my-activity', label: 'My Activity', icon: 'Gauge' },
   // Backoffice — the platform operator's own tools, never shown to a tenant's users.
   platform: { href: '/platform', label: 'Tenants', icon: 'Building2' },
   platformPlans: { href: '/platform/plans', label: 'Plans', icon: 'Layers' },
@@ -146,7 +148,7 @@ export function getPermissionsForRole(role: string): UserPermissions {
         nav: nav(
           'dashboard', 'employees', 'leave', 'attendance', 'timesheets', 'payroll', 'recruitment',
           'atsKanban', 'preboarding', 'onboarding', 'offboarding', 'performance', 'enps', 'oneOnOnes', 'lms',
-          'reports', 'whatsapp', 'settings', 'audit', 'surveys',
+          'reports', 'monitoring', 'whatsapp', 'settings', 'audit', 'surveys', 'myActivity',
           'marketplace', 'extensions', 'ai', 'security', 'expenses', 'loans', 'billing',
         ),
         actions: ADMIN_ACTIONS,
@@ -154,14 +156,14 @@ export function getPermissionsForRole(role: string): UserPermissions {
     case ROLES.MANAGER:
       return {
         portal: 'manager',
-        nav: nav('dashboard', 'team', 'approvals', 'offboarding', 'oneOnOnes', 'leave', 'performance', 'attendance', 'timesheets', 'reports', 'myProfile', 'myPay', 'ai', 'security', 'expenses', 'loans', 'surveys'),
+        nav: nav('dashboard', 'team', 'approvals', 'offboarding', 'oneOnOnes', 'leave', 'performance', 'attendance', 'timesheets', 'reports', 'monitoring', 'myActivity', 'myProfile', 'myPay', 'ai', 'security', 'expenses', 'loans', 'surveys'),
         actions: MANAGER_ACTIONS,
       };
     case ROLES.EMPLOYEE:
     default:
       return {
         portal: 'ess',
-        nav: nav('dashboard', 'myProfile', 'leave', 'attendance', 'timesheets', 'myPay', 'performance', 'lms', 'offboarding', 'ai', 'security', 'expenses', 'loans', 'surveys'),
+        nav: nav('dashboard', 'myProfile', 'leave', 'attendance', 'timesheets', 'myPay', 'performance', 'lms', 'offboarding', 'ai', 'security', 'expenses', 'loans', 'surveys', 'myActivity'),
         actions: ESS_ACTIONS,
       };
   }

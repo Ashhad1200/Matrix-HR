@@ -7,7 +7,7 @@ import {
   LayoutDashboard, User, Calendar, Clock, DollarSign, Target, GraduationCap, Sparkles,
   Users, Inbox, Briefcase, UserPlus, MessageCircle, BarChart3, Settings, Store, Sliders,
   GitBranch, Shield, Kanban, FileSignature, Heart, Puzzle, Timer, MessagesSquare, Building2,
-  UserMinus, Receipt, Banknote, LogOut, ScrollText, Layers, CreditCard, type LucideIcon,
+  UserMinus, Receipt, Banknote, LogOut, ScrollText, Layers, CreditCard, Activity, Gauge, type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/brand/logo';
@@ -18,7 +18,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   LayoutDashboard, User, Calendar, Clock, DollarSign, Target, GraduationCap, Sparkles,
   Users, Inbox, Briefcase, UserPlus, MessageCircle, BarChart3, Settings, Store, Sliders,
   GitBranch, Shield, Kanban, FileSignature, Heart, Puzzle, Timer, MessagesSquare, Building2,
-  UserMinus, Receipt, Banknote, ScrollText, Layers, CreditCard,
+  UserMinus, Receipt, Banknote, ScrollText, Layers, CreditCard, Activity, Gauge,
 };
 
 const PORTAL_LABELS: Record<string, string> = {
@@ -31,12 +31,12 @@ const PORTAL_LABELS: Record<string, string> = {
 const GROUPS: { label: string | null; hrefs: string[] }[] = [
   { label: null, hrefs: ['/dashboard'] },
   { label: 'Manage', hrefs: ['/platform', '/platform/billing', '/platform/plans', '/platform/audit'] },
-  { label: 'Workspace', hrefs: ['/my-profile', '/team', '/approvals', '/one-on-ones'] },
+  { label: 'Workspace', hrefs: ['/my-profile', '/my-activity', '/team', '/approvals', '/one-on-ones'] },
   { label: 'People', hrefs: ['/employees', '/recruitment', '/recruitment/kanban', '/recruitment/preboarding', '/onboarding', '/offboarding'] },
   { label: 'Time', hrefs: ['/leave', '/attendance', '/timesheets'] },
   { label: 'Pay', hrefs: ['/payroll', '/my-pay', '/expenses', '/loans'] },
   { label: 'Talent', hrefs: ['/performance', '/performance/enps', '/surveys', '/lms'] },
-  { label: 'Insights', hrefs: ['/reports', '/ai'] },
+  { label: 'Insights', hrefs: ['/reports', '/monitoring', '/ai'] },
   { label: 'Company', hrefs: ['/whatsapp', '/settings', '/settings/custom-fields', '/settings/workflows', '/settings/audit', '/billing', '/marketplace', '/extensions'] },
 ];
 
