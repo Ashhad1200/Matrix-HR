@@ -25,7 +25,7 @@ const MODULES: { group: string; items: [string, string][] }[] = [
   {
     group: 'People',
     items: [
-      ['Employee records', 'Documents, departments, job titles and an org chart.'],
+      ['Employee records', 'Documents, departments, designations and an org chart, imported in bulk.'],
       ['Recruitment', 'Post roles and move candidates across a board.'],
       ['Pre-boarding', 'Signed paperwork collected before day one.'],
       ['Onboarding', 'Checklists from templates, tracked to done.'],
@@ -46,6 +46,7 @@ const MODULES: { group: string; items: [string, string][] }[] = [
       ['Payroll', 'Monthly runs with tax, EOBI and provident fund.'],
       ['Expenses', 'Claims by category, reimbursed through payroll.'],
       ['Loans and advances', 'Approved in the app, recovered in instalments.'],
+      ['Pay components', 'Allowances, bonuses, arrears and deductions, per person, straight into the run.'],
       ['Pay stubs', 'Each employee reads their own, and nobody else’s.'],
     ],
   },
@@ -62,6 +63,8 @@ const MODULES: { group: string; items: [string, string][] }[] = [
     group: 'Company',
     items: [
       ['Reports', 'Standard reports and a builder, exported to a file.'],
+      ['AI assistant', 'Ask about your own data; it confirms before it changes anything.'],
+      ['Activity Monitor', 'A disclosed desktop agent, installed with consent, that records time and activity only.'],
       ['Workflows', 'Approval steps you define, per request type.'],
       ['Custom fields', 'The fields your company tracks that ours do not.'],
       ['Audit log', 'Who changed what, and when.'],
@@ -106,6 +109,18 @@ const FAQ: { q: string; a: string }[] = [
   {
     q: 'Can we connect our own tools?',
     a: 'Yes. Create scoped API keys, receive webhooks with retries, export the payroll journal to QuickBooks, and set up single sign-on.',
+  },
+  {
+    q: 'Do you offer employee monitoring?',
+    a: 'Yes, as a disclosed, optional module that is off until you turn it on. An employee installs the agent themselves after accepting your policy, and it shows a tray icon the whole time. It records time and activity only — active and idle time, mouse and keyboard counts, and the app or website in focus — never keystrokes, the screen, or the contents of anything. Each person can see everything collected about them, and HR is alerted if an agent stops reporting.',
+  },
+  {
+    q: 'Can we be billed in US dollars?',
+    a: 'Yes. Companies in Pakistan are billed in rupees and everyone else in US dollars, chosen from your country at sign-up. Each plan has a set price in both currencies — there is no live conversion — and you pay by bank transfer either way.',
+  },
+  {
+    q: 'Can we run it under our own brand?',
+    a: 'Resellers can run MatrixHR white-label: your product name, logo, colours, support address and domain throughout the app, emails and payslips, with many client companies on one server. A single company can also run its own private copy. Ask us about either.',
   },
   {
     q: 'How does the trial work?',
@@ -246,6 +261,57 @@ export default async function LandingPage() {
           </div>
         </section>
 
+        {/* 5b. Activity Monitor — disclosed, consent-first */}
+        <section id="monitor" aria-labelledby="monitor-title" className="scroll-mt-16 border-y border-[var(--mx-rule)] bg-[var(--mx-sheet)] py-24 sm:py-32">
+          <div className={cn(WRAP, 'grid items-start gap-14 lg:grid-cols-12 lg:gap-8')}>
+            <div className="lg:col-span-6">
+              <p className="text-sm font-semibold uppercase tracking-wider text-[var(--mx-signal)]">Optional · off by default</p>
+              <h2 id="monitor-title" className="mx-h2 mt-3 max-w-[18ch]">
+                Activity monitoring you can show your team.
+              </h2>
+              <p className="mt-6 max-w-[48ch] text-lg leading-relaxed text-[var(--mx-ink-2)]">
+                A desktop agent each employee installs themselves, after reading your policy and accepting it. It shows a
+                tray icon the whole time it runs, and anyone can open <em>My Activity</em> to see exactly what has been
+                collected about them. Nothing is hidden, and there is no AI reading along.
+              </p>
+              <dl className="mt-10 grid max-w-xl gap-x-10 gap-y-6 sm:grid-cols-2">
+                {[
+                  ['Consent first', 'Nothing records until the employee accepts the policy and installs the agent.'],
+                  ['Visible, always', 'A tray icon stays on while it runs; the person sees their own data any time.'],
+                  ['Counts, not content', 'Active and idle time, mouse and keyboard counts, and the app in focus.'],
+                  ['HR knows if it stops', 'An agent that goes quiet during work hours raises an alert.'],
+                ].map(([t, d], i) => (
+                  <In key={t} delay={i * 70}>
+                    <dt className="font-semibold">{t}</dt>
+                    <dd className="mt-1 text-[var(--mx-ink-2)]">{d}</dd>
+                  </In>
+                ))}
+              </dl>
+            </div>
+            <div className="lg:col-span-5 lg:col-start-8">
+              <div className="rounded-[6px] border border-[var(--mx-rule)] bg-[var(--mx-paper)] p-6 shadow-[0_18px_40px_-24px_rgba(8,37,28,0.35)] sm:p-8">
+                <div>
+                  <p className="text-sm font-semibold text-[var(--mx-ink)]">What it records</p>
+                  <ul className="mt-3 space-y-2 text-[0.9375rem] text-[var(--mx-ink-2)]">
+                    {['Active vs idle time', 'Mouse and keyboard event counts', 'The app or website in focus'].map((x) => (
+                      <li key={x} className="flex gap-2.5"><span aria-hidden="true" className="mt-[0.55em] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--mx-signal)]" />{x}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="mt-7 border-t border-[var(--mx-rule)] pt-6">
+                  <p className="text-sm font-semibold text-[var(--mx-ink)]">What it never records</p>
+                  <ul className="mt-3 space-y-2 text-[0.9375rem] text-[var(--mx-ink-2)]">
+                    {['Your keystrokes or which keys', 'Your screen or screenshots', 'Your clipboard or file contents'].map((x) => (
+                      <li key={x} className="flex gap-2.5"><span aria-hidden="true" className="mt-[0.5em] h-3 w-3 shrink-0" ><svg viewBox="0 0 12 12" className="h-3 w-3 text-[var(--mx-ink-3,var(--mx-ink-2))]"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" /></svg></span>{x}</li>
+                    ))}
+                  </ul>
+                </div>
+                <p className="mt-7 text-xs leading-relaxed text-[var(--mx-ink-2)]">Data is kept for a limited time and then deleted. HR and managers see daily summaries, not keystrokes or screens, and every look is in the audit log.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* 6. The rest of the product, as a dense index */}
         <section id="modules" aria-labelledby="modules-title" className="scroll-mt-16 bg-[var(--mx-ledger)] py-24 text-[var(--mx-ledger-ink)] sm:py-32">
           <div className={WRAP}>
@@ -287,6 +353,19 @@ export default async function LandingPage() {
                   Bank files for Meezan, HBL or a generic format, a QuickBooks journal, WhatsApp messages, and webhooks to your own
                   systems. Build on top with scoped API keys and single sign-on.
                 </p>
+              </div>
+            </div>
+
+            {/* Deployment modes */}
+            <div className="mt-20 grid gap-10 border-t border-[var(--mx-ledger-rule)] pt-12 lg:grid-cols-12 lg:gap-8">
+              <h3 className="font-display text-2xl font-bold tracking-tight text-white lg:col-span-3">Make it yours</h3>
+              <div className="lg:col-span-4">
+                <p className="text-sm font-semibold text-[var(--mx-ledger-ink-2)]">White-label, for resellers</p>
+                <p className="mt-2 text-lg leading-relaxed">Your product name, logo, colours, support address and domain throughout the app, emails and payslips — with many client companies hosted on one server, all under your brand.</p>
+              </div>
+              <div className="lg:col-span-5">
+                <p className="text-sm font-semibold text-[var(--mx-ledger-ink-2)]">Billed in your currency</p>
+                <p className="mt-2 text-lg leading-relaxed">Companies in Pakistan pay in rupees and everyone else in US dollars, set from the country at sign-up, by bank transfer. A single company can also run its own private copy on its own server.</p>
               </div>
             </div>
           </div>
@@ -387,6 +466,7 @@ export default async function LandingPage() {
             <a href="#run" className="mx-link w-fit">Payroll</a>
             <a href="#whatsapp" className="mx-link w-fit">WhatsApp approvals</a>
             <a href="#access" className="mx-link w-fit">Who sees what</a>
+            <a href="#monitor" className="mx-link w-fit">Activity Monitor</a>
             <a href="#modules" className="mx-link w-fit">Modules</a>
             <a href="#security" className="mx-link w-fit">Security</a>
             <a href="#pricing" className="mx-link w-fit">Pricing</a>
