@@ -11,6 +11,7 @@ const LINKS = [
   { href: '#run', label: 'Payroll' },
   { href: '#whatsapp', label: 'Approvals' },
   { href: '#access', label: 'Who sees what' },
+  { href: '#monitor', label: 'Monitor' },
   { href: '#pricing', label: 'Pricing' },
   { href: '#faq', label: 'Questions' },
 ];
