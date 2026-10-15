@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'" />
+<title>MatrixHR Activity Agent</title>
+<style>
+  body { font-family: system-ui, -apple-system, Segoe UI, sans-serif; margin: 0; padding: 24px; color: #0f172a; background: #f8fafc; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  p.sub { color: #64748b; font-size: 13px; margin: 0 0 16px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 4px; }
+  input { width: 100%; box-sizing: border-box; padding: 9px 11px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
+  .note { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; font-size: 12px; border-radius: 8px; padding: 10px 12px; margin: 16px 0; line-height: 1.5; }
+  button { margin-top: 16px; width: 100%; padding: 11px; border: 0; border-radius: 8px; background: #166548; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; }
+  button:disabled { opacity: .6; cursor: default; }
+  .err { color: #b91c1c; font-size: 13px; margin-top: 10px; min-height: 18px; }
+</style>
+</head>
+<body>
+  <h1>Set up the activity agent</h1>
+  <p class="sub">Paste the details from your <b>My Activity</b> page. A tray icon stays visible while it runs.</p>
+  <div class="note">This agent records <b>time and activity only</b> — active/idle time, mouse and keyboard counts, and the app or website in focus. It never records your keystrokes, your screen or your files.</div>
+  <label for="url">Server URL</label>
+  <input id="url" placeholder="https://matrixhr.treevoxa.com/api/v1" />
+  <label for="token">Pairing key</label>
+  <input id="token" placeholder="mon_…" />
+  <label for="name">Name for this computer</label>
+  <input id="name" placeholder="Office laptop" />
+  <button id="go">Connect</button>
+  <div class="err" id="err"></div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    $('go').addEventListener('click', async () => {
+      $('err').textContent = ''; $('go').disabled = true;
+      try {
+        const r = await window.matrixhr.pair({ serverUrl: $('url').value, deviceToken: $('token').value, deviceName: $('name').value });
+        if (!r.ok) { $('err').textContent = r.error || 'Could not connect. Check the URL and key.'; $('go').disabled = false; }
+      } catch (e) { $('err').textContent = String(e); $('go').disabled = false; }
+    });
+  </script>
+</body>
+</html>

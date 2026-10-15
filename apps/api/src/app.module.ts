@@ -31,6 +31,7 @@ import { FormulasModule } from './formulas/formulas.module';
 import { PreboardingModule } from './preboarding/preboarding.module';
 import { EsignModule } from './esign/esign.module';
 import { EnpsModule } from './enps/enps.module';
+import { MonitoringModule } from './monitoring/monitoring.module';
 import { PeerReviewsModule } from './peer-reviews/peer-reviews.module';
 import { ExtensionsModule } from './extensions/extensions.module';
 import { ReportsBuilderModule } from './reports-builder/reports-builder.module';
@@ -95,6 +96,7 @@ import { CreditsModule } from './credits/credits.service';
     PreboardingModule,
     EsignModule,
     EnpsModule,
+    MonitoringModule,
     PeerReviewsModule,
     ExtensionsModule,
     ReportsBuilderModule,

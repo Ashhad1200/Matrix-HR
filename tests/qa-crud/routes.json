@@ -1594,6 +1594,143 @@
   "file": "marketplace/marketplace.controller.ts"
  },
  {
+  "method": "POST",
+  "path": "/activity/ingest",
+  "auth": true,
+  "roles": [],
+  "file": "monitoring/ingest.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/monitoring/settings",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "monitoring/monitoring.controller.ts"
+ },
+ {
+  "method": "PUT",
+  "path": "/monitoring/settings",
+  "auth": true,
+  "roles": [
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "monitoring/monitoring.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/monitoring/overview",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "monitoring/monitoring.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/monitoring/summaries",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "monitoring/monitoring.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/monitoring/devices",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "monitoring/monitoring.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/monitoring/devices/:id/revoke",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "monitoring/monitoring.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/monitoring/alerts",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "monitoring/monitoring.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/monitoring/alerts/:id/resolve",
+  "auth": true,
+  "roles": [
+   "MANAGER",
+   "HR_MANAGER",
+   "COMPANY_ADMIN"
+  ],
+  "file": "monitoring/monitoring.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/monitoring/run-maintenance",
+  "auth": true,
+  "roles": [
+   "COMPANY_ADMIN"
+  ],
+  "file": "monitoring/monitoring.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/monitoring/me",
+  "auth": true,
+  "roles": [],
+  "file": "monitoring/monitoring.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/monitoring/me/consent",
+  "auth": true,
+  "roles": [],
+  "file": "monitoring/monitoring.controller.ts"
+ },
+ {
+  "method": "POST",
+  "path": "/monitoring/me/devices",
+  "auth": true,
+  "roles": [],
+  "file": "monitoring/monitoring.controller.ts"
+ },
+ {
+  "method": "DELETE",
+  "path": "/monitoring/me/devices/:id",
+  "auth": true,
+  "roles": [],
+  "file": "monitoring/monitoring.controller.ts"
+ },
+ {
+  "method": "GET",
+  "path": "/monitoring/me/activity",
+  "auth": true,
+  "roles": [],
+  "file": "monitoring/monitoring.controller.ts"
+ },
+ {
   "method": "GET",
   "path": "/notifications",
   "auth": true,

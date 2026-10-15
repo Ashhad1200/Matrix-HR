@@ -121,100 +121,106 @@ enum NotificationChannel {
 // ─── Auth & Tenancy ──────────────────────────────────────────────────────────
 
 model Tenant {
-  id        String       @id @default(cuid())
-  name      String
-  subdomain String       @unique
-  plan      String       @default("starter")
-  status    TenantStatus @default(ACTIVE)
-  timezone  String       @default("Asia/Karachi")
-  currency  String       @default("PKR")
-  locale    String       @default("en")
-  logoUrl   String?
+  id              String       @id @default(cuid())
+  name            String
+  subdomain       String       @unique
+  plan            String       @default("starter")
+  status          TenantStatus @default(ACTIVE)
+  timezone        String       @default("Asia/Karachi")
+  currency        String       @default("PKR")
+  locale          String       @default("en")
+  logoUrl         String?
   // Billing currency (PKR for Pakistan, USD otherwise). Set at sign-up from the chosen country; only the operator can change it.
-  billingCurrency String @default("USD")
+  billingCurrency String       @default("USD")
   country         String?
-  primaryColor String?   @default("#2563eb")
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  primaryColor    String?      @default("#2563eb")
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
-  users              User[]
-  employees          Employee[]
-  departments        Department[]
-  designations       Designation[]
-  leavePolicies      LeavePolicy[]
-  leaveRequests      LeaveRequest[]
-  holidays           Holiday[]
-  shifts             Shift[]
-  attendanceLogs     AttendanceLog[]
-  officeLocations    OfficeLocation[]
-  onboardingTemplates OnboardingTemplate[]
-  payrollRuns        PayrollRun[]
-  salaryStructures   SalaryStructure[]
-  compensationItems  CompensationItem[]
-  jobPostings        JobPosting[]
-  reviewCycles       ReviewCycle[]
-  courses            Course[]
-  auditLogs          AuditLog[]
-  notifications      Notification[]
-  whatsappMessages   WhatsAppMessage[]
-  customFieldDefs    CustomFieldDefinition[]
-  workflowDefs       WorkflowDefinition[]
-  workflowInstances  WorkflowInstance[]
-  offboardingCases   OffboardingCase[]
-  integrationSyncLogs IntegrationSyncLog[]
-  expenseCategories  ExpenseCategory[]
-  expenseClaims      ExpenseClaim[]
-  loanRequests       LoanRequest[]
-  biometricDevices   BiometricDevice[]
-  whatsappConsents   WhatsAppConsent[]
-  whatsappActionTokens WhatsAppActionToken[]
-  webhooks           Webhook[]
-  tenantIntegrations TenantIntegration[]
-  enpsSurveys        EnpsSurvey[]
-  formulaDefinitions FormulaDefinition[]
-  apiKeys            ApiKey[]
-  preboardingInvites PreboardingInvite[]
-  esignRequests      EsignRequest[]
-  reportDefinitions  ReportDefinition[]
-  extensionAccess    ExtensionPanelAccess[]
-  peerReviews360     PeerReview360[]
-  oneOnOnes          OneOnOne[]
-  projects           Project[]
-  timeEntries        TimeEntry[]
-  ssoConfig          SsoConfig?
-  subscription       Subscription?
-  usageEvents        UsageEvent[]
-  aiEnabled          Boolean      @default(true)
-  weekendDays        Int[]        @default([6, 0]) // 0 = Sunday ... 6 = Saturday; leave does not count these days
-  paymentRequests    PaymentRequest[]
-  aiConversations    AiConversation[]
-  aiCreditAccount    AiCreditAccount?
-  aiActionTokens     AiActionToken[]
-  userInvites        UserInvite[]
+  users                  User[]
+  employees              Employee[]
+  departments            Department[]
+  designations           Designation[]
+  leavePolicies          LeavePolicy[]
+  leaveRequests          LeaveRequest[]
+  holidays               Holiday[]
+  shifts                 Shift[]
+  attendanceLogs         AttendanceLog[]
+  officeLocations        OfficeLocation[]
+  onboardingTemplates    OnboardingTemplate[]
+  payrollRuns            PayrollRun[]
+  salaryStructures       SalaryStructure[]
+  compensationItems      CompensationItem[]
+  jobPostings            JobPosting[]
+  reviewCycles           ReviewCycle[]
+  courses                Course[]
+  auditLogs              AuditLog[]
+  notifications          Notification[]
+  whatsappMessages       WhatsAppMessage[]
+  customFieldDefs        CustomFieldDefinition[]
+  workflowDefs           WorkflowDefinition[]
+  workflowInstances      WorkflowInstance[]
+  offboardingCases       OffboardingCase[]
+  integrationSyncLogs    IntegrationSyncLog[]
+  expenseCategories      ExpenseCategory[]
+  expenseClaims          ExpenseClaim[]
+  loanRequests           LoanRequest[]
+  biometricDevices       BiometricDevice[]
+  whatsappConsents       WhatsAppConsent[]
+  whatsappActionTokens   WhatsAppActionToken[]
+  webhooks               Webhook[]
+  tenantIntegrations     TenantIntegration[]
+  enpsSurveys            EnpsSurvey[]
+  formulaDefinitions     FormulaDefinition[]
+  apiKeys                ApiKey[]
+  preboardingInvites     PreboardingInvite[]
+  esignRequests          EsignRequest[]
+  reportDefinitions      ReportDefinition[]
+  extensionAccess        ExtensionPanelAccess[]
+  peerReviews360         PeerReview360[]
+  oneOnOnes              OneOnOne[]
+  projects               Project[]
+  timeEntries            TimeEntry[]
+  ssoConfig              SsoConfig?
+  subscription           Subscription?
+  usageEvents            UsageEvent[]
+  aiEnabled              Boolean                 @default(true)
+  weekendDays            Int[]                   @default([6, 0]) // 0 = Sunday ... 6 = Saturday; leave does not count these days
+  paymentRequests        PaymentRequest[]
+  aiConversations        AiConversation[]
+  aiCreditAccount        AiCreditAccount?
+  aiActionTokens         AiActionToken[]
+  userInvites            UserInvite[]
+  monitoringSettings     MonitoringSettings?
+  monitoringConsents     MonitoringConsent[]
+  monitoredDevices       MonitoredDevice[]
+  activitySamples        ActivitySample[]
+  activityDailySummaries ActivityDailySummary[]
+  monitoringAlerts       MonitoringAlert[]
 }
 
 model User {
-  id           String     @id @default(cuid())
-  tenantId     String
-  employeeId   String?    @unique
-  email        String
-  passwordHash String
-  role         UserRole   @default(EMPLOYEE)
-  status       UserStatus @default(ACTIVE)
-  twoFaEnabled Boolean    @default(false)
-  twoFaSecret  String?
-  twoFaRecoveryCodes String[] // sha256 hashes, single use
-  twoFaLastStep Int?           // last accepted TOTP time-step, blocks replay
-  passwordChangedAt DateTime?
-  tokenVersion Int @default(0) // bumped on password reset/change: tokens carrying an older value are dead
-  failedAttempts Int      @default(0)
-  lockedUntil  DateTime?
-  emailVerified Boolean   @default(false)
-  emailVerifyToken String?
-  passwordResetToken String?
+  id                   String     @id @default(cuid())
+  tenantId             String
+  employeeId           String?    @unique
+  email                String
+  passwordHash         String
+  role                 UserRole   @default(EMPLOYEE)
+  status               UserStatus @default(ACTIVE)
+  twoFaEnabled         Boolean    @default(false)
+  twoFaSecret          String?
+  twoFaRecoveryCodes   String[] // sha256 hashes, single use
+  twoFaLastStep        Int? // last accepted TOTP time-step, blocks replay
+  passwordChangedAt    DateTime?
+  tokenVersion         Int        @default(0) // bumped on password reset/change: tokens carrying an older value are dead
+  failedAttempts       Int        @default(0)
+  lockedUntil          DateTime?
+  emailVerified        Boolean    @default(false)
+  emailVerifyToken     String?
+  passwordResetToken   String?
   passwordResetExpires DateTime?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
 
   tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   employee Employee? @relation(fields: [employeeId], references: [id])
@@ -242,26 +248,26 @@ model Session {
 // ─── Employee Database (HRIS) ────────────────────────────────────────────────
 
 model Department {
-  id              String  @id @default(cuid())
-  tenantId        String
-  name            String
-  parentId        String?
-  headEmployeeId  String?
-  costCenter      String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(cuid())
+  tenantId       String
+  name           String
+  parentId       String?
+  headEmployeeId String?
+  costCenter     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  tenant     Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  parent     Department?  @relation("DeptHierarchy", fields: [parentId], references: [id])
-  children   Department[] @relation("DeptHierarchy")
-  employees  Employee[]
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  parent       Department?   @relation("DeptHierarchy", fields: [parentId], references: [id])
+  children     Department[]  @relation("DeptHierarchy")
+  employees    Employee[]
   designations Designation[]
 
   @@index([tenantId])
 }
 
 model Designation {
-  id           String @id @default(cuid())
+  id           String   @id @default(cuid())
   tenantId     String
   name         String
   grade        String?
@@ -319,32 +325,36 @@ model Employee {
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 
-  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  designation  Designation?  @relation(fields: [designationId], references: [id])
-  department   Department?   @relation(fields: [departmentId], references: [id])
-  manager      Employee?     @relation("EmployeeManager", fields: [managerId], references: [id])
-  directReports Employee[]   @relation("EmployeeManager")
-  user         User?
-  documents    EmployeeDocument[]
-  family       EmployeeFamily[]
-  skills       EmployeeSkill[]
-  history      EmploymentHistory[]
-  leaveBalances LeaveBalance[]
-  leaveRequests LeaveRequest[] @relation("LeaveEmployee")
-  approvedLeaves LeaveRequest[] @relation("LeaveApprover")
-  attendanceLogs AttendanceLog[]
-  onboardingProgress OnboardingProgress[]
-  payrollItems PayrollItem[]
-  compensationItems CompensationItem[]
-  offboardingCases OffboardingCase[]
-  expenseClaims    ExpenseClaim[]
-  loanRequests     LoanRequest[]
-  goals        Goal[]
-  courseEnrollments CourseEnrollment[]
-  jobApplications JobApplication[]
-  oneOnOnesAsManager  OneOnOne[] @relation("OneOnOneManager")
-  oneOnOnesAsEmployee OneOnOne[] @relation("OneOnOneEmployee")
-  timeEntries  TimeEntry[]
+  tenant                 Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  designation            Designation?           @relation(fields: [designationId], references: [id])
+  department             Department?            @relation(fields: [departmentId], references: [id])
+  manager                Employee?              @relation("EmployeeManager", fields: [managerId], references: [id])
+  directReports          Employee[]             @relation("EmployeeManager")
+  monitoringConsents     MonitoringConsent[]
+  monitoredDevices       MonitoredDevice[]
+  activityDailySummaries ActivityDailySummary[]
+  monitoringAlerts       MonitoringAlert[]
+  user                   User?
+  documents              EmployeeDocument[]
+  family                 EmployeeFamily[]
+  skills                 EmployeeSkill[]
+  history                EmploymentHistory[]
+  leaveBalances          LeaveBalance[]
+  leaveRequests          LeaveRequest[]         @relation("LeaveEmployee")
+  approvedLeaves         LeaveRequest[]         @relation("LeaveApprover")
+  attendanceLogs         AttendanceLog[]
+  onboardingProgress     OnboardingProgress[]
+  payrollItems           PayrollItem[]
+  compensationItems      CompensationItem[]
+  offboardingCases       OffboardingCase[]
+  expenseClaims          ExpenseClaim[]
+  loanRequests           LoanRequest[]
+  goals                  Goal[]
+  courseEnrollments      CourseEnrollment[]
+  jobApplications        JobApplication[]
+  oneOnOnesAsManager     OneOnOne[]             @relation("OneOnOneManager")
+  oneOnOnesAsEmployee    OneOnOne[]             @relation("OneOnOneEmployee")
+  timeEntries            TimeEntry[]
 
   @@unique([tenantId, employeeCode])
   @@unique([tenantId, biometricPin])
@@ -373,66 +383,69 @@ model EmployeeDocument {
 }
 
 model EmployeeFamily {
-  id         String   @id @default(cuid())
-  employeeId String
-  relation   String
-  name       String
+  id          String    @id @default(cuid())
+  employeeId  String
+  relation    String
+  name        String
   dateOfBirth DateTime?
-  isDependent Boolean @default(false)
-  createdAt  DateTime @default(now())
+  isDependent Boolean   @default(false)
+  createdAt   DateTime  @default(now())
 
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
   @@index([employeeId])
 }
 
 model EmployeeSkill {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   employeeId  String
   skill       String
   proficiency String?
-  certified   Boolean @default(false)
+  certified   Boolean  @default(false)
   createdAt   DateTime @default(now())
 
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
   @@index([employeeId])
 }
 
 model EmploymentHistory {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   employeeId    String
   event         String
   effectiveFrom DateTime
   effectiveTo   DateTime?
-  salaryBefore  Decimal? @db.Decimal(12, 2)
-  salaryAfter   Decimal? @db.Decimal(12, 2)
+  salaryBefore  Decimal?  @db.Decimal(12, 2)
+  salaryAfter   Decimal?  @db.Decimal(12, 2)
   notes         String?
-  createdAt     DateTime @default(now())
+  createdAt     DateTime  @default(now())
 
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
   @@index([employeeId, effectiveFrom])
 }
 
 // ─── Leave Management ────────────────────────────────────────────────────────
 
 model LeavePolicy {
-  id              String   @id @default(cuid())
-  tenantId        String
-  name            String
-  code            String
-  daysPerYear     Decimal  @db.Decimal(5, 1)
-  accrualType     String   @default("yearly") // yearly, monthly
-  carryForwardMax Decimal? @db.Decimal(5, 1)
-  allowHalfDay    Boolean  @default(true)
-  allowNegative   Boolean  @default(false)
+  id                String   @id @default(cuid())
+  tenantId          String
+  name              String
+  code              String
+  daysPerYear       Decimal  @db.Decimal(5, 1)
+  accrualType       String   @default("yearly") // yearly, monthly
+  carryForwardMax   Decimal? @db.Decimal(5, 1)
+  allowHalfDay      Boolean  @default(true)
+  allowNegative     Boolean  @default(false)
   genderRestriction String?
-  eligibilityMonths Int    @default(0)
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  eligibilityMonths Int      @default(0)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  balances  LeaveBalance[]
-  requests  LeaveRequest[]
+  tenant   Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  balances LeaveBalance[]
+  requests LeaveRequest[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -445,9 +458,9 @@ model LeaveBalance {
   policyId   String
   year       Int
   entitled   Decimal @db.Decimal(5, 1)
-  used       Decimal @db.Decimal(5, 1) @default(0)
-  pending    Decimal @db.Decimal(5, 1) @default(0)
-  carried    Decimal @db.Decimal(5, 1) @default(0)
+  used       Decimal @default(0) @db.Decimal(5, 1)
+  pending    Decimal @default(0) @db.Decimal(5, 1)
+  carried    Decimal @default(0) @db.Decimal(5, 1)
 
   employee Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   policy   LeavePolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
@@ -457,23 +470,23 @@ model LeaveBalance {
 }
 
 model LeaveRequest {
-  id           String             @id @default(cuid())
-  tenantId     String
-  employeeId   String
-  policyId     String
-  startDate    DateTime
-  endDate      DateTime
-  isHalfDay    Boolean            @default(false)
-  halfDayPeriod String?           // morning, afternoon
-  days         Decimal            @db.Decimal(5, 1)
-  reason       String?
-  attachmentUrl String?
-  status       LeaveRequestStatus @default(PENDING)
-  approverId   String?
-  approvedAt   DateTime?
+  id              String             @id @default(cuid())
+  tenantId        String
+  employeeId      String
+  policyId        String
+  startDate       DateTime
+  endDate         DateTime
+  isHalfDay       Boolean            @default(false)
+  halfDayPeriod   String? // morning, afternoon
+  days            Decimal            @db.Decimal(5, 1)
+  reason          String?
+  attachmentUrl   String?
+  status          LeaveRequestStatus @default(PENDING)
+  approverId      String?
+  approvedAt      DateTime?
   rejectionReason String?
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
 
   tenant   Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   employee Employee    @relation("LeaveEmployee", fields: [employeeId], references: [id], onDelete: Cascade)
@@ -485,13 +498,13 @@ model LeaveRequest {
 }
 
 model Holiday {
-  id        String   @id @default(cuid())
-  tenantId  String
-  name      String
-  date      DateTime @db.Date
-  isOptional Boolean @default(false)
-  country   String   @default("PK")
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  tenantId   String
+  name       String
+  date       DateTime @db.Date
+  isOptional Boolean  @default(false)
+  country    String   @default("PK")
+  createdAt  DateTime @default(now())
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
@@ -501,17 +514,17 @@ model Holiday {
 // ─── Attendance ──────────────────────────────────────────────────────────────
 
 model Shift {
-  id          String  @id @default(cuid())
-  tenantId    String
-  name        String
-  type        String  @default("fixed") // fixed, flexible, rotational
-  startTime   String? // HH:mm
-  endTime     String?
-  graceMinutes Int    @default(10)
-  workingHours Decimal @db.Decimal(4, 1) @default(8)
-  isActive    Boolean @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  tenantId     String
+  name         String
+  type         String   @default("fixed") // fixed, flexible, rotational
+  startTime    String? // HH:mm
+  endTime      String?
+  graceMinutes Int      @default(10)
+  workingHours Decimal  @default(8) @db.Decimal(4, 1)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   attendanceLogs AttendanceLog[]
@@ -520,15 +533,15 @@ model Shift {
 }
 
 model OfficeLocation {
-  id        String  @id @default(cuid())
-  tenantId  String
-  name      String
-  address   String?
-  latitude  Decimal @db.Decimal(10, 7)
-  longitude Decimal @db.Decimal(10, 7)
-  radiusMeters Int  @default(100)
-  isActive  Boolean @default(true)
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  tenantId     String
+  name         String
+  address      String?
+  latitude     Decimal  @db.Decimal(10, 7)
+  longitude    Decimal  @db.Decimal(10, 7)
+  radiusMeters Int      @default(100)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
@@ -552,9 +565,9 @@ model AttendanceLog {
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
 
-  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  shift    Shift?   @relation(fields: [shiftId], references: [id])
+  tenant         Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  employee       Employee               @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  shift          Shift?                 @relation(fields: [shiftId], references: [id])
   regularization RegularizationRequest?
 
   @@unique([tenantId, employeeId, date])
@@ -562,15 +575,15 @@ model AttendanceLog {
 }
 
 model RegularizationRequest {
-  id              String   @id @default(cuid())
-  tenantId        String
-  attendanceLogId String   @unique
-  reason          String
-  requestedClockIn DateTime?
+  id                String    @id @default(cuid())
+  tenantId          String
+  attendanceLogId   String    @unique
+  reason            String
+  requestedClockIn  DateTime?
   requestedClockOut DateTime?
-  status          String   @default("pending") // pending, approved, rejected
-  reviewedAt      DateTime?
-  createdAt       DateTime @default(now())
+  status            String    @default("pending") // pending, approved, rejected
+  reviewedAt        DateTime?
+  createdAt         DateTime  @default(now())
 
   attendanceLog AttendanceLog @relation(fields: [attendanceLogId], references: [id], onDelete: Cascade)
 
@@ -590,52 +603,53 @@ model OnboardingTemplate {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  tenant Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  tasks  OnboardingTask[]
+  tenant   Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tasks    OnboardingTask[]
   progress OnboardingProgress[]
 
   @@index([tenantId])
 }
 
 model OnboardingTask {
-  id         String @id @default(cuid())
-  templateId String
-  title      String
+  id          String   @id @default(cuid())
+  templateId  String
+  title       String
   description String?
-  phase      String @default("day1") // pre_joining, day1, week1, month1, month3
-  order      Int    @default(0)
-  assignee   String @default("employee") // employee, hr, manager, it
-  isRequired Boolean @default(true)
-  createdAt  DateTime @default(now())
+  phase       String   @default("day1") // pre_joining, day1, week1, month1, month3
+  order       Int      @default(0)
+  assignee    String   @default("employee") // employee, hr, manager, it
+  isRequired  Boolean  @default(true)
+  createdAt   DateTime @default(now())
 
-  template OnboardingTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  template OnboardingTemplate       @relation(fields: [templateId], references: [id], onDelete: Cascade)
   progress OnboardingTaskProgress[]
+
   @@index([templateId])
 }
 
 model OnboardingProgress {
-  id         String   @id @default(cuid())
-  tenantId   String
-  employeeId String
-  templateId String
-  startedAt  DateTime @default(now())
+  id          String    @id @default(cuid())
+  tenantId    String
+  employeeId  String
+  templateId  String
+  startedAt   DateTime  @default(now())
   completedAt DateTime?
-  status     String   @default("in_progress")
+  status      String    @default("in_progress")
 
-  employee Employee           @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  template OnboardingTemplate @relation(fields: [templateId], references: [id])
+  employee Employee                 @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  template OnboardingTemplate       @relation(fields: [templateId], references: [id])
   tasks    OnboardingTaskProgress[]
 
   @@index([tenantId, employeeId])
 }
 
 model OnboardingTaskProgress {
-  id         String               @id @default(cuid())
-  progressId String
-  taskId     String
-  status     OnboardingTaskStatus @default(PENDING)
+  id          String               @id @default(cuid())
+  progressId  String
+  taskId      String
+  status      OnboardingTaskStatus @default(PENDING)
   completedAt DateTime?
-  notes      String?
+  notes       String?
 
   progress OnboardingProgress @relation(fields: [progressId], references: [id], onDelete: Cascade)
   task     OnboardingTask     @relation(fields: [taskId], references: [id], onDelete: Cascade)
@@ -646,13 +660,13 @@ model OnboardingTaskProgress {
 // ─── Payroll ─────────────────────────────────────────────────────────────────
 
 model SalaryStructure {
-  id        String   @id @default(cuid())
-  tenantId  String
-  name      String
-  components Json    // [{name, type, amount, formula}]
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  tenantId   String
+  name       String
+  components Json // [{name, type, amount, formula}]
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
@@ -660,26 +674,26 @@ model SalaryStructure {
 }
 
 model PayrollRun {
-  id        String           @id @default(cuid())
-  tenantId  String
-  period    String           // 2026-01
-  status    PayrollRunStatus @default(DRAFT)
+  id          String           @id @default(cuid())
+  tenantId    String
+  period      String // 2026-01
+  status      PayrollRunStatus @default(DRAFT)
   processedAt DateTime?
   approvedBy  String?
 
   // Maker-checker (ENGINEERING_ROADMAP.md Phase 2): the actor who prepared a
   // run may not also be the one who approves it — enforced in the service.
-  preparedByUserId   String?
+  preparedByUserId     String?
   submittedForReviewAt DateTime?
-  approvedByUserId   String?
-  approvedAt         DateTime?
-  lockedAt           DateTime?
-  reopenedByUserId   String?
-  reopenedAt         DateTime?
-  reopenReason       String?
+  approvedByUserId     String?
+  approvedAt           DateTime?
+  lockedAt             DateTime?
+  reopenedByUserId     String?
+  reopenedAt           DateTime?
+  reopenReason         String?
 
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   tenant Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   items  PayrollItem[]
@@ -689,18 +703,18 @@ model PayrollRun {
 }
 
 model PayrollItem {
-  id            String  @id @default(cuid())
-  payrollRunId  String
-  employeeId    String
-  grossSalary   Decimal @db.Decimal(12, 2)
-  deductions    Decimal @db.Decimal(12, 2)
-  netSalary     Decimal @db.Decimal(12, 2)
-  taxAmount     Decimal @db.Decimal(12, 2) @default(0)
-  eobiAmount    Decimal @db.Decimal(12, 2) @default(0)
-  pfAmount      Decimal @db.Decimal(12, 2) @default(0)
-  breakdown     Json?
-  payslipUrl    String?
-  disbursed     Boolean @default(false)
+  id           String  @id @default(cuid())
+  payrollRunId String
+  employeeId   String
+  grossSalary  Decimal @db.Decimal(12, 2)
+  deductions   Decimal @db.Decimal(12, 2)
+  netSalary    Decimal @db.Decimal(12, 2)
+  taxAmount    Decimal @default(0) @db.Decimal(12, 2)
+  eobiAmount   Decimal @default(0) @db.Decimal(12, 2)
+  pfAmount     Decimal @default(0) @db.Decimal(12, 2)
+  breakdown    Json?
+  payslipUrl   String?
+  disbursed    Boolean @default(false)
 
   payrollRun PayrollRun @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
   employee   Employee   @relation(fields: [employeeId], references: [id])
@@ -715,15 +729,15 @@ model PayrollItem {
 /// hardcoded PAKISTAN_TAX_SLABS_2025 constant.
 model PayrollRuleSet {
   id               String    @id @default(cuid())
-  country          String    // "PK", "US"
+  country          String // "PK", "US"
   fiscalYear       Int
   effectiveFrom    DateTime
   effectiveTo      DateTime?
-  taxSlabs         Json      // [{ min, max, rate }]
+  taxSlabs         Json // [{ min, max, rate }]
   eobiEmployeeRate Decimal   @db.Decimal(6, 4)
   eobiEmployerRate Decimal   @db.Decimal(6, 4)
   eobiMinWage      Decimal   @db.Decimal(12, 2)
-  pfRate           Decimal   @db.Decimal(6, 4) @default(0.08)
+  pfRate           Decimal   @default(0.08) @db.Decimal(6, 4)
   isActive         Boolean   @default(true)
   createdAt        DateTime  @default(now())
 
@@ -736,38 +750,37 @@ model CompensationItem {
   id          String   @id @default(cuid())
   tenantId    String
   employeeId  String
-  type        String   // ALLOWANCE, DEDUCTION, LOAN, ADVANCE, BONUS, ARREARS
+  type        String // ALLOWANCE, DEDUCTION, LOAN, ADVANCE, BONUS, ARREARS
   label       String
   amount      Decimal  @db.Decimal(12, 2)
   recurring   Boolean  @default(true)
-  startPeriod String?  // "2026-01" — null = active from the beginning
-  endPeriod   String?  // null = ongoing (for recurring) or same as startPeriod (one-off)
+  startPeriod String? // "2026-01" — null = active from the beginning
+  endPeriod   String? // null = ongoing (for recurring) or same as startPeriod (one-off)
   createdAt   DateTime @default(now())
 
-  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
-  @@index([tenantId, employeeId])
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   sourceType String? // e.g. LoanRequest — rows generated by another module are managed there, not deleted by hand
   sourceId   String?
 
+  @@index([tenantId, employeeId])
   @@index([sourceType, sourceId])
 }
 
 // ─── Recruitment / ATS ───────────────────────────────────────────────────────
 
 model JobPosting {
-  id          String   @id @default(cuid())
-  tenantId    String
-  title       String
-  department  String?
-  description String?
+  id           String    @id @default(cuid())
+  tenantId     String
+  title        String
+  department   String?
+  description  String?
   requirements String?
-  status      String   @default("open") // open, closed, draft
-  postedAt    DateTime @default(now())
-  closedAt    DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status       String    @default("open") // open, closed, draft
+  postedAt     DateTime  @default(now())
+  closedAt     DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   tenant       Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   applications JobApplication[]
@@ -811,7 +824,7 @@ model ReviewCycle {
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 
-  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant  Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   goals   Goal[]
   reviews PerformanceReview[]
 
@@ -819,18 +832,18 @@ model ReviewCycle {
 }
 
 model Goal {
-  id          String  @id @default(cuid())
+  id          String    @id @default(cuid())
   tenantId    String
   employeeId  String
   cycleId     String?
   title       String
   description String?
-  weight      Int     @default(1)
-  progress    Int     @default(0)
-  status      String  @default("active")
+  weight      Int       @default(1)
+  progress    Int       @default(0)
+  status      String    @default("active")
   dueDate     DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   employee Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   cycle    ReviewCycle? @relation(fields: [cycleId], references: [id])
@@ -839,17 +852,17 @@ model Goal {
 }
 
 model PerformanceReview {
-  id           String  @id @default(cuid())
-  tenantId     String
-  cycleId      String
-  employeeId   String
-  reviewerId   String
-  selfRating   Int?
+  id            String   @id @default(cuid())
+  tenantId      String
+  cycleId       String
+  employeeId    String
+  reviewerId    String
+  selfRating    Int?
   managerRating Int?
-  feedback     String?
-  status       String  @default("pending")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  feedback      String?
+  status        String   @default("pending")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   cycle ReviewCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
 
@@ -897,16 +910,16 @@ model CourseEnrollment {
 // ─── Cross-Cutting ───────────────────────────────────────────────────────────
 
 model AuditLog {
-  id         String   @id @default(cuid())
-  tenantId   String
-  userId     String?
-  action     String
-  entity     String
-  entityId   String?
-  before     Json?
-  after      Json?
-  ipAddress  String?
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  before    Json?
+  after     Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
@@ -931,16 +944,16 @@ model Notification {
 }
 
 model WhatsAppMessage {
-  id          String   @id @default(cuid())
-  tenantId    String
+  id             String   @id @default(cuid())
+  tenantId       String
   recipientPhone String
-  templateName String?
-  body        String
-  status      String   @default("sent") // sent, delivered, read, failed
-  direction   String   @default("outbound")
-  externalId  String?  // WhatsApp message id (wamid) — dedupes Meta's webhook retries
-  metadata    Json?
-  createdAt   DateTime @default(now())
+  templateName   String?
+  body           String
+  status         String   @default("sent") // sent, delivered, read, failed
+  direction      String   @default("outbound")
+  externalId     String? // WhatsApp message id (wamid) — dedupes Meta's webhook retries
+  metadata       Json?
+  createdAt      DateTime @default(now())
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
@@ -952,9 +965,9 @@ model WhatsAppMessage {
 model WhatsAppConsent {
   id        String   @id @default(cuid())
   tenantId  String
-  phone     String   // digits only, normalised
-  status    String   // OPTED_IN, OPTED_OUT
-  source    String   // WHATSAPP_REPLY, SELF_SERVICE, ADMIN_ATTESTED
+  phone     String // digits only, normalised
+  status    String // OPTED_IN, OPTED_OUT
+  source    String // WHATSAPP_REPLY, SELF_SERVICE, ADMIN_ATTESTED
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -984,17 +997,17 @@ model WhatsAppActionToken {
 // ─── Custom Fields & Workflows (Phase 2) ─────────────────────────────────────
 
 model CustomFieldDefinition {
-  id         String   @id @default(cuid())
-  tenantId   String
-  entity     String   @default("Employee")
-  key        String
-  label      String
-  fieldType  String   // text, number, date, dropdown, boolean
-  options    Json?
-  required   Boolean  @default(false)
-  sortOrder  Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(cuid())
+  tenantId  String
+  entity    String   @default("Employee")
+  key       String
+  label     String
+  fieldType String // text, number, date, dropdown, boolean
+  options   Json?
+  required  Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
@@ -1003,38 +1016,38 @@ model CustomFieldDefinition {
 }
 
 model WorkflowDefinition {
-  id          String   @id @default(cuid())
-  tenantId    String
-  name        String
-  trigger     String   // employee.salary_change, leave.request, etc.
-  steps       Json     // [{role, order, action}]
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  trigger   String // employee.salary_change, leave.request, etc.
+  steps     Json // [{role, order, action}]
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  tenant    Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant    Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   instances WorkflowInstance[]
 
   @@index([tenantId])
 }
 
 model WorkflowInstance {
-  id           String   @id @default(cuid())
-  tenantId     String
-  definitionId String
-  entityType   String
-  entityId     String
-  currentStep  Int      @default(0)
-  status       String   @default("pending") // pending, approved, rejected
-  metadata     Json?
+  id                String    @id @default(cuid())
+  tenantId          String
+  definitionId      String
+  entityType        String
+  entityId          String
+  currentStep       Int       @default(0)
+  status            String    @default("pending") // pending, approved, rejected
+  metadata          Json?
   requestedByUserId String?
   subjectEmployeeId String?
-  completedAt  DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  completedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
-  tenant     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  definition WorkflowDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  tenant     Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  definition WorkflowDefinition   @relation(fields: [definitionId], references: [id], onDelete: Cascade)
   actions    WorkflowStepAction[]
 
   @@index([tenantId, status])
@@ -1047,7 +1060,7 @@ model WorkflowStepAction {
   stepIndex   Int
   actorUserId String
   actorRole   String
-  action      String   // APPROVE, REJECT
+  action      String // APPROVE, REJECT
   comment     String?
   createdAt   DateTime @default(now())
 
@@ -1072,7 +1085,7 @@ model OffboardingCase {
   id                 String            @id @default(cuid())
   tenantId           String
   employeeId         String
-  type               String            // RESIGNATION, TERMINATION
+  type               String // RESIGNATION, TERMINATION
   reason             String?
   noticeDate         DateTime          @default(now())
   lastWorkingDay     DateTime
@@ -1115,38 +1128,38 @@ model OffboardingClearanceItem {
 // ─── Integrations & Webhooks (Phase 5) ───────────────────────────────────────
 
 model Webhook {
-  id        String   @id @default(cuid())
-  tenantId  String
-  url       String
-  events    String[] // employee.created, employee.terminated, leave.approved
-  secret    String
-  isActive  Boolean  @default(true)
+  id                  String    @id @default(cuid())
+  tenantId            String
+  url                 String
+  events              String[] // employee.created, employee.terminated, leave.approved
+  secret              String
+  isActive            Boolean   @default(true)
   consecutiveFailures Int       @default(0)
   lastSuccessAt       DateTime?
   lastFailureAt       DateTime?
   lastError           String?
   disabledReason      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  tenant     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant     Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   deliveries WebhookDelivery[]
 
   @@index([tenantId])
 }
 
 model WebhookDelivery {
-  id         String   @id @default(cuid())
-  webhookId  String
-  event      String
-  payload    Json
-  status     String   @default("pending") // pending, retrying, delivered, failed (dead)
-  response   String?
-  attempts   Int      @default(0)
+  id            String    @id @default(cuid())
+  webhookId     String
+  event         String
+  payload       Json
+  status        String    @default("pending") // pending, retrying, delivered, failed (dead)
+  response      String?
+  attempts      Int       @default(0)
   nextAttemptAt DateTime?
-  lastError  String?
-  deliveredAt DateTime?
-  createdAt  DateTime @default(now())
+  lastError     String?
+  deliveredAt   DateTime?
+  createdAt     DateTime  @default(now())
 
   webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
 
@@ -1159,8 +1172,8 @@ model IntegrationSyncLog {
   id               String   @id @default(cuid())
   tenantId         String
   provider         String
-  direction        String   // INBOUND, OUTBOUND
-  status           String   // SUCCESS, PARTIAL, FAILED
+  direction        String // INBOUND, OUTBOUND
+  status           String // SUCCESS, PARTIAL, FAILED
   recordsProcessed Int      @default(0)
   recordsFailed    Int      @default(0)
   message          String?
@@ -1192,16 +1205,16 @@ model BiometricDevice {
 }
 
 model TenantIntegration {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   tenantId     String
-  provider     String   // slack, okta, deel
-  status       String   @default("disconnected")
+  provider     String // slack, okta, deel
+  status       String    @default("disconnected")
   accessToken  String?
   refreshToken String?
   config       Json?
   installedAt  DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
@@ -1210,14 +1223,14 @@ model TenantIntegration {
 }
 
 model FormulaDefinition {
-  id        String   @id @default(cuid())
-  tenantId  String
-  name      String
-  entity    String
-  expression String  // e.g. "dateOfJoining + 90 days"
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  entity      String
+  expression  String // e.g. "dateOfJoining + 90 days"
   targetField String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
@@ -1225,13 +1238,13 @@ model FormulaDefinition {
 }
 
 model ApiKey {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   tenantId  String
   name      String
   keyHash   String
   prefix    String
   lastUsed  DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
@@ -1241,15 +1254,15 @@ model ApiKey {
 // ─── Talent Acquisition Extensions (Phase 3) ───────────────────────────────
 
 model PreboardingInvite {
-  id          String   @id @default(cuid())
-  tenantId    String
+  id            String   @id @default(cuid())
+  tenantId      String
   applicationId String?
-  email       String
-  token       String   @unique
-  expiresAt   DateTime
-  status      String   @default("pending")
-  documents   Json?
-  createdAt   DateTime @default(now())
+  email         String
+  token         String   @unique
+  expiresAt     DateTime
+  status        String   @default("pending")
+  documents     Json?
+  createdAt     DateTime @default(now())
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
@@ -1257,15 +1270,15 @@ model PreboardingInvite {
 }
 
 model EsignRequest {
-  id         String   @id @default(cuid())
-  tenantId   String
-  entityType String
-  entityId   String
+  id          String    @id @default(cuid())
+  tenantId    String
+  entityType  String
+  entityId    String
   signerEmail String
   documentUrl String
-  status     String   @default("pending") // pending, signed, declined
-  signedAt   DateTime?
-  createdAt  DateTime @default(now())
+  status      String    @default("pending") // pending, signed, declined
+  signedAt    DateTime?
+  createdAt   DateTime  @default(now())
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
@@ -1275,17 +1288,17 @@ model EsignRequest {
 // ─── Experience (Phase 6) ───────────────────────────────────────────────────
 
 model EnpsSurvey {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   tenantId  String
   title     String
-  question  String   @default("How likely are you to recommend this company?")
-  status    String   @default("draft")
+  question  String    @default("How likely are you to recommend this company?")
+  status    String    @default("draft")
   sentAt    DateTime?
   closesAt  DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
-  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  responses EnpsResponse[]
+  tenant         Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  responses      EnpsResponse[]
   participations EnpsParticipation[]
 
   @@index([tenantId])
@@ -1306,7 +1319,7 @@ model EnpsParticipation {
 model EnpsResponse {
   id        String   @id @default(cuid())
   surveyId  String
-  score     Int      // 0-10
+  score     Int // 0-10
   comment   String?
   createdAt DateTime @default(now())
 
@@ -1339,7 +1352,7 @@ model ReportDefinition {
   id        String   @id @default(cuid())
   tenantId  String
   name      String
-  config    Json     // columns, filters, groupBy
+  config    Json // columns, filters, groupBy
   createdBy String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1352,7 +1365,7 @@ model ReportDefinition {
 model ExtensionPanelAccess {
   id        String   @id @default(cuid())
   tenantId  String
-  panel     String   // recruitment, it_assets, compliance
+  panel     String // recruitment, it_assets, compliance
   userId    String?
   role      String?
   readOnly  Boolean  @default(false)
@@ -1366,17 +1379,17 @@ model ExtensionPanelAccess {
 // ─── Manager Hub: 1-on-1s ────────────────────────────────────────────────────
 
 model OneOnOne {
-  id          String    @id @default(cuid())
-  tenantId    String
-  managerId   String
-  employeeId  String
-  scheduledAt DateTime
-  status      String    @default("scheduled") // scheduled, completed, cancelled
-  talkingPoints Json?   // [{text, done}]
-  notes       String?
-  privateNotes String?  // manager-only
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id            String   @id @default(cuid())
+  tenantId      String
+  managerId     String
+  employeeId    String
+  scheduledAt   DateTime
+  status        String   @default("scheduled") // scheduled, completed, cancelled
+  talkingPoints Json? // [{text, done}]
+  notes         String?
+  privateNotes  String? // manager-only
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   manager  Employee @relation("OneOnOneManager", fields: [managerId], references: [id], onDelete: Cascade)
@@ -1391,7 +1404,7 @@ model OneOnOne {
 model Project {
   id        String   @id @default(cuid())
   tenantId  String
-  key       String   // e.g. MTX, ACME-WEB
+  key       String // e.g. MTX, ACME-WEB
   name      String
   status    String   @default("active") // active, archived
   createdAt DateTime @default(now())
@@ -1427,17 +1440,17 @@ model TimeEntry {
 // ─── Enterprise SSO ──────────────────────────────────────────────────────────
 
 model SsoConfig {
-  id           String   @id @default(cuid())
-  tenantId     String   @unique
-  provider     String   @default("saml") // saml, oidc
-  enabled      Boolean  @default(false)
-  entryPoint   String?  // IdP SSO URL
-  issuer       String?
-  certificate  String?  // IdP x509 cert (PEM)
-  metadataUrl  String?
-  domains      Json?    // allowed email domains
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          String   @id @default(cuid())
+  tenantId    String   @unique
+  provider    String   @default("saml") // saml, oidc
+  enabled     Boolean  @default(false)
+  entryPoint  String? // IdP SSO URL
+  issuer      String?
+  certificate String? // IdP x509 cert (PEM)
+  metadataUrl String?
+  domains     Json? // allowed email domains
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
@@ -1455,40 +1468,40 @@ model ProductFeature {
 }
 
 model Plan {
-  id        String        @id @default(cuid())
-  code      String        @unique // "starter", "growth", "pro", "enterprise"
+  id        String   @id @default(cuid())
+  code      String   @unique // "starter", "growth", "pro", "enterprise"
   name      String
-  isActive  Boolean       @default(true)
-  createdAt DateTime      @default(now())
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 
   versions PlanVersion[]
 }
 
 model PlanVersion {
-  id                  String   @id @default(cuid())
-  planId              String
-  version             Int
-  pricePkrMonthly     Decimal? @db.Decimal(12, 2)
-  includedEmployees   Int      @default(0)
-  perEmployeePricePkr Decimal? @db.Decimal(12, 2)
-  isCurrent           Boolean  @default(true)
-  createdAt           DateTime @default(now())
+  id                    String   @id @default(cuid())
+  planId                String
+  version               Int
+  pricePkrMonthly       Decimal? @db.Decimal(12, 2)
+  includedEmployees     Int      @default(0)
+  perEmployeePricePkr   Decimal? @db.Decimal(12, 2)
+  isCurrent             Boolean  @default(true)
+  createdAt             DateTime @default(now())
   // Catalog columns (manual-payments work). All additive: existing rows keep currency PKR and are
   // not offered to new signups; the USD catalog is inserted as new versions.
-  currency            String   @default("PKR")
-  priceMonthly        Decimal? @db.Decimal(12, 2)
-  priceYearly         Decimal? @db.Decimal(12, 2)
-  aiCreditsMonthly    Int      @default(0)
-  maxEmployees        Int?
-  maxAdminUsers       Int?
-  overagePerEmployee  Decimal? @db.Decimal(12, 2)
-  offeredToNew        Boolean  @default(false)
+  currency              String   @default("PKR")
+  priceMonthly          Decimal? @db.Decimal(12, 2)
+  priceYearly           Decimal? @db.Decimal(12, 2)
+  aiCreditsMonthly      Int      @default(0)
+  maxEmployees          Int?
+  maxAdminUsers         Int?
+  overagePerEmployee    Decimal? @db.Decimal(12, 2)
+  offeredToNew          Boolean  @default(false)
   // Second price list on the same version: PKR for Pakistan, set by hand (no FX). The USD columns above stay the USD list.
-  priceMonthlyPkr        Decimal? @db.Decimal(12, 2)
-  priceYearlyPkr         Decimal? @db.Decimal(12, 2)
-  overagePerEmployeePkr  Decimal? @db.Decimal(12, 2)
+  priceMonthlyPkr       Decimal? @db.Decimal(12, 2)
+  priceYearlyPkr        Decimal? @db.Decimal(12, 2)
+  overagePerEmployeePkr Decimal? @db.Decimal(12, 2)
 
-  plan          Plan               @relation(fields: [planId], references: [id], onDelete: Cascade)
+  plan          Plan              @relation(fields: [planId], references: [id], onDelete: Cascade)
   entitlements  PlanEntitlement[]
   subscriptions Subscription[]
 
@@ -1510,19 +1523,19 @@ model PlanEntitlement {
 }
 
 model Subscription {
-  id            String    @id @default(cuid())
-  tenantId      String    @unique
-  planVersionId String
-  status        String    @default("trialing") // trialing, active, past_due, suspended, cancelled, expired
-  startedAt     DateTime  @default(now())
-  renewsAt      DateTime?
-  cancelledAt   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  tenantId         String    @unique
+  planVersionId    String
+  status           String    @default("trialing") // trialing, active, past_due, suspended, cancelled, expired
+  startedAt        DateTime  @default(now())
+  renewsAt         DateTime?
+  cancelledAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
   // End of the paid (or trial) period. NULL means "no billing clock": such a tenant never lapses.
   currentPeriodEnd DateTime?
   trialEndsAt      DateTime?
-  billingPeriod    String   @default("monthly") // monthly | yearly
+  billingPeriod    String    @default("monthly") // monthly | yearly
 
   tenant      Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   planVersion PlanVersion           @relation(fields: [planVersionId], references: [id])
@@ -1586,7 +1599,6 @@ model PlatformAuditLog {
 
   @@index([targetType, targetId])
 }
-
 
 // ─── Expenses, reimbursements, loans & advances (ENGINEERING_ROADMAP.md Phase 6a) ─────────────
 
@@ -1667,19 +1679,19 @@ enum LoanStatus {
 // A salary loan or advance. Once approved, an exact deduction row per instalment is written to
 // CompensationItem (sourceType = LoanRequest), which payroll already understands.
 model LoanRequest {
-  id                    String     @id @default(cuid())
-  tenantId              String
-  employeeId            String
-  type                  String     // LOAN, ADVANCE
-  amount                Decimal    @db.Decimal(12, 2)
-  installments          Int
-  firstDeductionPeriod  String     // YYYY-MM
-  reason                String?
-  status                LoanStatus @default(PENDING)
-  decidedAt             DateTime?
-  workflowInstanceId    String?
-  createdAt             DateTime   @default(now())
-  updatedAt             DateTime   @updatedAt
+  id                   String     @id @default(cuid())
+  tenantId             String
+  employeeId           String
+  type                 String // LOAN, ADVANCE
+  amount               Decimal    @db.Decimal(12, 2)
+  installments         Int
+  firstDeductionPeriod String // YYYY-MM
+  reason               String?
+  status               LoanStatus @default(PENDING)
+  decidedAt            DateTime?
+  workflowInstanceId   String?
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
 
   tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
@@ -1687,7 +1699,6 @@ model LoanRequest {
   @@index([tenantId, status])
   @@index([tenantId, employeeId])
 }
-
 
 // ─── Manual (bank-transfer) payments ───────────────────────────────────────────────────────────
 
@@ -1712,10 +1723,10 @@ model PaymentAccount {
 model PaymentRequest {
   id               String    @id @default(cuid())
   tenantId         String
-  purpose          String    // plan | credit_pack
+  purpose          String // plan | credit_pack
   planCode         String?
   planVersionId    String?
-  billingPeriod    String?   // monthly | yearly
+  billingPeriod    String? // monthly | yearly
   packCode         String?
   currency         String    @default("USD")
   expectedAmount   Decimal   @db.Decimal(12, 2)
@@ -1738,10 +1749,10 @@ model PaymentRequest {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  tenant   Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  account  PaymentAccount @relation(fields: [accountId], references: [id])
-  proof    PaymentProof?
-  receipt  Receipt?
+  tenant  Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  account PaymentAccount @relation(fields: [accountId], references: [id])
+  proof   PaymentProof?
+  receipt Receipt?
 
   @@index([tenantId, status])
   @@index([status, createdAt])
@@ -1781,21 +1792,21 @@ model ReceiptCounter {
 }
 
 model BillingSettings {
-  id                String   @id @default("singleton")
-  graceDays         Int      @default(3)
-  provisionalHours  Int      @default(72)
-  reminderDays      String   @default("7,1,0")
-  updatedAt         DateTime @updatedAt
+  id               String   @id @default("singleton")
+  graceDays        Int      @default(3)
+  provisionalHours Int      @default(72)
+  reminderDays     String   @default("7,1,0")
+  updatedAt        DateTime @updatedAt
 }
 
 // One 72-hour provisional window per (subscription, period end).
 model ProvisionalAccess {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   subscriptionId String
   periodEnd      DateTime
   until          DateTime
   revokedAt      DateTime?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime  @default(now())
 
   subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
@@ -1806,7 +1817,7 @@ model BillingReminder {
   id             String   @id @default(cuid())
   subscriptionId String
   periodEnd      DateTime
-  kind           String   // d7 | d1 | expired
+  kind           String // d7 | d1 | expired
   sentAt         DateTime @default(now())
 
   subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
@@ -1834,16 +1845,16 @@ model EmailOutbox {
 // ─── AI assistant ───────────────────────────────────────────────────────────────────────────────
 
 model AiSettings {
-  id             String   @id @default("singleton")
-  enabled        Boolean  @default(false) // master switch, read fresh on every request
-  provider       String   @default("openai") // openai | anthropic | gemini
-  openaiModel    String   @default("gpt-4o-mini")
-  anthropicModel String   @default("claude-haiku-4-5-20251001")
-  geminiModel    String   @default("gemini-2.0-flash")
+  id              String   @id @default("singleton")
+  enabled         Boolean  @default(false) // master switch, read fresh on every request
+  provider        String   @default("openai") // openai | anthropic | gemini
+  openaiModel     String   @default("gpt-4o-mini")
+  anthropicModel  String   @default("claude-haiku-4-5-20251001")
+  geminiModel     String   @default("gemini-2.0-flash")
   openaiKeyEnc    String?
   anthropicKeyEnc String?
   geminiKeyEnc    String?
-  updatedAt      DateTime @updatedAt
+  updatedAt       DateTime @updatedAt
 }
 
 model AiConversation {
@@ -1854,7 +1865,7 @@ model AiConversation {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tenant   Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant   Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   messages AiMessage[]
 
   @@index([tenantId, userId, updatedAt])
@@ -1863,7 +1874,7 @@ model AiConversation {
 model AiMessage {
   id             String   @id @default(cuid())
   conversationId String
-  role           String   // user | assistant | tool
+  role           String // user | assistant | tool
   content        String
   meta           Json?
   createdAt      DateTime @default(now())
@@ -1904,30 +1915,30 @@ model AiCreditAccount {
 }
 
 model AiCreditLedger {
-  id             String   @id @default(cuid())
-  tenantId       String
-  kind           String   // RESERVE | SETTLE | REFUND | GRANT | PURCHASE | MONTHLY | TRIAL
-  deltaMc        Int
-  monthlyPartMc  Int      @default(0)
-  purchasedPartMc Int     @default(0)
-  refId          String?
-  idempotencyKey String   @unique
-  detail         Json?
+  id              String   @id @default(cuid())
+  tenantId        String
+  kind            String // RESERVE | SETTLE | REFUND | GRANT | PURCHASE | MONTHLY | TRIAL
+  deltaMc         Int
+  monthlyPartMc   Int      @default(0)
+  purchasedPartMc Int      @default(0)
+  refId           String?
+  idempotencyKey  String   @unique
+  detail          Json?
   createdByUserId String?
-  createdAt      DateTime @default(now())
+  createdAt       DateTime @default(now())
 
   @@index([tenantId, createdAt])
 }
 
 model CreditPack {
-  id        String  @id @default(cuid())
-  code      String  @unique
-  name      String
-  credits   Int
-  price     Decimal @db.Decimal(12, 2)
-  pricePkr  Decimal? @db.Decimal(12, 2)
-  currency  String  @default("USD")
-  isActive  Boolean @default(true)
+  id       String   @id @default(cuid())
+  code     String   @unique
+  name     String
+  credits  Int
+  price    Decimal  @db.Decimal(12, 2)
+  pricePkr Decimal? @db.Decimal(12, 2)
+  currency String   @default("USD")
+  isActive Boolean  @default(true)
 }
 
 // ─── Staff logins: an invitation to set a password and sign in as an existing employee ─────────────
@@ -1949,5 +1960,142 @@ model UserInvite {
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  @@index([tenantId, employeeId])
+}
+
+// ─── Work-activity monitoring (disclosed) ──────────────────────────────────────
+// A desktop agent that the EMPLOYEE installs from their own panel (one-time, visible, with a tray icon)
+// records TIME AND ACTIVITY ONLY — active/idle seconds, mouse/keyboard event COUNTS (never which key),
+// and the foreground app/domain. It never records keystrokes, screen, clipboard or any content.
+// Raw samples auto-purge after a short retention; HR and managers see daily SUMMARIES, not raw rows.
+// Every cross-person view is audited. Off by default; a tenant turns it on and publishes a policy the
+// employee accepts before any agent pairs.
+
+model MonitoringSettings {
+  tenantId             String   @id
+  enabled              Boolean  @default(false)
+  // Policy the employee must accept before installing. Versioned so a changed policy re-prompts.
+  policyText           String   @default("")
+  policyVersion        Int      @default(1)
+  // What the agent is allowed to record (time/activity only, always; these narrow it further).
+  trackApps            Boolean  @default(true)
+  trackDomains         Boolean  @default(true)
+  // Work window used for the offline check and the "first activity vs clock-in" cross-check (tenant timezone).
+  workdayStartMin      Int      @default(540) // 09:00
+  workdayEndMin        Int      @default(1080) // 18:00
+  // An agent silent for this many minutes DURING the work window raises an AGENT_OFFLINE alert to HR.
+  offlineAlertMins     Int      @default(15)
+  retentionRawDays     Int      @default(30)
+  retentionSummaryDays Int      @default(365)
+  updatedByUserId      String?
+  updatedAt            DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+// The employee's recorded acceptance of the monitoring policy. No pairing without a current-version consent.
+model MonitoringConsent {
+  id            String   @id @default(cuid())
+  tenantId      String
+  employeeId    String
+  policyVersion Int
+  acceptedAt    DateTime @default(now())
+  ipAddress     String?
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, employeeId, policyVersion])
+  @@index([tenantId, employeeId])
+}
+
+// One registered agent install. The pairing token is stored only as a SHA-256 hash and sent in each batch.
+model MonitoredDevice {
+  id           String    @id @default(cuid())
+  tenantId     String
+  employeeId   String
+  name         String // e.g. hostname the employee named it
+  platform     String? // windows | mac | linux
+  agentVersion String?
+  tokenHash    String    @unique
+  status       String    @default("ACTIVE") // ACTIVE | REVOKED
+  pairedAt     DateTime  @default(now())
+  lastSeenAt   DateTime?
+  lastAlertAt  DateTime? // throttles repeated offline alerts for the same silence
+  revokedAt    DateTime?
+
+  tenant   Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  employee Employee          @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  samples  ActivitySample[]
+  alerts   MonitoringAlert[]
+
+  @@index([tenantId, employeeId])
+  @@index([tenantId, lastSeenAt])
+}
+
+// Raw per-window activity, auto-purged after retentionRawDays. Counts and durations only; no content.
+model ActivitySample {
+  id               String   @id @default(cuid())
+  tenantId         String
+  deviceId         String
+  employeeId       String
+  windowStart      DateTime
+  windowEnd        DateTime
+  activeSeconds    Int      @default(0)
+  idleSeconds      Int      @default(0)
+  mouseEvents      Int      @default(0)
+  keyboardEvents   Int      @default(0)
+  foregroundApp    String?
+  foregroundDomain String?
+  category         String? // work | communication | idle | other (classified from app/domain)
+  createdAt        DateTime @default(now())
+
+  tenant Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  device MonitoredDevice @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, employeeId, windowStart])
+  @@index([tenantId, createdAt])
+}
+
+// Nightly rollup HR and managers actually look at. One row per employee per local day.
+model ActivityDailySummary {
+  id              String    @id @default(cuid())
+  tenantId        String
+  employeeId      String
+  day             String // YYYY-MM-DD in the tenant timezone
+  activeSeconds   Int       @default(0)
+  idleSeconds     Int       @default(0)
+  offlineSeconds  Int       @default(0) // work-window time with no agent reporting
+  firstActivityAt DateTime?
+  lastActivityAt  DateTime?
+  topApps         Json? // [{ name, seconds }] — app/domain names only
+  mouseEvents     Int       @default(0)
+  keyboardEvents  Int       @default(0)
+  updatedAt       DateTime  @updatedAt
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, employeeId, day])
+  @@index([tenantId, day])
+}
+
+// What HR sees when an agent stops reporting, is quit, or is uninstalled.
+model MonitoringAlert {
+  id               String    @id @default(cuid())
+  tenantId         String
+  employeeId       String
+  deviceId         String?
+  type             String // AGENT_OFFLINE | AGENT_STOPPED | AGENT_REMOVED
+  detail           String?
+  createdAt        DateTime  @default(now())
+  resolvedAt       DateTime?
+  resolvedByUserId String?
+
+  tenant   Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  employee Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  device   MonitoredDevice? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, resolvedAt])
   @@index([tenantId, employeeId])
 }

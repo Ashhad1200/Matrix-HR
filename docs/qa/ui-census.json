@@ -5,6 +5,12 @@
   "inputs": 0,
   "tableRows": 0
  },
+ "admin:/my-activity": {
+  "title": "My Activity",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
  "admin:/one-on-ones": {
   "title": "1-on-1s",
   "buttons": [
@@ -216,6 +222,12 @@
   "inputs": 0,
   "tableRows": 53
  },
+ "admin:/monitoring": {
+  "title": "Activity Monitor",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
  "admin:/ai": {
   "title": "Ask MatrixHR",
   "buttons": [
@@ -250,9 +262,18 @@
  },
  "admin:/billing": {
   "title": "Billing",
-  "buttons": [],
+  "buttons": [
+   "Plan",
+   "AI credits",
+   "Monthly",
+   "Yearly (2 months free)",
+   "Starter$25 a monthUp to 25 employees2 admin users150 AI credits a month",
+   "Growth$69 a monthUp to 100 employees5 admin users500 AI credits a month",
+   "Business$149 a monthUp to 300 employees, then $0.50 each15 admin users1,500 AI credits a month",
+   "Continue to payment details"
+  ],
   "inputs": 0,
-  "tableRows": 0
+  "tableRows": 1
  },
  "admin:/marketplace": {
   "title": "Marketplace",
@@ -422,6 +443,12 @@
  },
  "hr:/dashboard": {
   "title": "Good evening, Hira",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
+ "hr:/my-activity": {
+  "title": "My Activity",
   "buttons": [],
   "inputs": 0,
   "tableRows": 0
@@ -637,6 +664,12 @@
   "inputs": 0,
   "tableRows": 53
  },
+ "hr:/monitoring": {
+  "title": "Activity Monitor",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
  "hr:/ai": {
   "title": "Ask MatrixHR",
   "buttons": [
@@ -671,9 +704,18 @@
  },
  "hr:/billing": {
   "title": "Billing",
-  "buttons": [],
+  "buttons": [
+   "Plan",
+   "AI credits",
+   "Monthly",
+   "Yearly (2 months free)",
+   "Starter$25 a monthUp to 25 employees2 admin users150 AI credits a month",
+   "Growth$69 a monthUp to 100 employees5 admin users500 AI credits a month",
+   "Business$149 a monthUp to 300 employees, then $0.50 each15 admin users1,500 AI credits a month",
+   "Continue to payment details"
+  ],
   "inputs": 0,
-  "tableRows": 0
+  "tableRows": 1
  },
  "hr:/marketplace": {
   "title": "Marketplace",
@@ -751,6 +793,12 @@
    "Save Changes"
   ],
   "inputs": 3,
+  "tableRows": 0
+ },
+ "manager:/my-activity": {
+  "title": "My Activity",
+  "buttons": [],
+  "inputs": 0,
   "tableRows": 0
  },
  "manager:/team": {
@@ -888,6 +936,12 @@
   "inputs": 0,
   "tableRows": 53
  },
+ "manager:/monitoring": {
+  "title": "Activity Monitor",
+  "buttons": [],
+  "inputs": 0,
+  "tableRows": 0
+ },
  "manager:/ai": {
   "title": "Ask MatrixHR",
   "buttons": [
@@ -923,6 +977,12 @@
    "Save Changes"
   ],
   "inputs": 3,
+  "tableRows": 0
+ },
+ "employee:/my-activity": {
+  "title": "My Activity",
+  "buttons": [],
+  "inputs": 0,
   "tableRows": 0
  },
  "employee:/offboarding": {
@@ -1058,7 +1118,7 @@
    "New tenant"
   ],
   "inputs": 0,
-  "tableRows": 13
+  "tableRows": 285
  },
  "superadmin:/platform/billing": {
   "title": "Billing",
@@ -1084,7 +1144,7 @@
   "title": "Audit log",
   "buttons": [],
   "inputs": 0,
-  "tableRows": 18
+  "tableRows": 200
  },
  "superadmin:/platform/ai": {
   "title": "AI assistant",
@@ -1096,7 +1156,7 @@
    "Grant"
   ],
   "inputs": 12,
-  "tableRows": 9
+  "tableRows": 270
  },
  "superadmin:/security": {
   "title": "Security",

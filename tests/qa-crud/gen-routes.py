@@ -8,11 +8,11 @@ for f in sorted(glob.glob(root + '/**/*.controller.ts', recursive=True)):
     for part in re.split(r"(?=@Controller\()", s)[1:]:
         base = re.match(r"@Controller\(\s*'?([^')]*)'?", part).group(1)
         head, body = part.split('export class', 1)
-        cls_guard = 'JwtAuthGuard' in head
+        cls_guard = 'JwtAuthGuard' in head or 'DeviceTokenGuard' in head
         cls_roles = re.findall(r"@Roles\(([^)]*)\)", head)
         for m in re.finditer(r"((?:\s*@\w+\([^\n]*\)\n)*)\s*@(Get|Post|Put|Patch|Delete)\(\s*(?:'([^']*)')?\s*\)", body):
             pre = m.group(1)
-            auth = cls_guard or 'JwtAuthGuard' in pre
+            auth = cls_guard or 'JwtAuthGuard' in pre or 'DeviceTokenGuard' in pre
             roles = re.findall(r"@Roles\(([^)]*)\)", pre) or cls_roles
             r = [x.strip().replace('UserRole.', '') for x in roles[0].split(',')] if roles else []
             path = ('/' + base + '/' + (m.group(3) or '')).replace('//', '/').rstrip('/') or '/'

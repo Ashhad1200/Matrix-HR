@@ -142,6 +142,27 @@ Notes
 | White-label `WL_CURRENCIES`; single-company shows no prices | ✅ | A second API with `WL_CURRENCIES=USD` bills a Pakistani client in USD, offers one currency on `/pricing` and refuses a PKR change; single-company `/pricing` is 404 (spec `09`) |
 Notes: amounts stay exact two-decimal numbers per currency (not integer minor units); companies that were already on a PKR plan become PKR; the billing journey now creates its own bank account.
 
+## 7f. Round 5: disclosed work-activity monitoring (spec `20-monitoring`; jest `monitoring.util.spec.ts`, `monitoring.integration.spec.ts`)
+A new off-by-default module. A desktop agent the **employee installs themselves** records **time and activity only** (active/idle seconds, mouse/keyboard event counts, foreground app/domain name) — never keystrokes, screen, clipboard or content. HR sees daily summaries + agent status, scoped by role; every cross-person view is audited.
+
+| Requirement | Result | Evidence |
+|---|---|---|
+| Off by default; HR enables it and must publish a policy first | ✅ | `20`: enabling with no policy → 400; employee/manager cannot read or change settings (403). Migration `4_monitoring` additive, `enabled` defaults false |
+| Policy versioned; editing it re-asks everyone | ✅ | `20` + integration: changing `policyText` bumps `policyVersion`; a non-policy change keeps it; an old consent no longer lets a device pair |
+| Employee-initiated, visible install (consent → download → run, tray icon) | ✅ | Browser test: *My Activity* shows the policy + "I understand and accept", then an **Install agent** modal that issues a one-time pairing key; the agent download link serves the setup/README (native binary is phase 2) |
+| Consent required before pairing | ✅ | `20` + integration: pairing before consent → 403; after consent → one-time `mon_…` token whose only stored form is its SHA-256 |
+| Agent ingest = counts only, device-token auth | ✅ | `20`: bad token → 401; valid token stores samples; with *track domains* off the domain is dropped and only the app name kept. `POST /activity/ingest`, header `X-Device-Token`, tenant+employee carried by the device |
+| Daily rollup HR/managers read | ✅ | `20` + integration: rollup folds raw windows into one summary/day (active 250s verified); employee self-view and HR overview both show it |
+| **Agent closed/uninstalled → HR is told** | ✅ | integration + `20`: a silent agent during work hours raises an `AGENT_OFFLINE` alert, notifies HR in-app, throttles repeats, and auto-resolves when the agent reports again; HR can also resolve manually |
+| Retention: raw samples auto-purge, summaries kept longer | ✅ | integration: a 40-day-old raw sample is purged at 30-day retention; a fresh one and the summaries remain |
+| Scoping + isolation | ✅ | integration + `20`: manager sees self + direct reports only; another tenant's admin sees nothing and gets 404 revoking a foreign device; employee cannot reach the HR overview (403) |
+| No AI anywhere in the monitoring/logs | ✅ | by construction — the module has no AI dependency; classification is a plain keyword map on the app/domain name |
+
+**Desktop agent (`apps/agent/`, Windows-first).** One cross-platform Electron codebase; records time and activity only (active/idle seconds, mouse/keyboard event counts, foreground app/host) — never keystrokes, screen or content, no AI. Core unit tests: **5/5** (`node --test`): windowed aggregation (active vs idle, top app, counts-only sample shape, reset) and the durable offline queue (FIFO, survives restart, size cap). Live E2E (`test/live-ingest.e2e.ts`): the **real Runner** with a mock input source, paired the proper way (admin enables → employee consents → pairs), sent batches to the live `/activity/ingest`; the server stored them and the rollup showed active seconds + mouse/keyboard counts, device online at agent v0.1.0. The native input/foreground hooks (`uiohook-napi`, `active-win`) and the visible tray GUI build on the target OS (Windows first, then macOS/Linux) — not in this headless sandbox. The agent is excluded from the pnpm workspace, so root install/CI are unaffected.
+
+Tests: jest **175/175** (adds 10: 4 unit + 6 DB integration). Browser test: 13 checks, no page errors (screenshots `monitoring-dashboard.png`, `monitoring-settings.png`, `my-activity-install.png`, `my-activity-consent.png`). RBAC route-matrix spec `06` still green with the 15 new routes (device-token ingest classified as authenticated, not public). Migration rehearsal re-run with **4 migrations** (`0_init`…`4_monitoring`): all 5 scenarios passed, 100 tables, existing-row fingerprint unchanged. Not built yet: the native desktop agent (phase 2).
+
+
 ## 8. Demo-safe path (fully verified, in this order)
 1. **Owner/HR:** sign up a fresh company (trial, every module) → Employees (add, search) → Recruitment (new job, add candidate, Applicant board) → Onboarding (new checklist, start for an employee) → Performance (new cycle) → Learning (new course) → eNPS (new survey, publish).
 2. **Employee:** Leave (apply: the form shows working days; edit; cancel) → Timesheets → Expenses → Loans → Performance (new goal, progress) → Learning (enrol) → Surveys (answer once) → the AI assistant.

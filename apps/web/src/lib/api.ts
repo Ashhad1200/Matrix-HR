@@ -578,6 +578,27 @@ export const api = {
     createHoliday: (data: any) => request<any>('/leave/holidays', { method: 'POST', body: JSON.stringify(data) }),
     deleteHoliday: (id: string) => request<any>(`/leave/holidays/${id}`, { method: 'DELETE' }),
   },
+  // Work-activity monitoring (disclosed): HR dashboard, settings, and the employee's own view + agent pairing.
+  monitoring: {
+    settings: () => request<any>('/monitoring/settings'),
+    updateSettings: (data: any) => request<any>('/monitoring/settings', { method: 'PUT', body: JSON.stringify(data) }),
+    overview: () => request<any>('/monitoring/overview'),
+    summaries: (params?: { employeeId?: string; from?: string; to?: string }) =>
+      request<any[]>(`/monitoring/summaries?${new URLSearchParams(params as any || {})}`),
+    devices: () => request<any[]>('/monitoring/devices'),
+    revokeDevice: (id: string) => request<any>(`/monitoring/devices/${id}/revoke`, { method: 'POST' }),
+    alerts: (resolved?: boolean) => request<any[]>(`/monitoring/alerts${resolved === undefined ? '' : `?resolved=${resolved}`}`),
+    resolveAlert: (id: string) => request<any>(`/monitoring/alerts/${id}/resolve`, { method: 'POST' }),
+    runMaintenance: () => request<any>('/monitoring/run-maintenance', { method: 'POST' }),
+    // employee self
+    me: () => request<any>('/monitoring/me'),
+    consent: () => request<any>('/monitoring/me/consent', { method: 'POST' }),
+    pairDevice: (data: { name: string; platform?: string; agentVersion?: string }) =>
+      request<any>('/monitoring/me/devices', { method: 'POST', body: JSON.stringify(data) }),
+    removeMyDevice: (id: string) => request<any>(`/monitoring/me/devices/${id}`, { method: 'DELETE' }),
+    myActivity: (params?: { from?: string; to?: string }) =>
+      request<any[]>(`/monitoring/me/activity?${new URLSearchParams(params as any || {})}`),
+  },
   // Short-lived signed links for private files
   files: {
     documentLink: (employeeId: string, docId: string) => request<{ url: string }>(`/employees/${employeeId}/documents/${docId}/link`),
