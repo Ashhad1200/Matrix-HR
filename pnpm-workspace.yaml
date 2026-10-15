@@ -1,3 +1,4 @@
 packages:
   - "apps/*"
   - "packages/*"
+  - "!apps/agent"   # standalone Electron app; built with its own npm install on the dev machine, not the pnpm workspace
