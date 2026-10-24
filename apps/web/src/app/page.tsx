@@ -43,7 +43,7 @@ const MODULES: { group: string; items: [string, string][] }[] = [
   {
     group: 'Pay',
     items: [
-      ['Payroll', 'Monthly runs with tax, EOBI and provident fund.'],
+      ['Payroll', 'Monthly runs with tax, social security and provident fund.'],
       ['Expenses', 'Claims by category, reimbursed through payroll.'],
       ['Loans and advances', 'Approved in the app, recovered in instalments.'],
       ['Pay components', 'Allowances, bonuses, arrears and deductions, per person, straight into the run.'],
@@ -84,14 +84,14 @@ const SECURITY: [string, string][] = [
 const FAQ: { q: string; a: string }[] = [
   {
     q: 'Which countries does payroll cover?',
-    a: 'Pakistan and the United States have payroll engines today. Other countries are not calculated yet, so confirm coverage for your team before you commit.',
+    a: 'Payroll is calculated only for the countries whose rule sets are built in, so confirm coverage for your team before you commit.',
   },
   {
     q: 'Are the tax slabs up to date with the latest budget?',
-    a: 'Tax slabs, EOBI and provident-fund rates live in a rule set that is versioned by effective date. Check the rates against your own advisor for the current fiscal year before your first live run.',
+    a: 'Tax slabs, social-security and provident-fund rates live in a rule set that is versioned by effective date. Check the rates against your own advisor for the current fiscal year before your first live run.',
   },
   {
-    q: 'Who can see salary, CNIC and bank details?',
+    q: 'Who can see salary, national ID and bank details?',
     a: 'HR, company admins and the employee themself. Managers and colleagues get the directory view, which leaves pay, ID and bank fields out entirely.',
   },
   {
@@ -116,7 +116,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: 'Can we be billed in US dollars?',
-    a: 'Yes. Companies in Pakistan are billed in rupees and everyone else in US dollars, chosen from your country at sign-up. Each plan has a set price in both currencies — there is no live conversion — and you pay by bank transfer either way.',
+    a: 'Yes. You are billed in US dollars, or in your local currency where we offer one, chosen from your country at sign-up. Each plan has a set price in each currency — there is no live conversion — and you pay by bank transfer either way.',
   },
   {
     q: 'Can we run it under our own brand?',
@@ -139,7 +139,7 @@ function JsonLd({ pricing }: { pricing: PricingData | null }) {
         operatingSystem: 'Web',
         url: siteUrl,
         description:
-          'HR and payroll for growing companies in Pakistan: attendance, leave, expenses, loans and payroll with a second approver, payslips and bank files.',
+          'HR and payroll for growing companies: attendance, leave, expenses, loans and payroll with a second approver, payslips and bank files.',
         offers: (pricing?.plans ?? []).map((p) => ({
           '@type': 'Offer',
           name: p.name,
@@ -177,11 +177,11 @@ export default async function LandingPage() {
             intro={
               <>
                 <h1 id="hero-title" className="mx-display max-w-[12ch] text-[clamp(3rem,7vw,6.4rem)]">
-                  Everything HR does ends up on a payslip.
+                  HR and payroll software that shows its working.
                 </h1>
                 <p className="mt-7 max-w-[44ch] text-lg leading-relaxed text-[var(--mx-ink-2)]">
-                  MatrixHR connects attendance, leave, expense claims and loans to payroll for companies in Pakistan, then shows
-                  its working, line by line.
+                  Everything HR does ends up on a payslip. MatrixHR connects attendance, leave, expense claims and loans to
+                  payroll, then shows its working, line by line.
                 </p>
                 <div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-3">
                   <Link href="/signup" className="mx-btn mx-btn-primary">
@@ -350,7 +350,7 @@ export default async function LandingPage() {
               <div className="lg:col-span-5">
                 <p className="text-sm font-semibold text-[var(--mx-ledger-ink-2)]">Goes out</p>
                 <p className="mt-2 text-lg leading-relaxed">
-                  Bank files for Meezan, HBL or a generic format, a QuickBooks journal, WhatsApp messages, and webhooks to your own
+                  Bank files in a generic format or a bank-specific one, a QuickBooks journal, WhatsApp messages, and webhooks to your own
                   systems. Build on top with scoped API keys and single sign-on.
                 </p>
               </div>
@@ -365,7 +365,7 @@ export default async function LandingPage() {
               </div>
               <div className="lg:col-span-5">
                 <p className="text-sm font-semibold text-[var(--mx-ledger-ink-2)]">Billed in your currency</p>
-                <p className="mt-2 text-lg leading-relaxed">Companies in Pakistan pay in rupees and everyone else in US dollars, set from the country at sign-up, by bank transfer. A single company can also run its own private copy on its own server.</p>
+                <p className="mt-2 text-lg leading-relaxed">Pay in US dollars, or in your local currency where we offer one, set from the country at sign-up, by bank transfer. A single company can also run its own private copy on its own server.</p>
               </div>
             </div>
           </div>
@@ -460,7 +460,7 @@ export default async function LandingPage() {
         <div className={cn(WRAP, 'flex flex-col gap-8 py-12 sm:flex-row sm:items-start sm:justify-between')}>
           <div>
             <Logo markClassName="h-7 w-7" />
-            <p className="mt-3 max-w-[32ch] text-sm text-[var(--mx-ink-2)]">HR and payroll for growing companies in Pakistan.</p>
+            <p className="mt-3 max-w-[32ch] text-sm text-[var(--mx-ink-2)]">HR and payroll for growing companies.</p>
           </div>
           <nav aria-label="Footer" className="grid grid-cols-2 gap-x-12 gap-y-2.5 text-[0.9375rem] sm:grid-cols-3">
             <a href="#run" className="mx-link w-fit">Payroll</a>

@@ -11,7 +11,7 @@ type ViewerId = 'self' | 'manager' | 'colleague' | 'hr' | 'outsider';
 
 const VIEWERS: { id: ViewerId; name: string; who: string; note: string }[] = [
   { id: 'self', name: 'Sara', who: 'herself', note: 'Employees see their whole record, including pay, and can update their own contact details.' },
-  { id: 'manager', name: 'Ali', who: 'her manager', note: 'Managers approve Sara’s leave and run her reviews, but her pay, CNIC and bank details stay hidden.' },
+  { id: 'manager', name: 'Ali', who: 'her manager', note: 'Managers approve Sara’s leave and run her reviews, but her pay, national ID and bank details stay hidden.' },
   { id: 'colleague', name: 'Maryam', who: 'a colleague', note: 'Colleagues get the directory: who Sara is, what she does and who she reports to.' },
   { id: 'hr', name: 'Hina', who: 'HR', note: 'HR and company admins see everything, and every change they make is written to the audit log.' },
   { id: 'outsider', name: 'Someone', who: 'at another company', note: 'Another company on MatrixHR gets nothing at all, not even confirmation that Sara exists.' },
@@ -24,8 +24,8 @@ const FIELDS: { label: string; value: string; private?: boolean }[] = [
   { label: 'Reports to', value: 'Ali Khan' },
   { label: 'Work email', value: 'sara.ahmed@acme.com' },
   { label: 'Basic salary', value: 'PKR 285,000 a month', private: true },
-  { label: 'CNIC', value: '42101-5550142-2', private: true },
-  { label: 'IBAN', value: 'PK36 MEZN 0000 0012 3456 4471', private: true },
+  { label: 'National ID', value: '•••• •••• 0142', private: true },
+  { label: 'Bank account', value: 'Account ending 4471', private: true },
 ];
 
 export function RecordLens() {

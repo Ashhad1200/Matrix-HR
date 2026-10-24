@@ -12,11 +12,12 @@ const display = Bricolage_Grotesque({ subsets: ['latin'], variable: '--font-disp
 const body = Figtree({ subsets: ['latin'], variable: '--font-body', display: 'swap' });
 
 const description =
-  'Attendance, leave, expense claims and loans flow into a payroll run that a second person approves, then out as payslips and a bank file. HR and payroll for growing companies in Pakistan.';
+  'Attendance, leave, expense claims and loans flow into a payroll run a second person approves, then out as payslips and a bank file. 30-day trial.';
 
 export function generateMetadata(): Metadata {
   const b = getBrand();
-  const title = b.whiteLabel ? `${b.name} | HR and payroll` : 'MatrixHR | HR and payroll for companies in Pakistan';
+  const title = b.whiteLabel ? `${b.name} | HR and payroll` : 'HR & Payroll Software with ZKTeco Attendance | MatrixHR';
+  const shareTitle = b.whiteLabel ? title : 'MatrixHR: HR and payroll that shows its working';
   return {
     metadataBase: new URL(b.websiteUrl && b.whiteLabel ? b.websiteUrl : siteUrl),
     title: { default: title, template: `%s | ${b.name}` },
@@ -24,8 +25,8 @@ export function generateMetadata(): Metadata {
     applicationName: b.name,
     ...(b.faviconUrl ? { icons: { icon: b.faviconUrl, shortcut: b.faviconUrl, apple: b.faviconUrl } } : {}),
     alternates: { canonical: '/' },
-    openGraph: { title, description: b.whiteLabel ? `HR and payroll with ${b.name}.` : description, type: 'website', siteName: b.name, url: '/', locale: 'en_PK' },
-    twitter: { card: 'summary_large_image', title, description: b.whiteLabel ? `HR and payroll with ${b.name}.` : description },
+    openGraph: { title: shareTitle, description: b.whiteLabel ? `HR and payroll with ${b.name}.` : description, type: 'website', siteName: b.name, url: '/', locale: 'en_US' },
+    twitter: { card: 'summary_large_image', title: shareTitle, description: b.whiteLabel ? `HR and payroll with ${b.name}.` : description },
   };
 }
 
