@@ -22,8 +22,13 @@ services:
       retries: 20
 
   minio:
-    # minio/minio on Docker Hub was retired; quay.io is MinIO's current registry.
+    # MinIO stopped publishing images: Docker Hub deleted minio/minio (11 Sep 2026) and quay.io answers
+    # 401 for every tag and digest (since 24 Sep 2026). pull_policy: never keeps the image already on the
+    # server (RELEASE.2025-09-07T16-13-09Z), so `docker compose pull` skips this service instead of
+    # failing the deploy. A server without that image cached can't start this service: move to a
+    # maintained MinIO build before that happens.
     image: 'quay.io/minio/minio:latest'
+    pull_policy: never
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
