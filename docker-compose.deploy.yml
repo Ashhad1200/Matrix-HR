@@ -22,13 +22,10 @@ services:
       retries: 20
 
   minio:
-    # MinIO stopped publishing images: Docker Hub deleted minio/minio (11 Sep 2026) and quay.io answers
-    # 401 for every tag and digest (since 24 Sep 2026). pull_policy: never keeps the image already on the
-    # server (RELEASE.2025-09-07T16-13-09Z), so `docker compose pull` skips this service instead of
-    # failing the deploy. A server without that image cached can't start this service: move to a
-    # maintained MinIO build before that happens.
-    image: 'quay.io/minio/minio:latest'
-    pull_policy: never
+    # MinIO stopped publishing images (Docker Hub deleted them in Sep 2026, quay.io answers 401).
+    # Silo is Pigsty's maintained MinIO fork: same data format, same command and MINIO_ROOT_* env,
+    # runs as root, ships mc and curl. Pinned by tag and digest; see docs/minio-to-silo.md.
+    image: 'docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z@sha256:2636fc4155d9a7e41ff58cdb65ddd13ba9304e67184e13c25bc5cb34016269d7'
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
