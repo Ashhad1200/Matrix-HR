@@ -30,7 +30,7 @@ export default function OpengraphImage() {
             {brand.name}
           </div>
           <div style={{ fontSize: 78, fontWeight: 800, lineHeight: 0.98, letterSpacing: -3 }}>Everything HR does ends up on a payslip.</div>
-          <div style={{ fontSize: 26, color: '#4a5e57' }}>HR and payroll for growing companies in Pakistan</div>
+          <div style={{ fontSize: 26, color: '#4a5e57' }}>HR and payroll for growing companies</div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', width: 430, background: '#fff', padding: 36, borderRadius: 6, boxShadow: '0 30px 60px -20px rgba(8,37,28,0.3)' }}>
           <div style={{ fontSize: 26, fontWeight: 700, marginBottom: 14 }}>Payslip, September</div>

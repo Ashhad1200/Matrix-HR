@@ -162,7 +162,7 @@ export function PayslipDemo({ intro }: { intro?: ReactNode }) {
             <div style={{ '--i': 4 } as CSSProperties} className="mt-3 flex items-end justify-between gap-4 border-t-2 border-[var(--mx-ink)] pt-4">
               <div>
                 <p className="text-sm font-semibold">Net pay</p>
-                <p className="text-xs text-[var(--mx-ink-2)]">To Meezan Bank, account ending 4471</p>
+                <p className="text-xs text-[var(--mx-ink-2)]">To the employee’s bank, account ending 4471</p>
               </div>
               <p className="mx-display mx-num text-[2.5rem] sm:text-5xl">
                 <span className="mr-1.5 align-top text-base font-semibold tracking-normal text-[var(--mx-ink-2)] [font-variation-settings:normal]">PKR</span>

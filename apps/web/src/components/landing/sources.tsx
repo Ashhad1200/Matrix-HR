@@ -31,7 +31,7 @@ const FRAGMENTS: Fragment[] = [
     scatter: [30, -150, 5],
     body: (
       <span>
-        <span className="font-semibold">Sara:</span> Sir, kal chutti chahiye, ammi ki tabiyat theek nahi
+        <span className="font-semibold">Sara:</span> Could I take Thursday off? Family appointment.
       </span>
     ),
   },

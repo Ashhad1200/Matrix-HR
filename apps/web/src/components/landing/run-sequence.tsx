@@ -30,7 +30,7 @@ const STEPS = [
   {
     status: 'Locked',
     title: 'Then the bank file',
-    body: 'Export for Meezan, HBL or a generic format. Anyone with a bad IBAN is left out and listed, and the QuickBooks journal balances before you download it.',
+    body: 'Export a generic bank file or a bank-specific format. Anyone with a bad IBAN is left out and listed, and the QuickBooks journal balances before you download it.',
     ui: 'Locked. Payslips are generated. Reopening requires a reason and admin approval.',
     action: 'Export bank file',
   },
@@ -149,7 +149,7 @@ function RunCard({ step }: { step: number }) {
                   <span className="hidden text-[var(--mx-ink-2)] sm:inline">, {r.role}</span>
                   {locked && r.flag && (
                     <span className="mt-1 block animate-fade-in text-xs text-[var(--mx-debit)]">
-                      Left out of the bank file: IBAN is not a valid Pakistani IBAN (check length and check digits)
+                      Left out of the bank file: IBAN is not valid (check length and check digits)
                     </span>
                   )}
                 </td>
