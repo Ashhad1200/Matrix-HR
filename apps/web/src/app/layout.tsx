@@ -12,7 +12,7 @@ const display = Bricolage_Grotesque({ subsets: ['latin'], variable: '--font-disp
 const body = Figtree({ subsets: ['latin'], variable: '--font-body', display: 'swap' });
 
 const description =
-  'Attendance, leave, expense claims and loans flow into a payroll run a second person approves, then out as payslips and a bank file. 30-day free trial.';
+  'Attendance, leave, expense claims and loans flow into a payroll run a second person approves, then out as payslips and a bank file. 30-day trial.';
 
 export function generateMetadata(): Metadata {
   const b = getBrand();
