@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Logo } from '@/components/brand/logo';
+import { GoogleAnalytics } from '@/components/landing/google-analytics';
+import { track } from '@/lib/analytics';
 
 export default function SignUpPage() {
   const brand = useBrand();
@@ -48,6 +50,7 @@ export default function SignUpPage() {
       const res = await api.auth.signup({ ...form, country: form.country === 'XX' ? undefined : form.country });
       localStorage.setItem('accessToken', res.accessToken);
       localStorage.setItem('refreshToken', res.refreshToken);
+      if (!brand.whiteLabel) await track('sign_up', { product: 'matrixhr' });
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Sign up failed');
@@ -58,6 +61,7 @@ export default function SignUpPage() {
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-[hsl(var(--muted))]/60 p-4">
+      {!brand.whiteLabel && <GoogleAnalytics product="matrixhr" />}
       <Link href="/" aria-label={`${brand.name} home`} className="rounded-md"><Logo /></Link>
       <Card className="w-full max-w-md animate-rise">
         <CardHeader className="text-center">

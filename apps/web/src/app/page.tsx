@@ -10,6 +10,7 @@ import { WhatsAppThread } from '@/components/landing/whatsapp-thread';
 import { RecordLens } from '@/components/landing/record-lens';
 import { Pricing } from '@/components/landing/pricing';
 import { In } from '@/components/landing/motion';
+import { GoogleAnalytics } from '@/components/landing/google-analytics';
 import { TRIAL_DAYS } from '@matrixhr/shared';
 import { headers } from 'next/headers';
 import { detectCurrency } from '@/lib/geo';
@@ -184,7 +185,7 @@ export default async function LandingPage() {
                   payroll, then shows its working, line by line.
                 </p>
                 <div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-3">
-                  <Link href="/signup" className="mx-btn mx-btn-primary">
+                  <Link href="/signup" className="mx-btn mx-btn-primary" data-cta="hero">
                     Start free trial
                   </Link>
                   <a href="#pricing" className="mx-btn mx-btn-quiet">
@@ -443,6 +444,7 @@ export default async function LandingPage() {
               <div className="mt-7 flex flex-wrap items-center gap-5">
                 <Link
                   href="/signup"
+                  data-cta="final-cta"
                   className="mx-btn bg-white text-[#0b1f19] shadow-[inset_0_-2px_0_rgb(0_0_0/0.15)] hover:bg-[#d8f2e3]"
                 >
                   Start free trial
@@ -455,6 +457,8 @@ export default async function LandingPage() {
           </div>
         </section>
       </main>
+      {/* The landing redirects white-label deployments to /login above, so this only runs on matrixhr's own site. */}
+      <GoogleAnalytics product="matrixhr" />
 
       <footer className="border-t border-[var(--mx-rule)]">
         <div className={cn(WRAP, 'flex flex-col gap-8 py-12 sm:flex-row sm:items-start sm:justify-between')}>
@@ -472,7 +476,7 @@ export default async function LandingPage() {
             <a href="#pricing" className="mx-link w-fit">Pricing</a>
             <a href="#faq" className="mx-link w-fit">Questions</a>
             <Link href="/login" className="mx-link w-fit">Sign in</Link>
-            <Link href="/signup" className="mx-link w-fit">Start free trial</Link>
+            <Link href="/signup" className="mx-link w-fit" data-cta="footer">Start free trial</Link>
           </nav>
         </div>
         <div className={cn(WRAP, 'pb-10 text-sm text-[var(--mx-ink-2)]')}>&copy; 2026 MatrixHR</div>

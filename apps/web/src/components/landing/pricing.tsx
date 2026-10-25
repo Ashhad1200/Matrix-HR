@@ -113,7 +113,7 @@ export function Pricing({ data, initial }: { data: PricingData; initial: Currenc
                     {tooBig ? `Over the ${p.maxEmployees}-employee limit for ${people} people` : `${usd((p.monthly ?? 0) + over)} a month for ${people} people`}
                   </p>
                 </div>
-                <Link href="/signup" className={cn('mx-btn h-11 text-[0.9375rem]', pick ? 'mx-btn-primary' : 'mx-btn-quiet')}>Start free trial</Link>
+                <Link href="/signup" data-cta="pricing" className={cn('mx-btn h-11 text-[0.9375rem]', pick ? 'mx-btn-primary' : 'mx-btn-quiet')}>Start free trial</Link>
               </div>
             </li>
           );

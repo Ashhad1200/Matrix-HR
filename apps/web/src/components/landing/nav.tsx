@@ -69,7 +69,7 @@ export function LandingNav() {
           <Link href={account.href} className="mx-link hidden px-2 text-[0.9375rem] font-medium sm:inline">
             {account.label}
           </Link>
-          <Link href="/signup" className="mx-btn mx-btn-primary hidden h-10 px-4 text-[0.9375rem] sm:inline-flex">
+          <Link href="/signup" className="mx-btn mx-btn-primary hidden h-10 px-4 text-[0.9375rem] sm:inline-flex" data-cta="header">
             Start free trial
           </Link>
           <button
@@ -102,7 +102,7 @@ export function LandingNav() {
               {account.label}
             </Link>
           </nav>
-          <Link href="/signup" className="mx-btn mx-btn-primary mt-2 w-full">
+          <Link href="/signup" className="mx-btn mx-btn-primary mt-2 w-full" data-cta="mobile-menu">
             Start free trial
           </Link>
         </div>
