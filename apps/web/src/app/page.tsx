@@ -479,7 +479,14 @@ export default async function LandingPage() {
             <Link href="/signup" className="mx-link w-fit" data-cta="footer">Start free trial</Link>
           </nav>
         </div>
-        <div className={cn(WRAP, 'pb-10 text-sm text-[var(--mx-ink-2)]')}>&copy; 2026 MatrixHR</div>
+        <div className={cn(WRAP, 'pb-10 text-sm text-[var(--mx-ink-2)]')}>
+          <p>&copy; 2026 MatrixHR</p>
+          <p className="mt-2">
+            MatrixHR is built by <a href="https://treevoxa.com/" className="mx-link">Treevoxa, a custom software development company</a>.
+            {' '}Need something MatrixHR doesn&apos;t do? See <a href="https://treevoxa.com/services/hr-software-development/" className="mx-link">custom HR software development</a>
+            {' '}or <a href="https://treevoxa.com/partners/white-label-matrixhr/" className="mx-link">white-label MatrixHR for resellers</a>.
+          </p>
+        </div>
       </footer>
     </div>
   );
